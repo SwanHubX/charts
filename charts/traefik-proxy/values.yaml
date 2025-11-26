@@ -1,0 +1,96 @@
+test:
+  image:
+    # Registry for the test image (e.g., busybox)
+    registry: repo.swanlab.cn
+    # Repository path for the test image
+    repository: self-hosted/busybox
+    # Tag for the test image
+    tag: '1.37.0'
+    # Image pull policy for the test pod
+    pullPolicy: IfNotPresent
+  # List of secrets used to pull the test image
+  imagePullSecrets: []
+
+# Traefik static configuration. All configurations remain unchanged except for images and pull secrets.
+traefik:
+  image:
+    # Registry for the main Traefik image
+    registry: repo.swanlab.cn
+    # Repository path for the Traefik image
+    repository: self-hosted/traefik
+    # Tag for the Traefik image
+    tag: '3.6'
+    # Image pull policy for the Traefik pods
+    pullPolicy: IfNotPresent
+
+  # Traefik dynamic/static configuration arguments.
+  additionalArguments:
+    # Plugins must be defined via args (additionalArguments), otherwise, static configuration might fail.
+    # Defines the local plugin 'identify' and its module path.
+    - "--experimental.localPlugins.identify.modulename=github.com/swanhubx/swanlab-helper/identify"
+
+  # IngressRoute configuration
+  ingressRoute:
+    dashboard:
+      # Disable the dashboard rendered by the Helm chart; it can be manually exposed via an IngressRoute resource.
+      enabled: false
+
+  # Service account configuration
+  serviceAccount:
+    # Overrides the name of the ServiceAccount to use or create. Empty string uses the default generated name.
+    name: ""
+
+  ports:
+    web:
+      # Port for the unsecure entrypoint.
+      # NOTE: 8080 is often used by other Traefik internal processes.
+      port: 8000
+    websecure:
+      # Port for the secure entrypoint
+      port: 8443
+
+  service:
+    enabled: true
+    ## -- Single service is using `MixedProtocolLBService` feature gate.
+    ## -- When set to false, it will create two Service, one for TCP and one for UDP.
+    single: true
+    type: LoadBalancer
+
+  deployment:
+    # Enable deployment resource creation
+    enabled: true
+    # Number of Traefik replicas
+    replicas: 2
+    # List of secrets used to pull the Traefik image
+    imagePullSecrets: [ ]
+
+    # Plugin configuration: volumes for loading the identity middleware
+    additionalVolumes:
+      - name: identify-plugin
+        # Volume used to share the plugin files between initContainer and main container
+        emptyDir: { }
+
+    initContainers:
+      - name: download-identify
+        # Image for the init container that downloads the custom plugin files
+        image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.2
+        env:
+          - name: COPY_TO
+            # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
+            value: /plugins-tmp
+        volumeMounts:
+          - name: identify-plugin
+            # Mount path for the shared volume
+            mountPath: /plugins-tmp
+
+  # Volume mounts for the main Traefik container
+  additionalVolumeMounts:
+    - name: identify-plugin
+      # Mount the volume to the specific path where Traefik expects to find the local plugin source code.
+      mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
+
+  # Create a IngressClass for Traefik
+  ingressClass:
+    enabled: true
+    isDefaultClass: false
+    name: "traefik-proxy"

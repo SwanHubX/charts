@@ -1,0 +1,23 @@
+{{- if .Values.integrations.postgres.enabled | eq false }}
+{{- if empty .Values.dependencies.postgres.persistence.existingClaim }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "swanlab.postgres.pvcName" .}}
+  labels:
+  {{- include "swanlab.postgres.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.postgres.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.dependencies.postgres.persistence.storageSize | quote }}
+    {{- if .Values.dependencies.postgres.persistence.storageClass }}
+  storageClassName: {{ .Values.dependencies.postgres.persistence.storageClass | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

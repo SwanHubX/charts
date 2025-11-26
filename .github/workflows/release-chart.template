@@ -1,0 +1,96 @@
+name: 'Helm Chart Release'
+
+#on:
+#  # 监听 'release' 事件
+#  release:
+#    # 仅当发布被发布（published）时触发
+#    types:
+#      - published
+
+# 允许同时运行一个作业，并取消旧的作业
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  # 检查并发布 chart 的作业
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+        with:
+          # 必须获取完整的 Git 历史，以便 chart-releaser 能够生成正确的 index 文件
+          fetch-depth: 0
+
+      # 自动设置 Chart.yaml 版本
+      - name: ⚙️ Set Chart Version from Tag
+        id: setup-version
+        # 确保你的 Git Tag 格式为 'vX.Y.Z'
+        run: |
+          # 1. 安装 yq (用于处理 YAML 文件)
+          # yq 是一个非常强大的命令行 YAML/JSON 处理器
+          echo "Installing yq..."
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+          
+          # 2. 获取 Tag 版本
+          TAG_VERSION=${GITHUB_REF##*/}
+          # 移除前缀 'v' (例如 v1.2.3 -> 1.2.3)
+          NEW_VERSION=${TAG_VERSION#v}
+          
+          CHART_PATH="./traefik-proxy"
+          
+          # 3. 检查 Tag 格式是否是有效的 SemVer（可选，但推荐）
+          if ! echo "$NEW_VERSION" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' ; then
+            echo "::error::Git Tag '$TAG_VERSION' (stripped to '$NEW_VERSION') is not a valid Semantic Version (X.Y.Z). Aborting."
+            exit 1
+          fi
+          
+          # 4. 使用 yq 更新 Chart.yaml 中的 version 字段
+          echo "Updating $CHART_PATH/Chart.yaml version to $NEW_VERSION..."
+          yq e ".version = \"$NEW_VERSION\"" -i $CHART_PATH/Chart.yaml
+                    
+          # 6. 打印更新后的版本以供检查
+          UPDATED_VERSION=$(yq e '.version' $CHART_PATH/Chart.yaml)
+          echo "Successfully updated Chart.yaml version to: $UPDATED_VERSION"
+          
+          # 7. 作为OUTPUTS输出版本以供后续步骤使用
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+
+      # 进行 Helm Lint 检查
+      - name: 🛠️ Set up Helm
+        # helm v3.18+
+        uses: azure/setup-helm@v4.3.0
+
+      - name: 🔍 Run Helm Lint
+        run: |
+          HELM_CHART_PATH="./traefik-proxy" 
+          
+          if [ ! -d "$HELM_CHART_PATH" ]; then
+            echo "Error: Helm chart directory not found at $HELM_CHART_PATH"
+            exit 1
+          fi
+          
+          # 执行 helm lint，-s 标志会跳过 values.yaml 中缺失的 keys 警告
+          echo "Running helm lint on $HELM_CHART_PATH..."
+          helm lint $HELM_CHART_PATH
+
+      # 使用原生helm命令推送chart到仓库
+      - name: 🚀 Release Helm Chart
+        env:
+          HELM_CHAT_FILE: "traefik-proxy-${{steps.setup-version.outputs.version}}.tgz"
+        run: |
+          helm plugin install https://github.com/AliyunContainerService/helm-acr
+          helm repo add traefik https://helm.traefik.io/traefik
+          helm repo update
+          cd traefik-proxy
+          helm dependency build .
+          helm package .
+          echo "${{ secrets.SWANLAB_HELM_REPO_PASSWORD }}" | helm registry login repo.swanlab.cn \
+            -u ${{ secrets.SWANLAB_HELM_REPO_USERNAME }} \
+            --password-stdin
+          helm push $HELM_CHAT_FILE oci://repo.swanlab.cn/helm
+
