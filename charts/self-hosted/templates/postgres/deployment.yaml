@@ -1,0 +1,89 @@
+{{- if .Values.integrations.postgres.enabled | eq false }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.postgres.fullname" . }}
+  labels:
+  {{- include "swanlab.postgres.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+    {{- include "swanlab.postgres.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.postgres.labels" . | nindent 8 }}
+      {{- include "swanlab.postgres.selectorLabels" . | nindent 8 }}
+      {{- if .Values.dependencies.postgres.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: postgres
+        image: "{{ .Values.dependencies.postgres.image.repository }}:{{ .Values.dependencies.postgres.image.tag }}"
+        imagePullPolicy: {{ .Values.dependencies.postgres.image.pullPolicy }}
+        ports:
+          - containerPort: 5432
+            name: postgres
+        env:
+          - name: TZ
+            value: "UTC"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.postgres.secretName" . }}
+                key: username
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.postgres.secretName" . }}
+                key: password
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.postgres.secretName" . }}
+                key: database
+        volumeMounts:
+          # 不要直接挂载到 /var/lib/postgres/data ，因为存在 lost+found 目录会导致 postgres 启动失败
+          # 挂载到父目录，Postgres 会在其中创建 data 子目录
+          - mountPath: /var/lib/postgres
+            name: {{ include "swanlab.postgres.fullname" . }}-volume
+        {{- if .Values.dependencies.postgres.resources }}
+        resources:
+        {{- toYaml .Values.dependencies.postgres.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: {{ include "swanlab.postgres.fullname" . }}-volume
+          persistentVolumeClaim:
+            claimName: {{ include "swanlab.postgres.pvcName" . }}
+      {{- if .Values.dependencies.postgres.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.dependencies.postgres.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dependencies.postgres.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.dependencies.postgres.customTolerations | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.postgres.fullname" . }}
+  labels:
+  {{- include "swanlab.postgres.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.postgres.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: 5432
+      name: postgres
+{{- end }}

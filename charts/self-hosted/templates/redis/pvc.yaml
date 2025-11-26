@@ -1,0 +1,23 @@
+{{- if .Values.integrations.redis.enabled | eq false }}
+{{- if empty .Values.dependencies.redis.persistence.existingClaim }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{include "swanlab.redis.pvcName" .}}
+  labels:
+  {{- include "swanlab.redis.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.redis.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.redis.customAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.dependencies.redis.persistence.storageSize | quote }}
+    {{- if .Values.dependencies.redis.persistence.storageClass }}
+  storageClassName: {{ .Values.dependencies.redis.persistence.storageClass | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

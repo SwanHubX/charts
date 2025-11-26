@@ -1,0 +1,165 @@
+{{- if .Values.integrations.s3.enabled | eq false }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.s3.fullname" . }}
+  labels:
+  {{- include "swanlab.s3.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+    {{- include "swanlab.s3.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.s3.labels" . | nindent 8 }}
+      {{- include "swanlab.s3.selectorLabels" . | nindent 8 }}
+      {{- if .Values.dependencies.s3.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.dependencies.s3.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: s3
+        image: "{{ .Values.dependencies.s3.image.repository }}:{{ .Values.dependencies.s3.image.tag }}"
+        imagePullPolicy: {{ .Values.dependencies.s3.image.pullPolicy }}
+        ports:
+          - containerPort: 9000
+            name: minio
+          - containerPort: 9001
+            name: minio-console
+        args:
+          - "server"
+          - "/data"
+          - "--console-address"
+          - ":9001"
+        env:
+          - name: TZ
+            value: "UTC"
+          - name: MINIO_ROOT_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.s3.secretName" . }}
+                key: accessKey
+          - name: MINIO_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.s3.secretName" . }}
+                key: secretKey
+        volumeMounts:
+          - mountPath: /data
+            name: {{ include "swanlab.s3.fullname" . }}-volume
+        {{- if .Values.dependencies.s3.resources }}
+        resources:
+        {{- toYaml .Values.dependencies.s3.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: {{ include "swanlab.s3.fullname" . }}-volume
+          persistentVolumeClaim:
+            claimName: {{ include "swanlab.s3.pvcName" . }}
+      {{- if .Values.dependencies.s3.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.dependencies.s3.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dependencies.s3.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.dependencies.s3.customTolerations | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.s3.fullname" . }}
+  labels:
+  {{- include "swanlab.s3.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.s3.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: 9000
+      name: minio
+    - port: 9001
+      name: minio-console
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "swanlab.s3.fullname" . }}-init-buckets
+spec:
+  completions: 1
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-minio
+          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
+          imagePullPolicy: {{ .Values.helper.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              MINIO_SERVICE_HOST=$(echo $MINIO_ENDPOINT | awk -F'//' '{print $2}' | awk -F':' '{print $1}')
+              MINIO_SERVICE_PORT=$(echo $MINIO_ENDPOINT | awk -F':' '{print $3}')
+              echo "Checking MinIO Server at ${MINIO_SERVICE_HOST}:${MINIO_SERVICE_PORT}..."
+              while ! nc -z -w 2 ${MINIO_SERVICE_HOST} ${MINIO_SERVICE_PORT}; do
+              echo "MinIO Service not ready, waiting 5 seconds..."
+              sleep 5
+              done
+              echo "MinIO Service is up!"
+          env:
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: endpoint
+      containers:
+        - name: minio-mc-job
+          image: "{{ .Values.dependencies.s3.mcImage.repository }}:{{ .Values.dependencies.s3.mcImage.tag }}"
+          imagePullPolicy: {{ .Values.dependencies.s3.mcImage.pullPolicy }}
+          env:
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: secretKey
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: accessKey
+            - name: MINIO_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: endpoint
+            - name: MINIO_PRIVATE_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: privateBucket
+            - name: MINIO_PUBLIC_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" . }}
+                  key: publicBucket
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # 1. set alias
+              mc alias set swanlab-minio $MINIO_ENDPOINT $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+
+              # 2. private bucket
+              mc mb --ignore-existing swanlab-minio/$MINIO_PRIVATE_BUCKET
+              mc anonymous set private swanlab-minio/$MINIO_PRIVATE_BUCKET
+
+              # 3. public bucket
+              mc mb --ignore-existing swanlab-minio/$MINIO_PUBLIC_BUCKET
+              mc anonymous set public swanlab-minio/$MINIO_PUBLIC_BUCKET
+{{- end }}

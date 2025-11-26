@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.cloud.fullname" . }}
+  labels:
+  {{- include "swanlab.cloud.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default 1 .Values.service.cloud.replicaCount }}
+  selector:
+    matchLabels:
+    {{- include "swanlab.cloud.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.cloud.labels" . | nindent 8 }}
+      {{- include "swanlab.cloud.selectorLabels" . | nindent 8 }}
+      {{- if .Values.service.cloud.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.service.cloud.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: cloud
+          image: {{ include "swanlab.cloud.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.cloud.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+              name: web
+        {{- if .Values.service.cloud.resources }}
+          resources:
+        {{- toYaml .Values.service.cloud.resources | nindent 12 }}
+        {{- end }}
+      {{- if .Values.service.cloud.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.service.cloud.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.service.cloud.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.service.cloud.customTolerations | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.cloud.fullname" . }}
+  labels:
+  {{- include "swanlab.cloud.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.cloud.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.cloud.port" . }}
+      targetPort: web

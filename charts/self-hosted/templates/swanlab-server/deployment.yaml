@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.server.fullname" . }}
+  labels:
+  {{- include "swanlab.server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ default 1 .Values.service.server.replicaCount }}
+  selector:
+    matchLabels:
+    {{- include "swanlab.server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.server.labels" . | nindent 8 }}
+      {{- include "swanlab.server.selectorLabels" . | nindent 8 }}
+      {{- if .Values.service.server.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.service.server.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: server
+          image: {{ include "swanlab.server.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.server.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+              name: server
+          command:
+            - bash
+            - -c
+            - npx prisma migrate deploy && node migrate.js && pm2-runtime app.js
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "swanlab.postgres.secretName" . }}
+                  key: primaryUrl
+            - name: DATABASE_URL_REPLICA
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "swanlab.postgres.secretName" . }}
+                  key: replicaUrl
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "swanlab.s3.secretName" . }}
+                  key: accessKey
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "swanlab.s3.secretName" . }}
+                  key: secretKey
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{include "swanlab.redis.secretName" . }}
+                  key: url
+            - name: VERSION
+              value: {{ .Chart.AppVersion | quote }}
+            - name: SERVER_PREFIX
+              value: /api
+        {{- if .Values.service.server.resources }}
+          resources:
+        {{- toYaml .Values.service.server.resources | nindent 12 }}
+        {{- end }}
+      {{- if .Values.service.server.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.service.server.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.service.server.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.service.server.customTolerations | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.server.fullname" . }}
+  labels:
+  {{- include "swanlab.server.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.server.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.server.port" . }}
+      targetPort: server

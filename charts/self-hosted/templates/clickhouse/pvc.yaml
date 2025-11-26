@@ -1,0 +1,23 @@
+{{- if .Values.integrations.clickhouse.enabled | eq false }}
+{{- if empty .Values.dependencies.clickhouse.persistence.existingClaim }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "swanlab.clickhouse.pvcName" . }}
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.clickhouse.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.dependencies.clickhouse.persistence.storageSize | quote }}
+    {{- if .Values.dependencies.clickhouse.persistence.storageClass }}
+  storageClassName: {{ .Values.dependencies.clickhouse.persistence.storageClass | quote }}
+{{- end }}
+{{- end }}
+{{- end }}
