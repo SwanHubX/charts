@@ -1,0 +1,65 @@
+name: 'Helm Chart Release'
+
+on:
+  push:
+    branches:
+      - main
+
+# 允许同时运行一个作业，并取消旧的作业
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+        with:
+          # 必须获取完整的 Git 历史，以便 chart-releaser 能够生成正确的 index 文件
+          fetch-depth: 0
+
+      - name: 🛠️ Set Git User
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: 🛠️ Set up Helm
+        # helm v3.18+
+        uses: azure/setup-helm@v4.3.0
+
+      - name: 📥 Add Traefik Helm Repo
+        run: |
+          helm repo add traefik https://helm.traefik.io/traefik
+          helm repo update
+
+      - name: 🦢 Add SwanLab Helm Repo
+        run: |
+          helm repo add swanlab https://helm.swanlab.cn
+          helm repo update
+
+      - name: 🔍 Run Helm Lint
+        run: |
+          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
+            echo "Linting $chart_dir..."
+            helm dependency update "$chart_dir"
+            helm lint "$chart_dir"
+          done
+
+      - name: 👮 Move LICENSE to Chart Directories
+        run: |
+          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
+            echo "Copying LICENSE to $chart_dir..."
+            cp LICENSE "$chart_dir/"
+          done
+
+      - name: 🚀 Release Helm Chart
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: ./charts
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
