@@ -35,6 +35,71 @@ spec:
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: ping
+          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
+          imagePullPolicy: {{.Values.helper.pullPolicy}}
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.redis.secretName" . }}
+                  key: url
+            - name: CLICKHOUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.clickhouse.secretName" . }}
+                  key: host
+            - name: CLICKHOUSE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.clickhouse.secretName" . }}
+                  key: tcpPort
+          # 核心检测逻辑
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              echo "🔍 Starting dependency check..."
+
+              # ---------------------------------------------------------
+              # 1. Parse Redis URL (extract host and port from redis://user:pass@host:port/db)
+              # ---------------------------------------------------------
+              # Remove protocol prefix (redis://)
+              tmp="${REDIS_URL#*://}"
+              # Remove path suffix (/0 or /db)
+              tmp="${tmp%%/*}"
+              # Remove auth info (user:pass@), keep content after the last @
+              host_port="${tmp##*@}"
+
+              # Extract Host (remove port after colon)
+              r_host="${host_port%:*}"
+              # Extract Port (remove host before colon)
+              r_port="${host_port##*:}"
+
+              # If no port specified, default to 6379
+              if [ "$r_host" = "$r_port" ]; then
+              r_port="6379"
+              fi
+
+              echo "➡️ Checking Redis ($r_host:$r_port)..."
+              # Loop check until success
+              until nc -z -w 1 "$r_host" "$r_port"; do
+              echo "   Waiting for Redis to be ready..."
+              sleep 2
+              done
+              echo "✅ Redis is ready!"
+
+              # ---------------------------------------------------------
+              # 2. Check ClickHouse (variables provided directly, no parsing needed)
+              # ---------------------------------------------------------
+              echo "➡️ Checking ClickHouse ($CLICKHOUSE_HOST:$CLICKHOUSE_PORT)..."
+              until nc -z -w 1 "$CLICKHOUSE_HOST" "$CLICKHOUSE_PORT"; do
+              echo "   Waiting for ClickHouse to be ready..."
+              sleep 2
+              done
+              echo "✅ ClickHouse is ready!"
+
+              echo "🎉 All dependencies are ready. Proceeding to main container..."
       containers:
         - name: house
           image: {{ include "swanlab.house.image" . | quote }}

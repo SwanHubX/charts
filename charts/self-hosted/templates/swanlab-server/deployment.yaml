@@ -24,6 +24,80 @@ spec:
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: ping
+          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
+          imagePullPolicy: {{.Values.helper.pullPolicy}}
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.redis.secretName" . }}
+                  key: url
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.postgres.secretName" . }}
+                  key: primaryUrl
+            - name: POSTGRES_REPLICA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.postgres.secretName" . }}
+                  key: replicaUrl
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Define a function to parse URL and check port
+              check_service() {
+                service_name=$1
+                url=$2
+                default_port=$3
+
+                # If env var is empty, skip check (e.g., Replica might be optional)
+                if [ -z "$url" ]; then
+                echo "⚪ $service_name URL not set, skipping check."
+                return
+                fi
+
+                # --- URL parsing logic (compatible with BusyBox sh) ---
+                # 1. Remove protocol header (e.g., postgres://)
+                tmp="${url#*://}"
+                # 2. Remove path/params (e.g., /dbname?sslmode=disable)
+                tmp="${tmp%%/*}"
+                tmp="${tmp%%\?*}"
+                # 3. Remove auth info (e.g., user:password@), keep only content after @
+                host_port="${tmp##*@}"
+
+                # 4. Separate host and port
+                host="${host_port%:*}"
+                port="${host_port##*:}"
+
+                # If host equals port, no port specified in URL (e.g., host/db)
+                if [ "$host" = "$port" ]; then
+                port="$default_port"
+                fi
+
+                # --- Check logic ---
+                echo "➡️  Checking $service_name ($host:$port)..."
+                until nc -z -w 1 "$host" "$port"; do
+                echo "   ⏳ Waiting for $service_name to be ready..."
+                sleep 2
+                done
+                echo "✅ $service_name is ready!"
+              }
+
+              echo "🔍 Starting dependency check..."
+
+              # Check Redis
+              check_service "Redis" "$REDIS_URL" "6379"
+
+              # Check Postgres Primary
+              check_service "Postgres Primary" "$POSTGRES_URL" "5432"
+
+              # Check Postgres Replica (if available)
+              check_service "Postgres Replica" "$POSTGRES_REPLICA_URL" "5432"
+
+              echo "🎉 All dependencies are ready!"
       containers:
         - name: server
           image: {{ include "swanlab.server.image" . | quote }}

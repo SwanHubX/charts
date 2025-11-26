@@ -24,6 +24,64 @@ spec:
       imagePullSecrets:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: ping
+          env:
+            - name: SWANLAB_SERVER_URL
+              value: "http://{{ include "swanlab.server.fullname" . }}:{{ include "swanlab.server.port" . }}/api"
+            - name: SWANLAB_CLOUD_URL
+              value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
+          image: {{ .Values.helper.repository }}:{{ .Values.helper.tag }}
+          imagePullPolicy: {{ .Values.helper.pullPolicy }}
+          command: [ "/bin/sh", "-c" ]
+          args:
+            - |
+              # Function to parse HTTP URL and check TCP connectivity
+              check_url() {
+                service_name=$1
+                url=$2
+
+                if [ -z "$url" ]; then
+                  echo "⚪ $service_name URL not set, skipping check."
+                  return
+                fi
+
+                # --- URL Parsing ---
+                # 1. Remove protocol (http:// or https://)
+                tmp="${url#*://}"
+                # 2. Remove path suffix (e.g., /api, /, or query params)
+                tmp="${tmp%%/*}"
+
+                # 3. Extract Host and Port
+                # Get content before the last colon
+                host="${tmp%:*}"
+                # Get content after the last colon
+                port="${tmp##*:}"
+
+                # If host equals port, it means no port was specified in URL (e.g. http://example.com/api)
+                # Default to 80 in that case
+                if [ "$host" = "$port" ]; then
+                  port="80"
+                fi
+
+                # --- Check Logic ---
+                echo "➡️  Checking $service_name ($host:$port)..."
+                until nc -z -w 1 "$host" "$port"; do
+                  echo "   ⏳ Waiting for $service_name to be ready..."
+                  sleep 2
+                done
+                echo "✅ $service_name is ready!"
+              }
+
+              echo "🔍 Starting service connectivity check..."
+
+              # Check SwanLab Server (removes /api automatically)
+              check_url "SwanLab Server" "$SWANLAB_SERVER_URL"
+
+              # Check SwanLab Cloud
+              check_url "SwanLab Cloud" "$SWANLAB_CLOUD_URL"
+
+              echo "🎉 All services are reachable!"
       containers:
         - name: server
           image: {{ include "swanlab.next.image" . | quote }}
