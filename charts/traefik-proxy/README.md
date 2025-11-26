@@ -22,4 +22,14 @@ spec:
       AuthUrl: "http://swanlab-server:3000/api/identity"
 ```
 
-Note: by default, ingressClass is set to `traefik-proxy`, and isDefaultClass is set to `false`. You may need to adjust these values based on your cluster configuration.
+For flexibility, we have not predefined a schema for traefik-proxy.
+If you have some understanding of [traefik](https://helm.traefik.io/traefik), you can freely configure the relevant parameter values under the `traefik` property. 
+Otherwise, we recommend using the `traefik` helm directly, as it is more versatile:
+
+```bash
+helm repo add traefik https://helm.traefik.io/traefik
+
+helm install traefik traefik/traefik
+```
+
+> Note: by default, [providers.kubernetesCRD.labelSelector](https://doc.traefik.io/traefik/reference/install-configuration/providers/kubernetes/kubernetes-crd/#opt-providers-kubernetesCRD-labelselector) is set to `swanlab=traefik-proxy`. You may need to adjust these values based on your cluster configuration.

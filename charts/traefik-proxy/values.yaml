@@ -94,5 +94,5 @@ traefik:
     kubernetesCRD:
       # Label selector to filter IngressRoute resources
       # It's useful when multiple applications deploy Traefik in the same cluster.
-      # Only supports a single selector in the current version:
+      # Only supports a single selector in the current version, and you may need recreate Traefik release to change it.
       labelSelector: "swanlab=traefik-proxy"
