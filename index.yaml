@@ -3,6 +3,38 @@ entries:
   self-hosted:
   - apiVersion: v2
     appVersion: "2.4"
+    created: "2025-11-26T06:09:14.751497799Z"
+    dependencies:
+    - alias: ingress
+      name: traefik-proxy
+      repository: https://helm.swanlab.cn
+      version: 1.0.0
+    description: A Helm chart for deploying SwanLab, an open-source ML experiment
+      tracking platform, on Kubernetes.
+    digest: d4bda9501fa36c930f429e3f8c66570ed82435a7b5df1f83adfb3d39c36e5f42
+    home: https://swanlab.cn
+    icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
+    keywords:
+    - swanlab
+    - ml-ops
+    - machine-learning
+    - experiment-tracking
+    kubeVersion: '>=1.22.0-0'
+    maintainers:
+    - email: team@swanlab.cn
+      name: cunyue
+    - email: team@swanlab.cn
+      name: kaikai
+    name: self-hosted
+    sources:
+    - https://github.com/SwanHubX/charts/tree/main/charts/self-hosted
+    - https://github.com/SwanHubX/SwanLab
+    type: application
+    urls:
+    - https://github.com/SwanHubX/charts/releases/download/self-hosted-0.1.2/self-hosted-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: "2.4"
     created: "2025-11-26T05:25:43.653039897Z"
     dependencies:
     - alias: ingress
@@ -67,6 +99,26 @@ entries:
     version: 0.1.0
   traefik-proxy:
   - apiVersion: v2
+    created: "2025-11-26T06:09:14.964342328Z"
+    dependencies:
+    - name: traefik
+      repository: https://helm.traefik.io/traefik
+      version: 37.3.0
+    description: A Helm chart app encapsulating most of the Traefik resource configurations.
+    digest: 14335289513f381ce1ec0a142d686820f9f03041f9d8b96b88cf66827343d381
+    home: https://swanlab.cn
+    icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
+    maintainers:
+    - email: team@swanhub.co
+      name: cunyue
+    name: traefik-proxy
+    sources:
+    - https://github.com/SwanHubX/charts/tree/main/charts/traefik-proxy
+    type: application
+    urls:
+    - https://github.com/SwanHubX/charts/releases/download/traefik-proxy-1.0.2/traefik-proxy-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
     created: "2025-11-26T05:25:43.86763885Z"
     dependencies:
     - name: traefik
@@ -106,4 +158,4 @@ entries:
     urls:
     - https://github.com/SwanHubX/charts/releases/download/traefik-proxy-1.0.0/traefik-proxy-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-26T05:25:43.867649439Z"
+generated: "2025-11-26T06:09:14.964358558Z"
