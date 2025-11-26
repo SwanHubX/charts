@@ -17,12 +17,6 @@ spec:
   entryPoints:
     - web
   routes:
-    # for debug: 如果要访问traefik内部dashboard并且不与其他路由冲突，最好使用单独的域名
-    - match: Host(`dashboard.self-hosted.powerducker.com`)
-      kind: Rule
-      services:
-        - name: api@internal
-          kind: TraefikService
     - match: PathPrefix(`/api`)
       kind: Rule
       middlewares:
