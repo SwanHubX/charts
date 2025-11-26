@@ -1,5 +1,38 @@
 apiVersion: v1
 entries:
+  self-hosted:
+  - apiVersion: v2
+    appVersion: "2.4"
+    created: "2025-11-26T05:18:26.4586474Z"
+    dependencies:
+    - alias: ingress
+      name: traefik-proxy
+      repository: https://helm.swanlab.cn
+      version: 1.0.0
+    description: A Helm chart for deploying SwanLab, an open-source ML experiment
+      tracking platform, on Kubernetes.
+    digest: 142a9767b753ea3fec3a7224bb9013bc88f70416138222447a22c8cebefaeb9d
+    home: https://swanlab.cn
+    icon: https://raw.githubusercontent.com/SwanHubX/traefik-proxy/main/assets/icon.png
+    keywords:
+    - swanlab
+    - ml-ops
+    - machine-learning
+    - experiment-tracking
+    kubeVersion: '>=1.22.0-0'
+    maintainers:
+    - email: team@swanlab.cn
+      name: cunyue
+    - email: team@swanlab.cn
+      name: kaikai
+    name: self-hosted
+    sources:
+    - https://github.com/SwanHubX/charts/tree/main/charts/self-hosted
+    - https://github.com/SwanHubX/SwanLab
+    type: application
+    urls:
+    - https://github.com/SwanHubX/charts/releases/download/self-hosted-0.1.0/self-hosted-0.1.0.tgz
+    version: 0.1.0
   traefik-proxy:
   - apiVersion: v2
     created: "2025-11-26T05:09:18.509385993Z"
@@ -21,4 +54,4 @@ entries:
     urls:
     - https://github.com/SwanHubX/charts/releases/download/traefik-proxy-1.0.0/traefik-proxy-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-26T05:09:18.509395651Z"
+generated: "2025-11-26T05:18:26.458655996Z"
