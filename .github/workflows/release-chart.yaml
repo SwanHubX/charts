@@ -37,10 +37,10 @@ jobs:
           helm repo add traefik https://helm.traefik.io/traefik
           helm repo update
 
-#      - name: 🦢 Add SwanLab Helm Repo
-#        run: |
-#          helm repo add swanlab https://helm.swanlab.cn
-#          helm repo update
+      - name: 🦢 Add SwanLab Helm Repo
+        run: |
+          helm repo add swanlab https://helm.swanlab.cn
+          helm repo update
 
       - name: 🔍 Run Helm Lint
         run: |

@@ -1,0 +1,10 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "swanlab.traefik.identify" . }}
+  labels:
+    {{ include "swanlab.traefik.crd.label" . }}
+spec:
+  plugin:
+    identify:
+      AuthUrl: {{ include "swanlab.server.identify" . | quote }}

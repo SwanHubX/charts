@@ -1,0 +1,88 @@
+{{- if .Values.integrations.clickhouse.enabled | eq false }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+    {{- include "swanlab.clickhouse.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.clickhouse.labels" . | nindent 8 }}
+      {{- include "swanlab.clickhouse.selectorLabels" . | nindent 8 }}
+      {{- if .Values.dependencies.clickhouse.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: clickhouse
+        image: "{{ .Values.dependencies.clickhouse.image.repository }}:{{ .Values.dependencies.clickhouse.image.tag }}"
+        imagePullPolicy: {{ .Values.dependencies.clickhouse.image.pullPolicy }}
+        ports:
+          - containerPort: 9000
+            name: clickhouse-tcp
+          - containerPort: 8123
+            name: clickhouse-http
+        env:
+          - name: TZ
+            value: "UTC"
+          - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+            value: "1"
+          - name: CLICKHOUSE_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.clickhouse.secretName" . }}
+                key: username
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "swanlab.clickhouse.secretName" . }}
+                key: password
+        volumeMounts:
+          - mountPath: /var/lib/clickhouse
+            name: {{ include "swanlab.clickhouse.fullname" . }}-volume
+        {{- if .Values.dependencies.clickhouse.resources }}
+        resources:
+        {{- toYaml .Values.dependencies.clickhouse.resources | nindent 12 }}
+        {{- end }}
+      volumes:
+        - name: {{ include "swanlab.clickhouse.fullname" . }}-volume
+          persistentVolumeClaim:
+            claimName: {{ include "swanlab.clickhouse.pvcName" . }}
+      {{- if .Values.dependencies.clickhouse.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.dependencies.clickhouse.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dependencies.clickhouse.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.dependencies.clickhouse.customTolerations | nindent 8 }}
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.clickhouse.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: 9000
+      name: clickhouse-tcp
+    - port: 8123
+      name: clickhouse-http
+{{- end }}

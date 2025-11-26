@@ -1,0 +1,84 @@
+{{- $identify := include "swanlab.traefik.identify" . }}
+{{- $server := include "swanlab.server.fullname" . }}
+{{- $serverPort := include "swanlab.server.port" . }}
+{{- $house := include "swanlab.house.fullname" . }}
+{{- $housePort := include "swanlab.house.port" . }}
+{{- $next := include "swanlab.next.fullname" . }}
+{{- $nextPort := include "swanlab.next.port" . }}
+{{- $cloud := include "swanlab.cloud.fullname" . }}
+{{- $cloudPort := include "swanlab.cloud.port" . }}
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{include "swanlab.fullname" . }}-route-internal
+  labels:
+    {{ include "swanlab.traefik.crd.label" . }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    # for debug: 如果要访问traefik内部dashboard并且不与其他路由冲突，最好使用单独的域名
+    - match: Host(`dashboard.self-hosted.powerducker.com`)
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+    - match: PathPrefix(`/api`)
+      kind: Rule
+      middlewares:
+        - name: {{ $identify }}
+      services:
+        - name: {{ $server }}
+          port: {{ $serverPort }}
+
+---
+{{- $tls := .Values.ingress.tls }}
+{{- $host := .Values.ingress.host }}
+
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{include "swanlab.fullname" . }}-route
+  labels:
+    {{ include "swanlab.traefik.crd.label" . }}
+spec:
+  entryPoints:
+    - {{ include "swanlab.traefik.entrypoint" $tls }}
+  routes:
+    # next
+    - match: {{ include "swanlab.traefik.match" (list $host "/") }}
+      kind: Rule
+      services:
+        - name: {{ $next }}
+          port: {{ $nextPort }}
+    # server
+    - match: {{include "swanlab.traefik.match" (list $host "/api") }}
+      kind: Rule
+      middlewares:
+        - name: {{ $identify }}
+      services:
+        - name: {{ $server }}
+          port: {{ $serverPort }}
+    # house
+    - match: {{include "swanlab.traefik.match" (list $host "/api/house") }}
+      kind: Rule
+      middlewares:
+        - name: {{ $identify }}
+      services:
+        - name: {{ $house }}
+          port: {{ $housePort }}
+    # minio
+    - match: {{include "swanlab.traefik.match" (list $host "/swanlab-private") }}
+      kind: Rule
+      services:
+        - name: minio
+          port: 9000
+    - match: {{include "swanlab.traefik.match" (list $host "/swanlab-public") }}
+      kind: Rule
+      services:
+        - name: minio
+          port: 9000
+  {{- if $tls }}
+  tls:
+    secretName: {{ $tls }}
+  {{- end }}
