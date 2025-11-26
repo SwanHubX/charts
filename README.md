@@ -1,5 +1,5 @@
 SwanLab Official Open Source Helm Repository. 
-[Helm](https://helm.sh/) is required to use and operate these charts. You can add the Traefik Helm Repository like below:
+[Helm](https://helm.sh/) is required to use and operate these charts. You can add the SwamLab Helm Repository like below:
 
 ```bash
 helm repo add swanlab https://helm.swanlab.cn
