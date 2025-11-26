@@ -50,12 +50,12 @@ jobs:
             helm lint "$chart_dir"
           done
 
-      - name: 👮 Move LICENSE to Chart Directories
-        run: |
-          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
-            echo "Copying LICENSE to $chart_dir..."
-            cp LICENSE "$chart_dir/"
-          done
+#      - name: 👮 Move LICENSE to Chart Directories
+#        run: |
+#          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
+#            echo "Copying LICENSE to $chart_dir..."
+#            cp LICENSE "$chart_dir/"
+#          done
 
       - name: 🚀 Release Helm Chart
         uses: helm/chart-releaser-action@v1.7.0
