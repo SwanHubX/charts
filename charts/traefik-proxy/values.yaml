@@ -90,7 +90,9 @@ traefik:
       mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
 
   # Create a IngressClass for Traefik
-  ingressClass:
-    enabled: true
-    isDefaultClass: false
-    name: "traefik-proxy"
+  providers:
+    kubernetesCRD:
+      # Label selector to filter IngressRoute resources
+      # It's useful when multiple applications deploy Traefik in the same cluster.
+      # Only supports a single selector in the current version:
+      labelSelector: "swanlab=traefik-proxy"

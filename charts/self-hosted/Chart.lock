@@ -1,6 +1,0 @@
-dependencies:
-- name: traefik-proxy
-  repository: https://helm.swanlab.cn
-  version: 1.1.0
-digest: sha256:0570f6dd23529d909b0190d5b256cf549aa83ad65b4009ae730a0c79e00f4d74
-generated: "2025-11-24T21:29:04.224647+08:00"
