@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "traefik-proxy.fullname" . }}-test-connection"
+  labels:
+    {{- include "traefik-proxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  imagePullSecrets: {{- toYaml .Values.test.imagePullSecrets | nindent 4 }}
+  containers:
+    - name: wget
+      image: '{{- include "traefik-proxy.busyboxImage" . }}'
+      imagePullPolicy: {{ .Values.test.image.pullPolicy }}
+      command: ['sh', '-c']
+      args:
+        - wget --server-response --quiet '{{ include "traefik-proxy.fullname" . }}:80' 2>&1 | grep "HTTP/"
+  restartPolicy: Never

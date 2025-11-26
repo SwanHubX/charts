@@ -1,0 +1,4 @@
+Traefik-proxy has been deployed! Enjoy your reverse proxy. And you can check the status through:
+
+1. helm test {{ .Release.Name }} -n {{ .Release.Namespace }}
+2. helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
