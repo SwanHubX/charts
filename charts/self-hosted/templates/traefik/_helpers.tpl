@@ -10,10 +10,6 @@ Traefik-Proxy fullname
 {{- printf "%s-identity" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "swanlab.traefik.ingressClass" -}}
-{{- default .Values.ingress.traefik.providers.kubernetesCRD.ingressClass "" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 
 {{/*
 Parses labelSelector ("key=value") into a YAML label map.

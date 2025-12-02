@@ -95,8 +95,6 @@ spec:
             - containerPort: 3000
               name: web
           env:
-            - name: PROXY_URL # 标注此值未用到
-              value: "http://{{ include "swanlab.server.fullname" . }}:{{include "swanlab.server.port" . }}"
             - name: CLOUD_URL
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL
