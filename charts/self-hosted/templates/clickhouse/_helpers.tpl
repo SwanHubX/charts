@@ -38,6 +38,7 @@ Clickhouse Secret Name
 {{- else -}}
 {{ include "swanlab.clickhouse.fullname" . }}-credentials
 {{- end -}}
+{{- end -}}
 
 
 {{/*

@@ -38,6 +38,7 @@ Redis Secret Name
 {{- else -}}
 {{ include "swanlab.redis.fullname" . }}-credentials
 {{- end -}}
+{{- end -}}
 
 {{/*
 Redis PVC Name

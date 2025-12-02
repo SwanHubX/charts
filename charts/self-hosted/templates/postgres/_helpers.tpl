@@ -38,6 +38,7 @@ PostgreSQL Secret Name
 {{- else -}}
 {{ include "swanlab.postgres.fullname" . }}-credentials
 {{- end -}}
+{{- end -}}
 
 
 {{/*

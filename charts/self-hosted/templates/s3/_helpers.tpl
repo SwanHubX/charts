@@ -38,6 +38,7 @@ S3 Secret Name
 {{- else -}}
 {{ include "swanlab.s3.fullname" . }}-credentials
 {{- end -}}
+{{- end -}}
 
 
 {{/*
