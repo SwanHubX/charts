@@ -33,7 +33,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Clickhouse Secret Name
 */}}
 {{- define "swanlab.clickhouse.secretName" -}}
+{{- if .Values.integrations.clickhouse.enabled -}}
+{{- required "If .Values.integrations.clickhouse.enabled is true, you must specify the name of the existing secret via .Values.integrations.clickhouse.existingSecret." .Values.integrations.clickhouse.existingSecret -}}
+{{- else -}}
 {{ include "swanlab.clickhouse.fullname" . }}-credentials
+{{- end -}}
 {{- end -}}
 
 

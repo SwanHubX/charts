@@ -33,7 +33,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Redis Secret Name
 */}}
 {{- define "swanlab.redis.secretName" -}}
+{{- if .Values.integrations.redis.enabled -}}
+{{- required "If .Values.integrations.redis.enabled is true, you must specify the name of the existing secret via .Values.integrations.redis.existingSecret." .Values.integrations.redis.existingSecret -}}
+{{- else -}}
 {{ include "swanlab.redis.fullname" . }}-credentials
+{{- end -}}
 {{- end -}}
 
 {{/*

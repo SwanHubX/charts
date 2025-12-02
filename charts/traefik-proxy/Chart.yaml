@@ -1,7 +1,7 @@
 apiVersion: v2
 name: traefik-proxy
 type: application
-version: 1.0.2
+version: 1.0.3
 icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
 description: A Helm chart app encapsulating most of the Traefik resource configurations.
 home: https://swanlab.cn

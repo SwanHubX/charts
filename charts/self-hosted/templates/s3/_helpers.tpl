@@ -33,7 +33,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 S3 Secret Name
 */}}
 {{- define "swanlab.s3.secretName" -}}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the name of the existing secret via .Values.integrations.s3.existingSecret." .Values.integrations.s3.existingSecret -}}
+{{- else -}}
 {{ include "swanlab.s3.fullname" . }}-credentials
+{{- end -}}
 {{- end -}}
 
 
