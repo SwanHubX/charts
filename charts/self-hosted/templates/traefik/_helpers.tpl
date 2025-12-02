@@ -2,16 +2,12 @@
 Traefik-Proxy fullname
 */}}
 {{- define "swanlab.traefik.fullname" -}}
-{{- printf "%s-traefik" (include "swanlab.fullname" .) | trunc 40 | trimSuffix "-" -}}
+{{- printf "%s-traefik" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 
 {{- define "swanlab.traefik.identify" -}}
 {{- printf "%s-identity" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "swanlab.traefik.ingressClass" -}}
-{{- default .Values.ingress.traefik.providers.kubernetesCRD.ingressClass "" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 

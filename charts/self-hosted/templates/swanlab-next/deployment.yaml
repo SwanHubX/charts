@@ -5,7 +5,7 @@ metadata:
   labels:
   {{- include "swanlab.next.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default 1 .Values.service.next.replicaCount }}
+  replicas: {{ default 0 .Values.service.next.replicaCount }}
   selector:
     matchLabels:
     {{- include "swanlab.next.selectorLabels" . | nindent 6 }}
@@ -31,6 +31,8 @@ spec:
               value: "http://{{ include "swanlab.server.fullname" . }}:{{ include "swanlab.server.port" . }}/api"
             - name: SWANLAB_CLOUD_URL
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
+            - name: SWANLAB_HOUSE_URL
+              value: "http://{{ include "swanlab.house.fullname" . }}:{{include "swanlab.house.port" . }}/api/house"
           image: {{ .Values.helper.repository }}:{{ .Values.helper.tag }}
           imagePullPolicy: {{ .Values.helper.pullPolicy }}
           command: [ "/bin/sh", "-c" ]
@@ -81,6 +83,9 @@ spec:
               # Check SwanLab Cloud
               check_url "SwanLab Cloud" "$SWANLAB_CLOUD_URL"
 
+              # Check SwanLab House (removes /api/house automatically)
+              check_url "SwanLab House" "$SWANLAB_HOUSE_URL"
+
               echo "🎉 All services are reachable!"
       containers:
         - name: server
@@ -90,8 +95,6 @@ spec:
             - containerPort: 3000
               name: web
           env:
-            - name: PROXY_URL # 标注此值未用到
-              value: "http://{{ include "swanlab.server.fullname" . }}:{{include "swanlab.server.port" . }}"
             - name: CLOUD_URL
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL

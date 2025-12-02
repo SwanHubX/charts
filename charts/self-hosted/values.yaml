@@ -68,7 +68,7 @@ service:
 
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
-      storageClass: "standard"
+      storageClass: "local-storage"
       # Volume size for the database data.
       storageSize: "10Gi"
 
@@ -116,6 +116,12 @@ service:
     resources: {} # K8s Resource Limits and Requests
 
 
+# Additional environment variables can be specified here.
+env:
+  # API Host will change the api-key login host displayed in the frontend application.
+  apiHost: ""
+
+
 # Configuration for internal-deployed infrastructure (Chart-managed services).
 # These components serve as the default application dependencies and are only
 # provisioned in the cluster if the corresponding 'integrations.<service>.enabled' is false.
@@ -137,7 +143,7 @@ dependencies:
 
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
-      storageClass: "standard"
+      storageClass: "local-storage"
       # Volume size for the database data.
       storageSize: "10Gi"
 
@@ -162,7 +168,7 @@ dependencies:
       pullPolicy: "IfNotPresent"
 
     persistence: # Persistent Storage Configuration
-      storageClass: "standard"
+      storageClass: "local-storage"
       storageSize: "10Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)
@@ -190,7 +196,7 @@ dependencies:
     password: ""
 
     persistence: # Persistent Storage Configuration
-      storageClass: "standard"
+      storageClass: "local-storage"
       storageSize: "20Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)
@@ -224,7 +230,7 @@ dependencies:
     secretKey: ""
 
     persistence: # Persistent Storage Configuration
-      storageClass: "standard"
+      storageClass: "local-storage"
       storageSize: "20Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)
