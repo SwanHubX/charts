@@ -61,6 +61,7 @@ spec:
       services:
         - name: {{ $house }}
           port: {{ $housePort }}
+  {{- if .Values.integrations.s3.enabled | eq false }}
     # minio
     - match: {{include "swanlab.traefik.match" (list $host "/swanlab-private") }}
       kind: Rule
@@ -72,6 +73,7 @@ spec:
       services:
         - name: minio
           port: 9000
+  {{- end }}
   {{- if $tls }}
   tls:
     secretName: {{ $tls }}
