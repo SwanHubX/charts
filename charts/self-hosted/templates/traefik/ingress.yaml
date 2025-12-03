@@ -32,7 +32,7 @@ spec:
         - name: {{ $house }}
           port: {{ $housePort }}
 ---
-{{- $tls := .Values.ingress.tls }}
+{{- $tls := .Values.ingress.tlsSecret }}
 {{- $host := .Values.ingress.host }}
 
 apiVersion: traefik.io/v1alpha1

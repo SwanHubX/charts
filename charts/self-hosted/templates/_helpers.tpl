@@ -53,6 +53,6 @@ Application Ingress Host
 Application Ingress TLS Secret Name
 */}}
 {{- define "swanlab.tls" -}}
-{{- .Values.ingress.tls | default "" | trim -}}
+{{- .Values.ingress.tlsSecret | default "" | trim -}}
 {{- end -}}
 

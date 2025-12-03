@@ -313,7 +313,7 @@ ingress:
   # |:----------------------|
   # | tls.crt               |
   # | tls.key               |
-  tls: ""
+  tlsSecret: ""
   # The host domain name for accessing SwanLab services.
   # If set, you can only access SwanLab via this domain.
   host: ""
@@ -352,6 +352,21 @@ ingress:
       replicas: 2
       # List of secrets used to pull the Traefik image
       imagePullSecrets: [ ]
+
+      # If you need to replace identify image, you can modify the initContainers section here.
+      # BUT REMEMBER: You can ONLY change the image field, other fields MUST NOT be changed.
+      initContainers:
+        - name: download-identify
+          # Image for the init container that downloads the custom plugin files
+          image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.2
+          env:
+            - name: COPY_TO
+              # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
+              value: /plugins-tmp
+          volumeMounts:
+            - name: identify-plugin
+              # Mount path for the shared volume
+              mountPath: /plugins-tmp
 
     providers:
       kubernetesCRD:

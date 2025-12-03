@@ -16,6 +16,9 @@ spec:
         resources:
           requests:
             storage: {{.Values.service.house.persistence.storageSize}}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
+    whenScaled: Delete
   replicas: {{ default 0 .Values.service.house.replicaCount }}
   selector:
     matchLabels:
