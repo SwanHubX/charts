@@ -99,9 +99,9 @@ spec:
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL
               value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
-            - name: VERIFIER_URL
+            - name: API_VERIFIER_URL
               value: {{ include "swanlab.server.identify" . | quote }}
-            - name: INTERNAL_API_URL
+            - name: API_INTERNAL_URL
               value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
         {{- if .Values.service.next.resources }}
           resources:
