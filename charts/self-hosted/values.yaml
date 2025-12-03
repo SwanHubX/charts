@@ -46,16 +46,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    logImage:
-      repository: repo.swanlab.cn/self-hosted/logrotate
-      tag: "1.0"
-      pullPolicy: "IfNotPresent"
-
-    fbImage:
-      repository: repo.swanlab.cn/self-hosted/fluent-bit
-      tag: "3.2"
-      pullPolicy: "IfNotPresent"
-
 
     replicaCount: 1
 
@@ -66,12 +56,20 @@ service:
     customNodeSelector: { }
     resources: {} # K8s Resource Limits and Requests
 
+    # TODO: We will delete these configurations in the future.
+    logImage:
+      repository: repo.swanlab.cn/self-hosted/logrotate
+      tag: "1.0"
+      pullPolicy: "IfNotPresent"
+    fbImage:
+      repository: repo.swanlab.cn/self-hosted/fluent-bit
+      tag: "3.2"
+      pullPolicy: "IfNotPresent"
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
       storageClass: "local-storage"
       # Volume size for the database data.
       storageSize: "10Gi"
-
       # Use an existing PVC by name (leave empty to create a new one)
       existingClaim: ""
 

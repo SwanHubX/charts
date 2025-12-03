@@ -39,17 +39,24 @@
       "properties": {
         "server": { "$ref": "#/definitions/standardService" },
         "house": {
-          "allOf": [
-            { "$ref": "#/definitions/standardService" },
-            {
-              "type": "object",
-              "properties": {
-                "logImage": { "$ref": "#/definitions/imageConfig" },
-                "fbImage": { "$ref": "#/definitions/imageConfig" },
-                "persistence": { "$ref": "#/definitions/persistenceConfig" }
-              }
-            }
-          ]
+          "type": "object",
+          "additionalProperties": false,
+          "description": "House service has standard fields PLUS extra images and persistence",
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "replicas": { "type": "integer" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "replicaCount": { "type": "integer" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" },
+
+            "logImage": { "$ref": "#/definitions/imageConfig" },
+            "fbImage": { "$ref": "#/definitions/imageConfig" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" }
+          }
         },
         "cloud": { "$ref": "#/definitions/standardService" },
         "next": { "$ref": "#/definitions/standardService" }
@@ -167,87 +174,48 @@
             "imagePullSecrets": { "type": "array" }
           }
         },
+        "global": {
+          "type": "object"
+        },
         "traefik": {
           "type": "object",
-          "additionalProperties": false,
+          "description": "Traefik configuration. We allow additional properties here because Traefik has many native fields.",
           "properties": {
             "image": {
               "type": "object",
-              "additionalProperties": false,
               "properties": {
                 "registry": { "type": "string" },
                 "repository": { "type": "string" },
-                "tag": { "type": "string" },
-                "pullPolicy": {
-                  "type": "string",
-                  "enum": ["IfNotPresent", "Always", "Never"]
-                }
+                "tag": { "type": "string" }
               }
             },
             "service": {
               "type": "object",
-              "additionalProperties": false,
               "properties": {
                 "type": { "type": "string" }
               }
             },
             "deployment": {
               "type": "object",
-              "additionalProperties": false,
               "properties": {
                 "replicas": { "type": "integer" },
-                "imagePullSecrets": { "type": "array" },
                 "initContainers": {
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "additionalProperties": false,
                     "required": ["name", "image"],
                     "properties": {
                       "name": { "type": "string" },
                       "image": { "type": "string" },
-                      "env": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "required": ["name"],
-                          "properties": {
-                            "name": { "type": "string" },
-                            "value": { "type": "string" },
-                            "valueFrom": { "type": "object" }
-                          }
-                        }
-                      },
-                      "volumeMounts": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "required": ["name", "mountPath"],
-                          "properties": {
-                            "name": { "type": "string" },
-                            "mountPath": { "type": "string" },
-                            "readOnly": { "type": "boolean" },
-                            "subPath": { "type": "string" }
-                          }
-                        }
-                      }
+                      "env": { "type": "array" },
+                      "volumeMounts": { "type": "array" }
                     }
                   }
                 }
               }
             },
             "providers": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kubernetesCRD": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "labelSelector": { "type": "string" }
-                  }
-                }
-              }
+              "type": "object"
             }
           }
         }
