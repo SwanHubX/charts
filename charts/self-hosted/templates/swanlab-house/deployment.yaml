@@ -19,7 +19,7 @@ spec:
   persistentVolumeClaimRetentionPolicy:
     whenDeleted: Delete
     whenScaled: Delete
-  replicas: {{ default 0 .Values.service.house.replicaCount }}
+  replicas: {{ default 0 .Values.service.house.replicas }}
   selector:
     matchLabels:
     {{- include "swanlab.house.selectorLabels" . | nindent 6 }}

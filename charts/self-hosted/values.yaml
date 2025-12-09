@@ -26,9 +26,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    replicaCount: 1
-
-
     customLabels: {}
     customAnnotations: {}
     customTolerations: []
@@ -45,9 +42,6 @@ service:
       # For patch update delivery
       tag: ""
       pullPolicy: "IfNotPresent"
-
-
-    replicaCount: 1
 
 
     customLabels: {}
@@ -84,8 +78,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    replicaCount: 1
-
 
     customLabels: {}
     customAnnotations: {}
@@ -103,8 +95,6 @@ service:
       # For patch update delivery
       tag: ""
       pullPolicy: "IfNotPresent"
-
-    replicaCount: 1
 
 
     customLabels: {}
