@@ -94,6 +94,7 @@ kind: Job
 metadata:
   name: {{ include "swanlab.s3.fullname" . }}-init-buckets
 spec:
+  ttlSecondsAfterFinished: 3600
   completions: 1
   template:
     spec:

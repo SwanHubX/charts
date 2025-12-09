@@ -254,6 +254,7 @@ integrations:
     # | database              |
     # | username              |
     # | password              |
+    # | port                  |
     # | primaryUrl           |
     # | replicaUrl           |
     existingSecret: ""

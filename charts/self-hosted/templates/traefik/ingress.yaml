@@ -17,14 +17,16 @@ spec:
   entryPoints:
     - web
   routes:
-    - match: PathPrefix(`/api`) && Header(`X-Requested-By`, `swanlab-next`)
+{{/*    - match: PathPrefix(`/api`) && Header(`X-Requested-By`, `swanlab-next`)*/}}
+    - match: PathPrefix(`/api`)
       kind: Rule
       middlewares:
         - name: {{ $identify }}
       services:
         - name: {{ $server }}
           port: {{ $serverPort }}
-    - match: PathPrefix(`/api/house`) && Header(`X-Requested-By`, `swanlab-next`)
+{{/*    - match: PathPrefix(`/api/house`) && Header(`X-Requested-By`, `swanlab-next`)*/}}
+    - match: PathPrefix(`/api/house`)
       kind: Rule
       middlewares:
         - name: {{ $identify }}
