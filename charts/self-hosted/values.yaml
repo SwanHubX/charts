@@ -116,8 +116,8 @@ service:
 
 # Additional environment variables can be specified here.
 env:
-  # API Host will change the api-key login host displayed in the frontend application.
-  apiHost: ""
+  # Login Host will change the api-key login host displayed in the frontend application.
+  loginHost: ""
 
 
 # Configuration for internal-deployed infrastructure (Chart-managed services).

@@ -103,9 +103,9 @@ spec:
               value: {{ include "swanlab.server.identify" . | quote }}
             - name: API_INTERNAL_URL
               value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
-            {{- if .Values.env.apiHost }}
+            {{- if .Values.env.loginHost }}
             - name: API_DISPLAY_HOST
-              value: {{ .Values.env.apiHost | quote }}
+              value: {{ .Values.env.loginHost | quote }}
             {{- end }}
         {{- if .Values.service.next.resources }}
           resources:
