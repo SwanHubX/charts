@@ -54,7 +54,8 @@
 
             "logImage": { "$ref": "#/definitions/imageConfig" },
             "fbImage": { "$ref": "#/definitions/imageConfig" },
-            "persistence": { "$ref": "#/definitions/persistenceConfig" }
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "retainPVC": { "type": "boolean" }
           }
         },
         "cloud": { "$ref": "#/definitions/standardService" },

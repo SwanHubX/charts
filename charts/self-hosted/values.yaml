@@ -64,8 +64,8 @@ service:
       storageClass: "local-storage"
       # Volume size for the database data.
       storageSize: "10Gi"
-      # Use an existing PVC by name (leave empty to create a new one)
-      existingClaim: ""
+    # Retain PVC on deletion. In the vast majority of cases, this is unnecessary.
+    retainPVC: false
 
   # Configuration of our frontend service
   cloud:
