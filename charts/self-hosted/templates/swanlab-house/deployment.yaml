@@ -12,11 +12,16 @@ spec:
       spec:
         accessModes:
           - ReadWriteOnce
-        storageClassName: {{.Values.service.house.persistence.storageClass}}
+        storageClassName: {{.Values.service.house.persistence.storageClass }}
         resources:
           requests:
-            storage: {{.Values.service.house.persistence.storageSize}}
-  replicas: {{ default 0 .Values.service.house.replicaCount }}
+            storage: {{.Values.service.house.persistence.storageSize }}
+  persistentVolumeClaimRetentionPolicy:
+    {{- if .Values.service.house.retainPVC }}
+    whenDeleted: Delete
+    whenScaled: Delete
+    {{- end }}
+  replicas: {{ default 0 .Values.service.house.replicas }}
   selector:
     matchLabels:
     {{- include "swanlab.house.selectorLabels" . | nindent 6 }}

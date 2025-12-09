@@ -5,7 +5,7 @@ metadata:
   labels:
   {{- include "swanlab.next.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default 0 .Values.service.next.replicaCount }}
+  replicas: {{ default 0 .Values.service.next.replicas }}
   selector:
     matchLabels:
     {{- include "swanlab.next.selectorLabels" . | nindent 6 }}
@@ -99,10 +99,14 @@ spec:
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL
               value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
-            - name: VERIFIER_URL
+            - name: API_VERIFIER_URL
               value: {{ include "swanlab.server.identify" . | quote }}
-            - name: INTERNAL_API_URL
+            - name: API_INTERNAL_URL
               value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
+            {{- if .Values.env.loginHost }}
+            - name: API_DISPLAY_HOST
+              value: {{ .Values.env.loginHost | quote }}
+            {{- end }}
         {{- if .Values.service.next.resources }}
           resources:
         {{- toYaml .Values.service.next.resources | nindent 12 }}

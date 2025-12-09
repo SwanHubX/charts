@@ -1,0 +1,270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SwanLab Self-Hosted Values",
+  "description": "Schema for SwanLab Self-Hosted Helm Chart",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "nameOverride": {
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "type": "string"
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "helper": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["IfNotPresent", "Always", "Never"]
+        }
+      }
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "server": { "$ref": "#/definitions/standardService" },
+        "house": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "House service has standard fields PLUS extra images and persistence",
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "replicas": { "type": "integer" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" },
+
+            "logImage": { "$ref": "#/definitions/imageConfig" },
+            "fbImage": { "$ref": "#/definitions/imageConfig" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "retainPVC": { "type": "boolean" }
+          }
+        },
+        "cloud": { "$ref": "#/definitions/standardService" },
+        "next": { "$ref": "#/definitions/standardService" }
+      }
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "loginHost": { "type": "string" }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "postgres": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "username": { "type": "string" },
+            "password": { "type": "string" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" }
+          }
+        },
+        "clickhouse": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "username": { "type": "string" },
+            "password": { "type": "string" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" }
+          }
+        },
+        "s3": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fullnameOverride": { "type": "string" },
+            "image": { "$ref": "#/definitions/imageConfig" },
+            "mcImage": { "$ref": "#/definitions/imageConfig" },
+            "accessKey": { "type": "string" },
+            "secretKey": { "type": "string" },
+            "persistence": { "$ref": "#/definitions/persistenceConfig" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
+            "resources": { "type": "object" }
+          }
+        }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "postgres": { "$ref": "#/definitions/integrationConfig" },
+        "redis": { "$ref": "#/definitions/integrationConfig" },
+        "clickhouse": { "$ref": "#/definitions/integrationConfig" },
+        "s3": { "$ref": "#/definitions/integrationConfig" }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tlsSecret": { "type": "string" },
+        "host": { "type": "string" },
+        "test": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "image": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "registry": { "type": "string" },
+                "repository": { "type": "string" },
+                "tag": { "type": "string" },
+                "pullPolicy": {
+                  "type": "string",
+                  "enum": ["IfNotPresent", "Always", "Never"]
+                }
+              }
+            },
+            "imagePullSecrets": { "type": "array" }
+          }
+        },
+        "global": {
+          "type": "object"
+        },
+        "traefik": {
+          "type": "object",
+          "description": "Traefik configuration. We allow additional properties here because Traefik has many native fields.",
+          "properties": {
+            "image": {
+              "type": "object",
+              "properties": {
+                "registry": { "type": "string" },
+                "repository": { "type": "string" },
+                "tag": { "type": "string" }
+              }
+            },
+            "service": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string" }
+              }
+            },
+            "deployment": {
+              "type": "object",
+              "properties": {
+                "replicas": { "type": "integer" },
+                "initContainers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "image"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "image": { "type": "string" },
+                      "env": { "type": "array" },
+                      "volumeMounts": { "type": "array" }
+                    }
+                  }
+                }
+              }
+            },
+            "providers": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "imageConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["IfNotPresent", "Always", "Never"]
+        }
+      }
+    },
+    "persistenceConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "storageClass": { "type": "string" },
+        "storageSize": { "type": "string" },
+        "existingClaim": { "type": "string" }
+      }
+    },
+    "standardService": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fullnameOverride": { "type": "string" },
+        "replicas": { "type": "integer" },
+        "image": { "$ref": "#/definitions/imageConfig" },
+        "customLabels": { "type": "object" },
+        "customAnnotations": { "type": "object" },
+        "customTolerations": { "type": "array" },
+        "customNodeSelector": { "type": "object" },
+        "resources": { "type": "object" }
+      }
+    },
+    "integrationConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "existingSecret": { "type": "string" }
+      }
+    }
+  }
+}

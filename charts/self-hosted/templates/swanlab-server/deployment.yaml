@@ -5,7 +5,7 @@ metadata:
   labels:
   {{- include "swanlab.server.labels" . | nindent 4 }}
 spec:
-  replicas: {{ default 0 .Values.service.server.replicaCount }}
+  replicas: {{ default 0 .Values.service.server.replicas }}
   selector:
     matchLabels:
     {{- include "swanlab.server.selectorLabels" . | nindent 6 }}

@@ -17,6 +17,7 @@ spec:
   entryPoints:
     - web
   routes:
+{{/*    - match: PathPrefix(`/api`) && Header(`X-Requested-By`, `swanlab-next`)*/}}
     - match: PathPrefix(`/api`)
       kind: Rule
       middlewares:
@@ -24,9 +25,16 @@ spec:
       services:
         - name: {{ $server }}
           port: {{ $serverPort }}
-
+{{/*    - match: PathPrefix(`/api/house`) && Header(`X-Requested-By`, `swanlab-next`)*/}}
+    - match: PathPrefix(`/api/house`)
+      kind: Rule
+      middlewares:
+        - name: {{ $identify }}
+      services:
+        - name: {{ $house }}
+          port: {{ $housePort }}
 ---
-{{- $tls := .Values.ingress.tls }}
+{{- $tls := .Values.ingress.tlsSecret }}
 {{- $host := .Values.ingress.host }}
 
 apiVersion: traefik.io/v1alpha1

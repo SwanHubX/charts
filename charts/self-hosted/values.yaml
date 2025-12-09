@@ -26,9 +26,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    replicaCount: 1
-
-
     customLabels: {}
     customAnnotations: {}
     customTolerations: []
@@ -46,19 +43,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    logImage:
-      repository: repo.swanlab.cn/self-hosted/logrotate
-      tag: "1.0"
-      pullPolicy: "IfNotPresent"
-
-    fbImage:
-      repository: repo.swanlab.cn/self-hosted/fluent-bit
-      tag: "3.2"
-      pullPolicy: "IfNotPresent"
-
-
-    replicaCount: 1
-
 
     customLabels: {}
     customAnnotations: {}
@@ -66,14 +50,22 @@ service:
     customNodeSelector: { }
     resources: {} # K8s Resource Limits and Requests
 
+    # TODO: We will delete these configurations in the future.
+    logImage:
+      repository: repo.swanlab.cn/self-hosted/logrotate
+      tag: "1.0"
+      pullPolicy: "IfNotPresent"
+    fbImage:
+      repository: repo.swanlab.cn/self-hosted/fluent-bit
+      tag: "3.2"
+      pullPolicy: "IfNotPresent"
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
       storageClass: "local-storage"
       # Volume size for the database data.
       storageSize: "10Gi"
-
-      # Use an existing PVC by name (leave empty to create a new one)
-      existingClaim: ""
+    # Retain PVC on deletion. In the vast majority of cases, this is unnecessary.
+    retainPVC: false
 
   # Configuration of our frontend service
   cloud:
@@ -85,8 +77,6 @@ service:
       # For patch update delivery
       tag: ""
       pullPolicy: "IfNotPresent"
-
-    replicaCount: 1
 
 
     customLabels: {}
@@ -106,8 +96,6 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
-    replicaCount: 1
-
 
     customLabels: {}
     customAnnotations: {}
@@ -118,8 +106,8 @@ service:
 
 # Additional environment variables can be specified here.
 env:
-  # API Host will change the api-key login host displayed in the frontend application.
-  apiHost: ""
+  # Login Host will change the api-key login host displayed in the frontend application.
+  loginHost: ""
 
 
 # Configuration for internal-deployed infrastructure (Chart-managed services).
@@ -256,6 +244,7 @@ integrations:
     # | database              |
     # | username              |
     # | password              |
+    # | port                  |
     # | primaryUrl           |
     # | replicaUrl           |
     existingSecret: ""
@@ -313,7 +302,7 @@ ingress:
   # |:----------------------|
   # | tls.crt               |
   # | tls.key               |
-  tls: ""
+  tlsSecret: ""
   # The host domain name for accessing SwanLab services.
   # If set, you can only access SwanLab via this domain.
   host: ""
@@ -352,6 +341,21 @@ ingress:
       replicas: 2
       # List of secrets used to pull the Traefik image
       imagePullSecrets: [ ]
+
+      # If you need to replace identify image, you can modify the initContainers section here.
+      # BUT REMEMBER: You can ONLY change the image field, other fields MUST NOT be changed.
+      initContainers:
+        - name: download-identify
+          # Image for the init container that downloads the custom plugin files
+          image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.2
+          env:
+            - name: COPY_TO
+              # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
+              value: /plugins-tmp
+          volumeMounts:
+            - name: identify-plugin
+              # Mount path for the shared volume
+              mountPath: /plugins-tmp
 
     providers:
       kubernetesCRD:
