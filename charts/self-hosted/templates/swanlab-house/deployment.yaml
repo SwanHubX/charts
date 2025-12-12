@@ -147,21 +147,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.clickhouse.secretName" . }}
                   key: database
-            - name: MINIO_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" .}}
-                  key: endpoint
-            - name: MINIO_SECRET_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" .}}
-                  key: accessKey
-            - name: MINIO_SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" .}}
-                  key: secretKey
             - name: SH_DISTRIBUTED_ENABLE
               value: "true"
             - name: SH_REDIS_URL
@@ -169,6 +154,32 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.redis.secretName" . }}
                   key: url
+            # s3
+            - name: SH_MINIO_ENDPOINT
+              value: "{{ include "swanlab.s3.endpoint" . }}:{{ include "swanlab.s3.port" . }}"
+            - name: SH_MINIO_USE_SSL
+              value: "{{ include "swanlab.s3.ssl" . }}"
+            - name: SH_MINIO_REGION
+              value: "{{ include "swanlab.s3.region" . }}"
+            - name: SH_MINIO_PATH_STYLE
+              value: "{{ include "swanlab.s3.pathStyle" . }}"
+
+            - name: SH_MINIO_SECRET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" .}}
+                  key: accessKey
+            - name: SH_MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" .}}
+                  key: secretKey
+            - name: SH_MINIO_PRIVATE_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.s3.secretName" .}}
+                  key: privateBucket
+
         - name: logrotate
           image: {{ .Values.service.house.logImage.repository }}:{{ .Values.service.house.logImage.tag }}
           env:

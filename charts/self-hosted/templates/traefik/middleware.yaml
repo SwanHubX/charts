@@ -8,3 +8,16 @@ spec:
   plugin:
     identify:
       AuthUrl: {{ include "swanlab.server.identify" . | quote }}
+
+---
+
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "swanlab.traefik.minio" . }}
+  labels:
+    {{ include "swanlab.traefik.crd.label" . }}
+spec:
+  headers:
+    customRequestHeaders:
+      Host: "{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"

@@ -145,7 +145,20 @@
         "postgres": { "$ref": "#/definitions/integrationConfig" },
         "redis": { "$ref": "#/definitions/integrationConfig" },
         "clickhouse": { "$ref": "#/definitions/integrationConfig" },
-        "s3": { "$ref": "#/definitions/integrationConfig" }
+        "s3": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "ssl": { "type": "boolean" },
+            "region": { "type": "string" },
+            "endpoint": { "type": "string" },
+            "domain": { "type": "string" },
+            "port": { "type": "integer" },
+            "pathStyle": { "type": "boolean" },
+            "existingSecret": { "type": "string" }
+          }
+        }
       }
     },
     "ingress": {

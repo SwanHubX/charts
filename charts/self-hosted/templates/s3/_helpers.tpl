@@ -47,3 +47,82 @@ S3 PVC Name
 {{- define "swanlab.s3.pvcName" -}}
 {{.Values.dependencies.s3.persistence.existingClaim | default (printf "%s-pvc" (include "swanlab.s3.fullname" .)) }}
 {{- end -}}
+
+{{/*
+S3 Type
+*/}}
+{{- define "swanlab.s3.type" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- "remote" -}}
+{{- else -}}
+{{- "local" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+S3 SSL
+*/}}
+{{- define "swanlab.s3.ssl" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- .Values.integrations.s3.ssl | default false -}}
+{{- else -}}
+{{- false -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Endpoint
+*/}}
+{{- define "swanlab.s3.endpoint" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 endpoint via .Values.integrations.s3.endpoint." .Values.integrations.s3.endpoint -}}
+{{- else -}}
+{{- include "swanlab.s3.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Port
+*/}}
+{{- define "swanlab.s3.port" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 port via .Values.integrations.s3.port." .Values.integrations.s3.port -}}
+{{- else -}}
+{{- 9000 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Region
+*/}}
+{{- define "swanlab.s3.region" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 region via .Values.integrations.s3.region." .Values.integrations.s3.region -}}
+{{- else -}}
+{{- "local" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Domain
+*/}}
+{{- define "swanlab.s3.domain" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 domain via .Values.integrations.s3.domain." .Values.integrations.s3.domain -}}
+{{- else -}}
+{{- "" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Path Style
+*/}}
+{{- define "swanlab.s3.pathStyle" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- .Values.integrations.s3.pathStyle | default true -}}
+{{- else -}}
+{{- true -}}
+{{- end -}}
+{{- end -}}
+

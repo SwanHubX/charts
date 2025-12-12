@@ -7,6 +7,8 @@
 {{- $nextPort := include "swanlab.next.port" . }}
 {{- $cloud := include "swanlab.cloud.fullname" . }}
 {{- $cloudPort := include "swanlab.cloud.port" . }}
+{{- $minio := include "swanlab.s3.fullname" . }}
+{{- $minioPort := include "swanlab.s3.port" . }}
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -73,14 +75,18 @@ spec:
     # minio
     - match: {{include "swanlab.traefik.match" (list $host "/swanlab-private") }}
       kind: Rule
+      middlewares:
+        - name: {{ include "swanlab.traefik.minio" . }}
       services:
-        - name: minio
-          port: 9000
+        - name: {{ $minio }}
+          port: {{ $minioPort }}
     - match: {{include "swanlab.traefik.match" (list $host "/swanlab-public") }}
       kind: Rule
+      middlewares:
+        - name: {{ include "swanlab.traefik.minio" . }}
       services:
-        - name: minio
-          port: 9000
+        - name: {{ $minio }}
+          port: {{ $minioPort }}
   {{- end }}
   {{- if $tls }}
   tls:

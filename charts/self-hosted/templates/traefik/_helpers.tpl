@@ -6,10 +6,19 @@ Traefik-Proxy fullname
 {{- end -}}
 
 
+{{/*
+Traefik identity middleware name
+*/}}
 {{- define "swanlab.traefik.identify" -}}
 {{- printf "%s-identity" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/*
+Traefik minio middleware name
+*/}}
+{{- define "swanlab.traefik.minio" -}}
+{{- printf "%s-minio" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
 
 {{/*
 Parses labelSelector ("key=value") into a YAML label map.
