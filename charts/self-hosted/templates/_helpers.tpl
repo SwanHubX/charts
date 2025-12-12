@@ -46,7 +46,7 @@ Common labels
 {{- define "swanlab.labels" -}}
 {{ include "swanlab.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.Version | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 helm.sh/chart: {{ include "swanlab.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
@@ -61,7 +61,7 @@ Cluster domain
 {{- end }}
 
 {{/*
-Image pull secrect
+Image pull secret
 */}}
 {{- define "swanlab.imagePullSecrets" -}}
 {{- toYaml .Values.global.imagePullSecrets -}}
@@ -71,7 +71,7 @@ Image pull secrect
 {{/*
 Pod Distribution Constraints Configuration (Based on Topology Spread Constraints)
 
-Usage: `{{ include "swanlab.podAntiAffinity" list(
+Usage: `{{ include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.component.selectorLabels" .) }}`
 */}}
 {{- define "swanlab.podAntiAffinity" -}}
 {{ $preset := index . 0 }}

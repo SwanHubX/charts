@@ -88,7 +88,7 @@ service:
 
 
     # sidecar logging configuration
-    # TODO: We will delete these configurations in the future.
+    # TODO: We will delete these configurations in the future: https://github.com/SwanHubX/charts/issues/14
     logResources: {}
     fbResources: {}
     logImage:
