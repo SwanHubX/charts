@@ -16,8 +16,8 @@ Traefik identity middleware name
 {{/*
 Traefik minio middleware name
 */}}
-{{- define "swanlab.gateway.minio" -}}
-{{- printf "%s-minio" (include "swanlab.gateway.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- define "swanlab.gateway.s3" -}}
+{{- printf "%s-s3" (include "swanlab.gateway.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*

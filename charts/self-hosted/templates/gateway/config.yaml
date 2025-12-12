@@ -45,8 +45,8 @@ data:
   {{- $serverPort := include "swanlab.server.port" .}}
   {{- $house := include "swanlab.house.fullname" . }}
   {{- $housePort := include "swanlab.house.port" . }}
-  {{- $minio := include "swanlab.s3.fullname" . }}
-  {{- $minioPort := include "swanlab.s3.port" . }}
+  {{- $s3 := include "swanlab.s3.fullname" . }}
+  {{- $s3Port := include "swanlab.s3.port" . }}
   dynamic.yaml: |
     http:
       middlewares:
@@ -54,7 +54,7 @@ data:
           plugin:
             identify:
               AuthUrl: {{ include "swanlab.server.identify" . | quote }}
-        {{ include "swanlab.gateway.minio" . }}:
+        {{ include "swanlab.gateway.s3" . }}:
           headers:
             customRequestHeaders:
               Host: "{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"
@@ -92,13 +92,13 @@ data:
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
       {{- if .Values.integrations.s3.enabled | eq false }}
         s3-router:
-          {{ $minio1 := include "swanlab.gateway.match" (list $host "/swanlab-private")}}
-          {{ $minio2 := include "swanlab.gateway.match" (list $host "/swanlab-public")}}
-          rule: {{ printf "(%s) || (%s)" $minio1 $minio2 }}
+          {{ $s1 := include "swanlab.gateway.match" (list $host "/swanlab-private")}}
+          {{ $s2 := include "swanlab.gateway.match" (list $host "/swanlab-public")}}
+          rule: {{ printf "(%s) || (%s)" $s1 $s2 }}
           service: "swanlab-s3"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.gateway.minio" . }}]
+          middlewares: [{{ include "swanlab.gateway.s3" . }}]
       {{- end }}
 
       services:
@@ -121,6 +121,6 @@ data:
         swanlab-s3:
           loadBalancer:
             servers:
-              - url: {{ include "swanlab.gateway.url" (list $minio $namespace $cluster $minioPort) }}
+              - url: {{ include "swanlab.gateway.url" (list $s3 $namespace $cluster $s3Port) }}
         {{- end }}
 
