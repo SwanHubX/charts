@@ -178,9 +178,9 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.s3.secretName" .}}
                   key: privateBucket
-        {{ if .Values.service.house.resources }}
+        {{- if .Values.service.house.resources }}
           resources:
-        {{- toYaml .Values.service.house.resources | nindent 8 }}
+        {{- toYaml .Values.service.house.resources | nindent 12 }}
         {{- end }}
         - name: logrotate
           image: {{ .Values.service.house.logImage.repository }}:{{ .Values.service.house.logImage.tag }}
@@ -198,9 +198,9 @@ spec:
           volumeMounts:
             - name: house
               mountPath: /data
-        {{ if .Values.service.house.logResources }}
+        {{- if .Values.service.house.logResources }}
           resources:
-        {{- toYaml .Values.service.house.logResources | nindent 8 }}
+        {{- toYaml .Values.service.house.logResources | nindent 12 }}
         {{- end }}
         - name: fluent-bit
           image: {{ .Values.service.house.fbImage.repository }}:{{ .Values.service.house.fbImage.tag }}
@@ -236,9 +236,9 @@ spec:
           volumeMounts:
             - name: house
               mountPath: /data
-        {{ if .Values.service.house.fbResources }}
+        {{- if .Values.service.house.fbResources }}
           resources:
-        {{- toYaml .Values.service.house.fbResources | nindent 8 }}
+        {{- toYaml .Values.service.house.fbResources | nindent 12 }}
         {{- end }}
       {{- if .Values.service.house.customNodeSelector }}
       nodeSelector:
