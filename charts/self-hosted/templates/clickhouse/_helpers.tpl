@@ -11,22 +11,22 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 
 {{/*
-Clickhouse Common labels
-*/}}
-{{- define "swanlab.clickhouse.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: clickhouse
-{{- if .Values.dependencies.clickhouse.customLabels }}
-{{ toYaml .Values.dependencies.clickhouse.customLabels }}
-{{- end }}
-{{- end -}}
-
-{{/*
 Clickhouse Selector labels
 */}}
 {{- define "swanlab.clickhouse.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-clickhouse
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-clickhouse
+{{- end -}}
+
+{{/*
+Clickhouse Common labels
+*/}}
+{{- define "swanlab.clickhouse.labels" -}}
+{{ include "swanlab.clickhouse.selectorLabels" . }}
+app.kubernetes.io/service: clickhouse
+{{- if .Values.dependencies.clickhouse.customLabels }}
+{{ toYaml .Values.dependencies.clickhouse.customLabels }}
+{{- end }}
 {{- end -}}
 
 {{/*

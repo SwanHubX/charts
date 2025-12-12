@@ -10,23 +10,24 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 {{- end -}}
 
-{{/*
-S3 Common labels
-*/}}
-{{- define "swanlab.s3.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: s3
-{{- if .Values.dependencies.s3.customLabels }}
-{{ toYaml .Values.dependencies.s3.customLabels }}
-{{- end }}
-{{- end -}}
 
 {{/*
 S3 Selector labels
 */}}
 {{- define "swanlab.s3.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-s3
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-s3
+{{- end -}}
+
+{{/*
+S3 Common labels
+*/}}
+{{- define "swanlab.s3.labels" -}}
+{{ include "swanlab.s3.selectorLabels" . }}
+app.kubernetes.io/service: s3
+{{- if .Values.dependencies.s3.customLabels }}
+{{ toYaml .Values.dependencies.s3.customLabels }}
+{{- end }}
 {{- end -}}
 
 {{/*

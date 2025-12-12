@@ -19,25 +19,25 @@ SwanLab-Next Image
 {{- printf "%s:%s" .Values.service.next.image.repository $tag -}}
 {{- end -}}
 
-{{/*
-SwanLab-Next Common labels
-*/}}
-{{- define "swanlab.next.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: next
-{{- if .Values.service.next.customLabels }}
-{{ toYaml .Values.service.next.customLabels }}
-{{- end }}
-{{- end -}}
 
 {{/*
 SwanLab-Next Selector labels
 */}}
 {{- define "swanlab.next.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-next
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-next
 {{- end -}}
 
+{{/*
+SwanLab-Next Common labels
+*/}}
+{{- define "swanlab.next.labels" -}}
+{{ include "swanlab.next.selectorLabels" . }}
+app.kubernetes.io/service: next
+{{- if .Values.service.next.customLabels }}
+{{ toYaml .Values.service.next.customLabels }}
+{{- end }}
+{{- end -}}
 
 {{/*
 SwanLab-Next Port

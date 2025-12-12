@@ -7,6 +7,26 @@ Gateway fullname
 
 
 {{/*
+Gateway Selector labels
+*/}}
+{{- define "swanlab.gateway.selectorLabels" -}}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-gateway
+{{- end -}}
+
+{{/*
+Gateway Common labels
+*/}}
+{{- define "swanlab.gateway.labels" -}}
+{{ include "swanlab.gateway.selectorLabels" . }}
+app.kubernetes.io/service: gateway
+{{- if .Values.gateway.customLabels }}
+{{ toYaml .Values.gateway.customLabels }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
 Traefik identity middleware name
 */}}
 {{- define "swanlab.gateway.identify" -}}
@@ -67,25 +87,4 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 {{- else -}}
     {{- printf "%s(`%s`)" $matcher $path -}}
 {{- end -}}
-{{- end -}}
-
-
-
-{{/*
-SwanLab-ServerCommon labels
-*/}}
-{{- define "swanlab.gateway.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: traefik
-{{- if .Values.gateway.customLabels }}
-{{ toYaml .Values.gateway.customLabels }}
-{{- end }}
-{{- end -}}
-
-{{/*
-SwanLab-ServerSelector labels
-*/}}
-{{- define "swanlab.gateway.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-traefik
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

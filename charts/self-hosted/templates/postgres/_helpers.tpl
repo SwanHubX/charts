@@ -10,23 +10,24 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 {{- end -}}
 
-{{/*
-PostgreSQL Common labels
-*/}}
-{{- define "swanlab.postgres.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: postgres
-{{- if .Values.dependencies.postgres.customLabels }}
-{{ toYaml .Values.dependencies.postgres.customLabels }}
-{{- end }}
-{{- end -}}
 
 {{/*
 PostgreSQL Selector labels
 */}}
 {{- define "swanlab.postgres.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-postgres
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-postgres
+{{- end -}}
+
+{{/*
+PostgreSQL Common labels
+*/}}
+{{- define "swanlab.postgres.labels" -}}
+{{ include "swanlab.postgres.selectorLabels" . }}
+app.kubernetes.io/service: postgres
+{{- if .Values.dependencies.postgres.customLabels }}
+{{ toYaml .Values.dependencies.postgres.customLabels }}
+{{- end }}
 {{- end -}}
 
 {{/*

@@ -9,6 +9,7 @@ global:
   clusterDomain: cluster.local
 
   # Kubernetes Pod Affinity/Anti-Affinity settings
+  # We use Topology Spread Constraints to achieve pod distribution across nodes.
   podAntiAffinityPreset: "soft" # soft, hard, or none
 
   # Global application settings

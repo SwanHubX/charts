@@ -11,22 +11,23 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 
 {{/*
-Redis Common labels
-*/}}
-{{- define "swanlab.redis.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: redis
-{{- if .Values.dependencies.redis.customLabels }}
-{{ toYaml .Values.dependencies.redis.customLabels }}
-{{- end }}
-{{- end -}}
-
-{{/*
 Redis Selector labels
 */}}
 {{- define "swanlab.redis.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-redis
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-redis
+{{- end -}}
+
+
+{{/*
+Redis Common labels
+*/}}
+{{- define "swanlab.redis.labels" -}}
+{{ include "swanlab.redis.selectorLabels" . }}
+app.kubernetes.io/service: redis
+{{- if .Values.dependencies.redis.customLabels }}
+{{ toYaml .Values.dependencies.redis.customLabels }}
+{{- end }}
 {{- end -}}
 
 {{/*

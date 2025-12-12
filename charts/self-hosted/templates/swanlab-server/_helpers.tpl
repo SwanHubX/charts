@@ -20,22 +20,23 @@ SwanLab-ServerImage
 {{- end -}}
 
 {{/*
-SwanLab-ServerCommon labels
+SwanLab-Server Selector labels
+*/}}
+{{- define "swanlab.server.selectorLabels" -}}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-server
+{{- end -}}
+
+
+{{/*
+SwanLab-Server Common labels
 */}}
 {{- define "swanlab.server.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: server
+{{ include "swanlab.server.selectorLabels" . }}
+app.kubernetes.io/service: server
 {{- if .Values.service.server.customLabels }}
 {{ toYaml .Values.service.server.customLabels }}
 {{- end }}
-{{- end -}}
-
-{{/*
-SwanLab-ServerSelector labels
-*/}}
-{{- define "swanlab.server.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-server
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
 {{/*

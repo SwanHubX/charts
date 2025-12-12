@@ -19,6 +19,7 @@ spec:
       {{- toYaml .Values.gateway.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.gateway.selectorLabels" . ) | nindent 6 }}
       initContainers:
         - name: download-identify
           image: "{{ .Values.gateway.identifyImage.repository }}:{{ .Values.gateway.identifyImage.tag }}"

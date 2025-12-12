@@ -19,6 +19,7 @@ spec:
       {{- toYaml .Values.service.next.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.next.selectorLabels" . ) | nindent 6 }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
