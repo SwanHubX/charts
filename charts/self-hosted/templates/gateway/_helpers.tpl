@@ -1,29 +1,29 @@
 {{/*
-Traefik-Proxy fullname
+Gateway fullname
 */}}
-{{- define "swanlab.traefik.fullname" -}}
-{{- printf "%s-traefik" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- define "swanlab.gateway.fullname" -}}
+{{- printf "%s" (include "swanlab.fullname" .) -}}
 {{- end -}}
 
 
 {{/*
 Traefik identity middleware name
 */}}
-{{- define "swanlab.traefik.identify" -}}
-{{- printf "%s-identity" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- define "swanlab.gateway.identify" -}}
+{{- printf "%s-identity" (include "swanlab.gateway.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Traefik minio middleware name
 */}}
-{{- define "swanlab.traefik.minio" -}}
-{{- printf "%s-minio" (include "swanlab.traefik.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- define "swanlab.gateway.minio" -}}
+{{- printf "%s-minio" (include "swanlab.gateway.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Traefik config map
 */}}
-{{- define "swanlab.traefik.configmap" -}}
+{{- define "swanlab.gateway.configmap" -}}
 {{- printf "%s-traefik-config" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -37,7 +37,7 @@ Parameters:
 - clusterDomain: The cluster domain (e.g., "cluster.local").
 - port: The port number to append.
 */}}
-{{- define "swanlab.traefik.url"  -}}
+{{- define "swanlab.gateway.url"  -}}
 {{- $service := index . 0 -}}
 {{- $ns := index . 1 -}}
 {{- $cluster := index . 2 -}}
@@ -50,9 +50,9 @@ Parameters:
 Helper function to generate the conditional Host() && PathPrefix() expression.
 This is used internally by buildRouteBlock.
 Params (list): [Host (string), Path (string)]
-Usage: {{ include "swanlab.traefik.matchExpression" (list $host $path) }}
+Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 */}}
-{{- define "swanlab.traefik.match" -}}
+{{- define "swanlab.gateway.match" -}}
 {{- $host := index . 0 -}}
 {{- $path := index . 1 -}}
 {{- /* 1. Set the default matcher to PathPrefix */ -}}
@@ -74,7 +74,7 @@ Usage: {{ include "swanlab.traefik.matchExpression" (list $host $path) }}
 {{/*
 SwanLab-ServerCommon labels
 */}}
-{{- define "swanlab.traefik.labels" -}}
+{{- define "swanlab.gateway.labels" -}}
 {{ include "swanlab.labels" . }}
 app.kubernetes.io/component: traefik
 {{- if .Values.gateway.customLabels }}
@@ -85,7 +85,7 @@ app.kubernetes.io/component: traefik
 {{/*
 SwanLab-ServerSelector labels
 */}}
-{{- define "swanlab.traefik.selectorLabels" -}}
+{{- define "swanlab.gateway.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "swanlab.name" . }}-traefik
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}

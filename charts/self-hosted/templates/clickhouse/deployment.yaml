@@ -22,10 +22,8 @@ spec:
       {{- end }}
     spec:
       restartPolicy: Always
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       containers:
       - name: clickhouse
         image: "{{ .Values.dependencies.clickhouse.image.repository }}:{{ .Values.dependencies.clickhouse.image.tag }}"

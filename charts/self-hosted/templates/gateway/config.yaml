@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "swanlab.traefik.configmap" . }}
+  name: {{ include "swanlab.gateway.configmap" . }}
 data:
   # -------------------------
   # Static configuration (loaded at startup)
@@ -50,55 +50,55 @@ data:
   dynamic.yaml: |
     http:
       middlewares:
-        {{ include "swanlab.traefik.identify" . }}:
+        {{ include "swanlab.gateway.identify" . }}:
           plugin:
             identify:
               AuthUrl: {{ include "swanlab.server.identify" . | quote }}
-        {{ include "swanlab.traefik.minio" . }}:
+        {{ include "swanlab.gateway.minio" . }}:
           headers:
             customRequestHeaders:
               Host: "{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"
       routers:
         next-router:
-          rule: {{ include "swanlab.traefik.match" (list $host "/") }}
+          rule: {{ include "swanlab.gateway.match" (list $host "/") }}
           service: "swanlab-next"
           entryPoints:
             - "web"
         server-router:
-          rule: {{ include "swanlab.traefik.match" (list $host "/api") }}
+          rule: {{ include "swanlab.gateway.match" (list $host "/api") }}
           service: "swanlab-server"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.traefik.identify" . }}]
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
         house-router:
-          rule: {{ include "swanlab.traefik.match" (list $host "/api/house") }}
+          rule: {{ include "swanlab.gateway.match" (list $host "/api/house") }}
           service: "swanlab-house"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.traefik.identify" . }}]
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
         server-router-internal:
     #      rule: PathPrefix(`/api`) && Header(`X-Requested-By`, `swanlab-next`)
           rule: PathPrefix(`/api`)
           service: "swanlab-server"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.traefik.identify" . }}]
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
         house-router-internal:
     #      rule: PathPrefix(`/api/house`) && Header(`X-Requested-By`, `swanlab-next`)
           rule: PathPrefix(`/api/house`)
           service: "swanlab-house"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.traefik.identify" . }}]
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
       {{- if .Values.integrations.s3.enabled | eq false }}
         s3-router:
-          {{ $minio1 := include "swanlab.traefik.match" (list $host "/swanlab-private")}}
-          {{ $minio2 := include "swanlab.traefik.match" (list $host "/swanlab-public")}}
+          {{ $minio1 := include "swanlab.gateway.match" (list $host "/swanlab-private")}}
+          {{ $minio2 := include "swanlab.gateway.match" (list $host "/swanlab-public")}}
           rule: {{ printf "(%s) || (%s)" $minio1 $minio2 }}
           service: "swanlab-s3"
           entryPoints:
             - "web"
-          middlewares: [{{ include "swanlab.traefik.minio" . }}]
+          middlewares: [{{ include "swanlab.gateway.minio" . }}]
       {{- end }}
 
       services:
@@ -108,19 +108,19 @@ data:
         swanlab-next:
           loadBalancer:
             servers:
-              - url: {{ include "swanlab.traefik.url" (list $next $namespace $cluster $nextPort) }}
+              - url: {{ include "swanlab.gateway.url" (list $next $namespace $cluster $nextPort) }}
         swanlab-server:
           loadBalancer:
             servers:
-              - url: {{ include "swanlab.traefik.url" (list $server $namespace $cluster $serverPort) }}
+              - url: {{ include "swanlab.gateway.url" (list $server $namespace $cluster $serverPort) }}
         swanlab-house:
           loadBalancer:
             servers:
-              - url: {{ include "swanlab.traefik.url" (list $house $namespace $cluster $housePort) }}
+              - url: {{ include "swanlab.gateway.url" (list $house $namespace $cluster $housePort) }}
         {{- if .Values.integrations.s3.enabled | eq false }}
         swanlab-s3:
           loadBalancer:
             servers:
-              - url: {{ include "swanlab.traefik.url" (list $minio $namespace $cluster $minioPort) }}
+              - url: {{ include "swanlab.gateway.url" (list $minio $namespace $cluster $minioPort) }}
         {{- end }}
 

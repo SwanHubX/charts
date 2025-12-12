@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "swanlab.traefik.fullname" . }}
+  name: {{ include "swanlab.gateway.fullname" . }}
   labels:
-  {{- include "swanlab.traefik.labels" . | nindent 4 }}
+  {{- include "swanlab.gateway.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-    {{- include "swanlab.traefik.selectorLabels" . | nindent 6 }}
+    {{- include "swanlab.gateway.selectorLabels" . | nindent 6 }}
   replicas: {{ default 1 .Values.gateway.replicas }}
   template:
     metadata:
       labels:
-      {{- include "swanlab.traefik.labels" . | nindent 8 }}
-      {{- include "swanlab.traefik.selectorLabels" . | nindent 8 }}
+      {{- include "swanlab.gateway.labels" . | nindent 8 }}
+      {{- include "swanlab.gateway.selectorLabels" . | nindent 8 }}
       {{- if .Values.gateway.customAnnotations }}
       annotations:
       {{- toYaml .Values.gateway.customAnnotations | nindent 8 }}
@@ -31,10 +31,8 @@ spec:
               # Mount path for the shared volume
               mountPath: /plugins-tmp
       restartPolicy: Always
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       containers:
         - name: traefik
           image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
@@ -59,7 +57,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ include "swanlab.traefik.configmap" . }}
+            name: {{ include "swanlab.gateway.configmap" . }}
         - name: identify-plugin
           emptyDir: {}
 
@@ -68,13 +66,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "swanlab.traefik.fullname" . }}
+  name: {{ include "swanlab.gateway.fullname" . }}
   labels:
-  {{- include "swanlab.traefik.labels" . | nindent 4 }}
+  {{- include "swanlab.gateway.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
   selector:
-  {{- include "swanlab.traefik.selectorLabels" . | nindent 4 }}
+  {{- include "swanlab.gateway.selectorLabels" . | nindent 4 }}
   ports:
     - port: 80
       name: web

@@ -20,10 +20,8 @@ spec:
       {{- end }}
     spec:
       restartPolicy: Always
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       initContainers:
         - name: ping
           env:
@@ -98,14 +96,15 @@ spec:
             - name: CLOUD_URL
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL
-              value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
+              value: "http://{{ include "swanlab.gateway.fullname" . }}:80/api"
             - name: API_VERIFIER_URL
               value: {{ include "swanlab.server.identify" . | quote }}
             - name: API_INTERNAL_URL
-              value: "http://{{ include "swanlab.traefik.fullname" . }}:80/api"
-            {{- if .Values.env.loginHost }}
+              value: "http://{{ include "swanlab.gateway.fullname" . }}:80/api"
+            {{- $loginHost := .Values.global.settings.loginHost }}
+            {{- if $loginHost | ne "" }}
             - name: API_DISPLAY_HOST
-              value: {{ .Values.env.loginHost | quote }}
+              value: {{ $loginHost | quote }}
             {{- end }}
         {{- if .Values.service.next.resources }}
           resources:

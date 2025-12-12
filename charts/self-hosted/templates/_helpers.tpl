@@ -46,6 +46,12 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Cluster domain
 */}}
 {{- define "swanlab.clusterDomain" -}}
-{{- default "cluster.local" .Values.clusterDomain -}}
+{{- default "cluster.local" .Values.global.clusterDomain -}}
 {{- end }}
 
+{{/*
+Image pull secrect
+*/}}
+{{- define "swanlab.imagePullSecrets" -}}
+{{- toYaml .Values.global.imagePullSecrets -}}
+{{- end }}
