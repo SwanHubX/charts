@@ -1,0 +1,17 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Get the application URL by running these commands:
+
+1. Access via kube-proxy:
+   Run the following command to forward your local port 8080 to the service:
+     kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "swanlab.gateway.fullname" . }} 8080:80
+
+   Then, you can access the service via:
+     http://127.0.0.1:8080
+
+2. Expose Service Externally:
+   SwanLab self-hosted is not exposed to the public internet.
+   If you wish to expose this service, you need to configure a LoadBalancer manually or use an Ingress Controller.
+   
+   Please refer to the official documentation for configuration details:
+   https://docs.swanlab.cn/guide_cloud/self_host/kubernetes-deploy.html
