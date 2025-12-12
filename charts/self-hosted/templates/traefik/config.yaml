@@ -29,9 +29,9 @@ data:
       localPlugins:
         identify:
           moduleName: github.com/swanhubx/swanlab-helper/identify
-    api:
-      dashboard: true # 启用 UI
-      insecure: true  # 启用非安全模式 (直接通过 :8080 访问，不强制 HTTPS/鉴权)
+{{/*    api:*/}}
+{{/*      dashboard: true # UI*/}}
+{{/*      insecure: true  # API*/}}
 
   # -------------------------
   # Dynamic Configuration (Routing Rules)
