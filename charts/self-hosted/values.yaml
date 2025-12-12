@@ -4,6 +4,14 @@ fullnameOverride: ""
 # Global Docker Image Pull Secrets
 imagePullSecrets: []
 
+# Global Kubernetes Cluster Domain
+clusterDomain: cluster.local
+
+# Additional environment variables can be specified here.
+env:
+  # Login Host will change the api-key login host displayed in the frontend application.
+  loginHost: ""
+
 # Configuration for test image used in various components
 helper: # Test Image Configuration
   # Repository path for the test image
@@ -12,6 +20,28 @@ helper: # Test Image Configuration
   tag: '1.37.0'
   # Image pull policy for the test pod
   pullPolicy: IfNotPresent
+
+gateway:
+  fullnameOverride: ""
+
+  replicas: 1
+
+  image:
+    repository: repo.swanlab.cn/self-hosted/traefik
+    # For patch update delivery
+    tag: "3.6"
+    pullPolicy: "IfNotPresent"
+
+  identifyImage:
+    repository: repo.swanlab.cn/self-hosted/swanlab-helper/identify
+    tag: "v1.2"
+    pullPolicy: "IfNotPresent"
+
+  customLabels: {}
+  customAnnotations: {}
+  customTolerations: []
+  customNodeSelector: { }
+  resources: {} # K8s Resource Limits and Requests
 
 # Configuration of main application services
 service:
@@ -102,13 +132,6 @@ service:
     customTolerations: []
     customNodeSelector: { }
     resources: {} # K8s Resource Limits and Requests
-
-
-# Additional environment variables can be specified here.
-env:
-  # Login Host will change the api-key login host displayed in the frontend application.
-  loginHost: ""
-
 
 # Configuration for internal-deployed infrastructure (Chart-managed services).
 # These components serve as the default application dependencies and are only
@@ -295,75 +318,3 @@ integrations:
     # | privateBucket        | string               |
     # | publicBucket         | string               |
     existingSecret: ""
-
-
-ingress:
-  # A secret used for TLS termination in ingress controllers
-  # If set, swanlab will use websecure port (443) with TLS.
-  # If left empty, swanlab will use web port (80) without TLS.
-  #
-  # | .data.<key> in Secret |
-  # |:----------------------|
-  # | tls.crt               |
-  # | tls.key               |
-  tlsSecret: ""
-  # The host domain name for accessing SwanLab services.
-  # If set, you can only access SwanLab via this domain.
-  host: ""
-
-  # Test image configuration for the gateway components
-  test:
-    image:
-      # Registry for the test image (e.g., busybox)
-      registry: repo.swanlab.cn
-      # Repository path for the test image
-      repository: self-hosted/busybox
-      # Tag for the test image
-      tag: '1.37.0'
-      # Image pull policy for the test pod
-      pullPolicy: IfNotPresent
-    # List of secrets used to pull the test image
-    imagePullSecrets: [ ]
-
-  # Traefik static configuration. All configurations remain unchanged except for images and pull secrets.
-  traefik:
-    image:
-      # Registry for the main Traefik image
-      registry: repo.swanlab.cn
-      # Repository path for the Traefik image
-      repository: self-hosted/traefik
-      # Tag for the Traefik image
-      tag: '3.6'
-      # Image pull policy for the Traefik pods
-      pullPolicy: IfNotPresent
-
-    service:
-      type: LoadBalancer
-
-    deployment:
-      # Number of Traefik replicas
-      replicas: 2
-      # List of secrets used to pull the Traefik image
-      imagePullSecrets: [ ]
-
-      # If you need to replace identify image, you can modify the initContainers section here.
-      # BUT REMEMBER: You can ONLY change the image field, other fields MUST NOT be changed.
-      initContainers:
-        - name: download-identify
-          # Image for the init container that downloads the custom plugin files
-          image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.2
-          env:
-            - name: COPY_TO
-              # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
-              value: /plugins-tmp
-          volumeMounts:
-            - name: identify-plugin
-              # Mount path for the shared volume
-              mountPath: /plugins-tmp
-
-    providers:
-      kubernetesCRD:
-        # Label selector to filter IngressRoute resources
-        # It's useful when multiple applications deploy Traefik in the same cluster.
-        # Only supports a single selector in the current version:
-        labelSelector: "swanlab=self-hosted"

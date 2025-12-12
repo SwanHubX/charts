@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.traefik.fullname" . }}
+  labels:
+  {{- include "swanlab.traefik.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+    {{- include "swanlab.traefik.selectorLabels" . | nindent 6 }}
+  replicas: {{ default 1 .Values.gateway.replicas }}
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.traefik.labels" . | nindent 8 }}
+      {{- include "swanlab.traefik.selectorLabels" . | nindent 8 }}
+      {{- if .Values.gateway.customAnnotations }}
+      annotations:
+      {{- toYaml .Values.gateway.customAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      initContainers:
+        - name: download-identify
+          image: "{{ .Values.gateway.identifyImage.repository }}:{{ .Values.gateway.identifyImage.tag }}"
+          env:
+            - name: COPY_TO
+              # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
+              value: /plugins-tmp
+          volumeMounts:
+            - name: identify-plugin
+              # Mount path for the shared volume
+              mountPath: /plugins-tmp
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: traefik
+          image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+          args:
+            - "--configfile=/etc/traefik/traefik.yaml"
+          ports:
+            - name: web
+              containerPort: 80
+            - name: metrics
+              containerPort: 9100
+            - name: traefik
+              containerPort: 8080
+          volumeMounts:
+            - name: config
+              mountPath: "/etc/traefik/traefik.yaml"
+              subPath: "traefik.yaml"
+            - name: config
+              mountPath: "/etc/traefik/dynamic/dynamic.yaml"
+              subPath: "dynamic.yaml"
+            - name: identify-plugin
+              mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "swanlab.traefik.configmap" . }}
+        - name: identify-plugin
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.traefik.fullname" . }}
+  labels:
+  {{- include "swanlab.traefik.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.traefik.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: 80
+      name: web
