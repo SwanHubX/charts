@@ -21,7 +21,7 @@ global:
 gateway:
   fullnameOverride: ""
 
-  replicas: 1
+  replicas: 2
 
   image:
     repository: repo.swanlab.cn/self-hosted/traefik
@@ -89,6 +89,8 @@ service:
 
     # sidecar logging configuration
     # TODO: We will delete these configurations in the future.
+    logResources: {}
+    fbResources: {}
     logImage:
       repository: repo.swanlab.cn/self-hosted/logrotate
       tag: "1.0"

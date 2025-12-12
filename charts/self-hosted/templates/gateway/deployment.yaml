@@ -55,12 +55,10 @@ spec:
               subPath: "dynamic.yaml"
             - name: identify-plugin
               mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
-      volumes:
-        - name: config
-          configMap:
-            name: {{ include "swanlab.gateway.configmap" . }}
-        - name: identify-plugin
-          emptyDir: {}
+        {{- if .Values.gateway.resources }}
+          resources:
+        {{- toYaml .Values.gateway.resources | nindent 12 }}
+        {{- end }}
       {{- if .Values.gateway.customNodeSelector }}
       nodeSelector:
       {{- toYaml .Values.gateway.customNodeSelector | nindent 8 }}
@@ -69,6 +67,12 @@ spec:
       tolerations:
       {{- toYaml .Values.gateway.customTolerations | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "swanlab.gateway.configmap" . }}
+        - name: identify-plugin
+          emptyDir: { }
 ---
 
 apiVersion: v1

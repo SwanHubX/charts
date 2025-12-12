@@ -110,6 +110,8 @@
             { "$ref": "#/definitions/commonService" },
             {
               "properties": {
+                "logResources": { "$ref": "#/definitions/resourcesConfig" },
+                "fbResources": { "$ref": "#/definitions/resourcesConfig" },
                 "logImage": { "$ref": "#/definitions/imageConfig" },
                 "fbImage": { "$ref": "#/definitions/imageConfig" },
                 "persistence": { "$ref": "#/definitions/persistenceConfig" },
