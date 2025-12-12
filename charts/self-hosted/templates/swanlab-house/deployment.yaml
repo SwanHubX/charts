@@ -35,11 +35,10 @@ spec:
       {{- toYaml .Values.service.house.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.house.selectorLabels" . ) | nindent 6 }}
       restartPolicy: Always
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       initContainers:
         - name: ping
           image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
@@ -179,7 +178,10 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.s3.secretName" .}}
                   key: privateBucket
-
+        {{- if .Values.service.house.resources }}
+          resources:
+        {{- toYaml .Values.service.house.resources | nindent 12 }}
+        {{- end }}
         - name: logrotate
           image: {{ .Values.service.house.logImage.repository }}:{{ .Values.service.house.logImage.tag }}
           env:
@@ -196,6 +198,10 @@ spec:
           volumeMounts:
             - name: house
               mountPath: /data
+        {{- if .Values.service.house.logResources }}
+          resources:
+        {{- toYaml .Values.service.house.logResources | nindent 12 }}
+        {{- end }}
         - name: fluent-bit
           image: {{ .Values.service.house.fbImage.repository }}:{{ .Values.service.house.fbImage.tag }}
           command: [ "fluent-bit/bin/fluent-bit", "-c", "/conf/fluent-bit.conf" ]
@@ -230,7 +236,18 @@ spec:
           volumeMounts:
             - name: house
               mountPath: /data
-
+        {{- if .Values.service.house.fbResources }}
+          resources:
+        {{- toYaml .Values.service.house.fbResources | nindent 12 }}
+        {{- end }}
+      {{- if .Values.service.house.customNodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.service.house.customNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.service.house.customTolerations }}
+      tolerations:
+      {{- toYaml .Values.service.house.customTolerations | nindent 8 }}
+      {{- end }}
 ---
 
 apiVersion: v1

@@ -20,22 +20,22 @@ SwanLab-House Image
 {{- end -}}
 
 {{/*
-SwanLab-House Common labels
-*/}}
-{{- define "swanlab.house.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: house
-{{- if .Values.service.house.customLabels }}
-{{ toYaml .Values.service.house.customLabels }}
-{{- end }}
-{{- end -}}
-
-{{/*
 SwanLab-House Selector labels
 */}}
 {{- define "swanlab.house.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-house
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-house
+{{- end -}}
+
+{{/*
+SwanLab-House Common labels
+*/}}
+{{- define "swanlab.house.labels" -}}
+{{ include "swanlab.house.selectorLabels" . }}
+app.kubernetes.io/service: house
+{{- if .Values.service.house.customLabels }}
+{{ toYaml .Values.service.house.customLabels }}
+{{- end }}
 {{- end -}}
 
 {{/*

@@ -19,11 +19,10 @@ spec:
       {{- toYaml .Values.service.cloud.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.cloud.selectorLabels" . ) | nindent 6 }}
       restartPolicy: Always
-      {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       containers:
         - name: cloud
           image: {{ include "swanlab.cloud.image" . | quote }}

@@ -1,30 +1,27 @@
 nameOverride: ""
 fullnameOverride: ""
 
-# Global Docker Image Pull Secrets
-imagePullSecrets: []
+global:
+  # Image pull settings
+  imagePullSecrets: []
 
-# Global Kubernetes Cluster Domain
-clusterDomain: cluster.local
+  # Kubernetes cluster domain name
+  clusterDomain: cluster.local
 
-# Additional environment variables can be specified here.
-env:
-  # Login Host will change the api-key login host displayed in the frontend application.
-  loginHost: ""
+  # Kubernetes Pod Affinity/Anti-Affinity settings
+  # We use Topology Spread Constraints to achieve pod distribution across nodes.
+  podAntiAffinityPreset: "soft" # soft, hard, or none
 
-# Configuration for test image used in various components
-helper: # Test Image Configuration
-  # Repository path for the test image
-  repository: repo.swanlab.cn/self-hosted/busybox
-  # Tag for the test image
-  tag: '1.37.0'
-  # Image pull policy for the test pod
-  pullPolicy: IfNotPresent
+  # Global application settings
+  settings:
+    # Login Host will change the api-key login host displayed in the frontend application.
+    # Note that this setting does not affect the actual backend service address.
+    loginHost: ""
 
 gateway:
   fullnameOverride: ""
 
-  replicas: 1
+  replicas: 2
 
   image:
     repository: repo.swanlab.cn/self-hosted/traefik
@@ -41,7 +38,16 @@ gateway:
   customAnnotations: {}
   customTolerations: []
   customNodeSelector: { }
-  resources: {} # K8s Resource Limits and Requests
+  resources: {}
+
+# Configuration for test image used in various components
+helper: # Test Image Configuration
+  # Repository path for the test image
+  repository: repo.swanlab.cn/self-hosted/busybox
+  # Tag for the test image
+  tag: '1.37.0'
+  # Image pull policy for the test pod
+  pullPolicy: IfNotPresent
 
 # Configuration of main application services
 service:
@@ -60,7 +66,7 @@ service:
     customAnnotations: {}
     customTolerations: []
     customNodeSelector: { }
-    resources: {} # K8s Resource Limits and Requests
+    resources: {}
 
   # Configuration of our data collection services
   house:
@@ -78,9 +84,13 @@ service:
     customAnnotations: {}
     customTolerations: []
     customNodeSelector: { }
-    resources: {} # K8s Resource Limits and Requests
+    resources: {}
 
-    # TODO: We will delete these configurations in the future.
+
+    # sidecar logging configuration
+    # TODO: We will delete these configurations in the future: https://github.com/SwanHubX/charts/issues/14
+    logResources: {}
+    fbResources: {}
     logImage:
       repository: repo.swanlab.cn/self-hosted/logrotate
       tag: "1.0"
@@ -91,7 +101,7 @@ service:
       pullPolicy: "IfNotPresent"
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
-      storageClass: "local-storage"
+      storageClass: ""
       # Volume size for the database data.
       storageSize: "10Gi"
     # Retain PVC on deletion. In the vast majority of cases, this is unnecessary.
@@ -113,7 +123,7 @@ service:
     customAnnotations: {}
     customTolerations: []
     customNodeSelector: { }
-    resources: {} # K8s Resource Limits and Requests
+    resources: {}
 
   # Configuration of our frontend service
   next:
@@ -131,7 +141,7 @@ service:
     customAnnotations: {}
     customTolerations: []
     customNodeSelector: { }
-    resources: {} # K8s Resource Limits and Requests
+    resources: {}
 
 # Configuration for internal-deployed infrastructure (Chart-managed services).
 # These components serve as the default application dependencies and are only
@@ -154,7 +164,7 @@ dependencies:
 
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
-      storageClass: "local-storage"
+      storageClass: ""
       # Volume size for the database data.
       storageSize: "10Gi"
 
@@ -179,7 +189,7 @@ dependencies:
       pullPolicy: "IfNotPresent"
 
     persistence: # Persistent Storage Configuration
-      storageClass: "local-storage"
+      storageClass: ""
       storageSize: "10Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)
@@ -207,7 +217,7 @@ dependencies:
     password: ""
 
     persistence: # Persistent Storage Configuration
-      storageClass: "local-storage"
+      storageClass: ""
       storageSize: "20Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)
@@ -241,7 +251,7 @@ dependencies:
     secretKey: ""
 
     persistence: # Persistent Storage Configuration
-      storageClass: "local-storage"
+      storageClass: ""
       storageSize: "20Gi"
 
       # Use an existing PVC by name (leave empty to create a new one)

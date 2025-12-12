@@ -19,23 +19,24 @@ SwanLab-Cloud Image
 {{- printf "%s:%s" .Values.service.cloud.image.repository $tag -}}
 {{- end -}}
 
-{{/*
-SwanLab-Cloud Common labels
-*/}}
-{{- define "swanlab.cloud.labels" -}}
-{{ include "swanlab.labels" . }}
-app.kubernetes.io/component: cloud
-{{- if .Values.service.cloud.customLabels }}
-{{ toYaml .Values.service.cloud.customLabels }}
-{{- end }}
-{{- end -}}
 
 {{/*
 SwanLab-Cloud Selector labels
 */}}
 {{- define "swanlab.cloud.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "swanlab.name" . }}-cloud
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-cloud
+{{- end -}}
+
+{{/*
+SwanLab-Cloud Common labels
+*/}}
+{{- define "swanlab.cloud.labels" -}}
+{{ include "swanlab.cloud.selectorLabels" . }}
+app.kubernetes.io/service: cloud
+{{- if .Values.service.cloud.customLabels }}
+{{ toYaml .Values.service.cloud.customLabels }}
+{{- end }}
 {{- end -}}
 
 

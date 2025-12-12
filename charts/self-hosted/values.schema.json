@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Values",
+  "title": "SwanLab Self-Hosted Configuration",
   "type": "object",
   "required": [
+    "global",
     "gateway",
+    "helper",
     "service",
     "dependencies",
     "integrations"
@@ -18,9 +20,10 @@
           "type": "string",
           "enum": ["Always", "IfNotPresent", "Never"]
         }
-      }
+      },
+      "required": ["repository"]
     },
-    "k8sResources": {
+    "resourcesConfig": {
       "type": "object",
       "properties": {
         "limits": { "type": "object" },
@@ -45,43 +48,59 @@
         "customAnnotations": { "type": "object" },
         "customTolerations": { "type": "array" },
         "customNodeSelector": { "type": "object" },
-        "resources": { "$ref": "#/definitions/k8sResources" }
+        "resources": { "$ref": "#/definitions/resourcesConfig" }
       }
     }
   },
   "properties": {
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
-    "imagePullSecrets": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" }
-        },
-        "required": ["name"]
-      }
-    },
-    "clusterDomain": { "type": "string" },
-    "env": {
+
+    "global": {
       "type": "object",
       "properties": {
-        "loginHost": { "type": "string" }
-      }
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        },
+        "clusterDomain": { "type": "string" },
+        "podAntiAffinityPreset": {
+          "type": "string",
+          "enum": ["soft", "hard", "none"],
+          "description": "Global pod anti-affinity preset. 'soft' attempts to spread pods, 'hard' enforces it."
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "loginHost": { "type": "string" }
+          }
+        }
+      },
+      "required": ["clusterDomain", "podAntiAffinityPreset"]
     },
-    "helper": {
-      "$ref": "#/definitions/imageConfig"
-    },
+
     "gateway": {
       "allOf": [
         { "$ref": "#/definitions/commonService" },
         {
           "properties": {
             "identifyImage": { "$ref": "#/definitions/imageConfig" }
-          }
+          },
+          "required": ["replicas", "image", "identifyImage"]
         }
       ]
     },
+
+    "helper": {
+      "$ref": "#/definitions/imageConfig"
+    },
+
     "service": {
       "type": "object",
       "properties": {
@@ -91,18 +110,23 @@
             { "$ref": "#/definitions/commonService" },
             {
               "properties": {
+                "logResources": { "$ref": "#/definitions/resourcesConfig" },
+                "fbResources": { "$ref": "#/definitions/resourcesConfig" },
                 "logImage": { "$ref": "#/definitions/imageConfig" },
                 "fbImage": { "$ref": "#/definitions/imageConfig" },
                 "persistence": { "$ref": "#/definitions/persistenceConfig" },
                 "retainPVC": { "type": "boolean" }
-              }
+              },
+              "required": ["logImage", "fbImage"]
             }
           ]
         },
         "cloud": { "$ref": "#/definitions/commonService" },
         "next": { "$ref": "#/definitions/commonService" }
-      }
+      },
+      "required": ["server", "house", "cloud", "next"]
     },
+
     "dependencies": {
       "type": "object",
       "properties": {
@@ -155,6 +179,7 @@
         }
       }
     },
+
     "integrations": {
       "type": "object",
       "properties": {
