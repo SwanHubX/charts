@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Values",
+  "type": "object",
+  "required": [
+    "gateway",
+    "service",
+    "dependencies",
+    "integrations"
+  ],
+  "definitions": {
+    "imageConfig": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "k8sResources": {
+      "type": "object",
+      "properties": {
+        "limits": { "type": "object" },
+        "requests": { "type": "object" }
+      }
+    },
+    "persistenceConfig": {
+      "type": "object",
+      "properties": {
+        "storageClass": { "type": "string" },
+        "storageSize": { "type": "string" },
+        "existingClaim": { "type": "string" }
+      }
+    },
+    "commonService": {
+      "type": "object",
+      "properties": {
+        "fullnameOverride": { "type": "string" },
+        "replicas": { "type": "integer", "minimum": 0 },
+        "image": { "$ref": "#/definitions/imageConfig" },
+        "customLabels": { "type": "object" },
+        "customAnnotations": { "type": "object" },
+        "customTolerations": { "type": "array" },
+        "customNodeSelector": { "type": "object" },
+        "resources": { "$ref": "#/definitions/k8sResources" }
+      }
+    }
+  },
+  "properties": {
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    },
+    "clusterDomain": { "type": "string" },
+    "env": {
+      "type": "object",
+      "properties": {
+        "loginHost": { "type": "string" }
+      }
+    },
+    "helper": {
+      "$ref": "#/definitions/imageConfig"
+    },
+    "gateway": {
+      "allOf": [
+        { "$ref": "#/definitions/commonService" },
+        {
+          "properties": {
+            "identifyImage": { "$ref": "#/definitions/imageConfig" }
+          }
+        }
+      ]
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "server": { "$ref": "#/definitions/commonService" },
+        "house": {
+          "allOf": [
+            { "$ref": "#/definitions/commonService" },
+            {
+              "properties": {
+                "logImage": { "$ref": "#/definitions/imageConfig" },
+                "fbImage": { "$ref": "#/definitions/imageConfig" },
+                "persistence": { "$ref": "#/definitions/persistenceConfig" },
+                "retainPVC": { "type": "boolean" }
+              }
+            }
+          ]
+        },
+        "cloud": { "$ref": "#/definitions/commonService" },
+        "next": { "$ref": "#/definitions/commonService" }
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "postgres": {
+          "allOf": [
+            { "$ref": "#/definitions/commonService" },
+            {
+              "properties": {
+                "username": { "type": "string" },
+                "password": { "type": "string" },
+                "persistence": { "$ref": "#/definitions/persistenceConfig" }
+              }
+            }
+          ]
+        },
+        "redis": {
+          "allOf": [
+            { "$ref": "#/definitions/commonService" },
+            {
+              "properties": {
+                "persistence": { "$ref": "#/definitions/persistenceConfig" }
+              }
+            }
+          ]
+        },
+        "clickhouse": {
+          "allOf": [
+            { "$ref": "#/definitions/commonService" },
+            {
+              "properties": {
+                "username": { "type": "string" },
+                "password": { "type": "string" },
+                "persistence": { "$ref": "#/definitions/persistenceConfig" }
+              }
+            }
+          ]
+        },
+        "s3": {
+          "allOf": [
+            { "$ref": "#/definitions/commonService" },
+            {
+              "properties": {
+                "mcImage": { "$ref": "#/definitions/imageConfig" },
+                "accessKey": { "type": "string" },
+                "secretKey": { "type": "string" },
+                "persistence": { "$ref": "#/definitions/persistenceConfig" }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "properties": {
+        "postgres": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "existingSecret": { "type": "string" }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "existingSecret": { "type": "string" }
+          }
+        },
+        "clickhouse": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "existingSecret": { "type": "string" }
+          }
+        },
+        "s3": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "ssl": { "type": "boolean" },
+            "endpoint": { "type": "string" },
+            "region": { "type": "string" },
+            "port": { "type": "integer" },
+            "domain": { "type": "string" },
+            "pathStyle": { "type": "boolean" },
+            "existingSecret": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
