@@ -158,11 +158,11 @@ spec:
             - name: SH_MINIO_ENDPOINT
               value: "{{ include "swanlab.s3.endpoint" . }}:{{ include "swanlab.s3.port" . }}"
             - name: SH_MINIO_USE_SSL
-              value: "{{ include "swanlab.s3.ssl" . }}"
+              value: {{ include "swanlab.s3.ssl" . | quote }}
             - name: SH_MINIO_REGION
-              value: "{{ include "swanlab.s3.region" . }}"
+              value: {{ include "swanlab.s3.region" . | quote }}
             - name: SH_MINIO_PATH_STYLE
-              value: "{{ include "swanlab.s3.pathStyle" . }}"
+              value: {{ include "swanlab.s3.pathStyle" . | quote }}
 
             - name: SH_MINIO_SECRET_ID
               valueFrom:

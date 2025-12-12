@@ -128,14 +128,14 @@ spec:
             - name: VERSION
               value: {{ .Chart.AppVersion | quote }}
             - name: SERVER_PREFIX
-              value: /api
+              value: "/api"
             - name: SS_HOUSE_URL
               value: "http://{{ include "swanlab.house.fullname" . }}:{{ include "swanlab.house.port" . }}/api/house"
             # s3
             - name: SS_STORAGE_TYPE
-              value: {{ include "swanlab.s3.type" . }}
+              value: {{ include "swanlab.s3.type" . | quote }}
             - name: SS_PUBLIC_STORAGE_ENDPOINT
-              value: {{ include "swanlab.s3.endpoint" . }}
+              value: {{ include "swanlab.s3.endpoint" . | quote }}
             - name: SS_PUBLIC_STORAGE_REGION
               value: {{ include "swanlab.s3.region" . }}
             - name: SS_PUBLIC_STORAGE_PATH_STYLE
@@ -145,9 +145,9 @@ spec:
             - name: SS_PUBLIC_STORAGE_USE_SSL
               value: {{ include "swanlab.s3.ssl" . | quote }}
             - name: SS_PRIVATE_STORAGE_ENDPOINT
-              value: {{ include "swanlab.s3.endpoint" . }}
+              value: {{ include "swanlab.s3.endpoint" . | quote }}
             - name: SS_PRIVATE_STORAGE_REGION
-              value: {{ include "swanlab.s3.region" . }}
+              value: {{ include "swanlab.s3.region" . | quote }}
             - name: SS_PRIVATE_STORAGE_PATH_STYLE
               value: {{ include "swanlab.s3.pathStyle" . | quote }}
             - name: SS_PRIVATE_STORAGE_PORT
@@ -155,7 +155,7 @@ spec:
             - name: SS_PRIVATE_STORAGE_USE_SSL
               value: {{ include "swanlab.s3.ssl" . | quote }}
             - name: SS_AVATAR_DOMAIN
-              value: {{ include "swanlab.s3.domain" . }}
+              value: {{ include "swanlab.s3.domain" . | quote }}
 
             - name: ACCESS_KEY
               valueFrom:
