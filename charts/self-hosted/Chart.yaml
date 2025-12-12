@@ -20,8 +20,3 @@ maintainers:
 sources:
   - https://github.com/SwanHubX/charts/tree/main/charts/self-hosted
   - https://github.com/SwanHubX/SwanLab
-dependencies:
-  - name: traefik-proxy
-    alias: ingress
-    version: "1.0.2"
-    repository: https://helm.swanlab.cn

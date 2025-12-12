@@ -43,16 +43,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 
 {{/*
-Application Ingress Host
+Cluster domain
 */}}
-{{- define "swanlab.host" -}}
-{{- .Values.ingress.host | default "" | trim -}}
-{{- end -}}
-
-{{/*
-Application Ingress TLS Secret Name
-*/}}
-{{- define "swanlab.tls" -}}
-{{- .Values.ingress.tlsSecret | default "" | trim -}}
-{{- end -}}
+{{- define "swanlab.clusterDomain" -}}
+{{- default "cluster.local" .Values.clusterDomain -}}
+{{- end }}
 
