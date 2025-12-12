@@ -64,15 +64,12 @@ data:
           service: "swanlab-next"
           entryPoints:
             - "web"
-          middlewares:
-              {{ include "swanlab.traefik.identify" . }}
         server-router:
           rule: {{ include "swanlab.traefik.match" (list $host "/api") }}
           service: "swanlab-server"
           entryPoints:
             - "web"
-          middlewares:
-              {{ include "swanlab.traefik.identify" . }}
+          middlewares: [{{ include "swanlab.traefik.identify" . }}]
         house-router:
           rule: {{ include "swanlab.traefik.match" (list $host "/api/house") }}
           service: "swanlab-house"
