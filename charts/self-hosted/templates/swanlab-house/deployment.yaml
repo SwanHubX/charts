@@ -50,15 +50,9 @@ spec:
                   name: {{ include "swanlab.redis.secretName" . }}
                   key: url
             - name: CLICKHOUSE_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
+              value: {{ include "swanlab.clickhouse.host" . | quote }}
             - name: CLICKHOUSE_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: tcpPort
+              value: {{ include "swanlab.clickhouse.tcpPort" . | quote }}
           # 核心检测逻辑
           command: [ "/bin/sh", "-c" ]
           args:
@@ -119,8 +113,16 @@ spec:
               value: "/api/house"
             - name: SH_LOG_PATH
               value: "/data/metrics/metrics.log"
+            - name: SH_DISTRIBUTED_ENABLE
+              value: "true"
             - name: SH_SERVER_URL
               value: "http://{{ include "swanlab.server.fullname" . }}:{{ include "swanlab.server.port" . }}/api"
+            - name: SH_DB_HOST
+              value: "{{ include "swanlab.clickhouse.host" . }}"
+            - name: SH_DB_PORT
+              value: "{{ include "swanlab.clickhouse.tcpPort" . }}"
+            - name: SH_DB_NAME
+              value: "{{ include "swanlab.clickhouse.database" . }}"
             - name: SH_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -131,23 +133,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.clickhouse.secretName" . }}
                   key: password
-            - name: SH_DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
-            - name: SH_DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: tcpPort
-            - name: SH_DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: database
-            - name: SH_DISTRIBUTED_ENABLE
-              value: "true"
             - name: SH_REDIS_URL
               valueFrom:
                 secretKeyRef:
@@ -207,15 +192,11 @@ spec:
             - name: LOG_PATH
               value: "/data/metrics/*.log"
             - name: CLICKHOUSE_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
+              value: {{ include "swanlab.clickhouse.host" . | quote }}
             - name: CLICKHOUSE_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: httpPort
+              value: {{ include "swanlab.clickhouse.httpPort" . | quote }}
+            - name: CLICKHOUSE_DATABASE
+              value: {{ include "swanlab.clickhouse.database" . | quote }}
             - name: CLICKHOUSE_USER
               valueFrom:
                 secretKeyRef:
@@ -226,11 +207,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.clickhouse.secretName" . }}
                   key: password
-            - name: CLICKHOUSE_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: database
           volumeMounts:
             - name: house
               mountPath: /data

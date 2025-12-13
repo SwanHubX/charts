@@ -145,7 +145,7 @@ spec:
             - name: SS_PUBLIC_STORAGE_USE_SSL
               value: {{ include "swanlab.s3.public.ssl" . | quote }}
             - name: SS_PUBLIC_STORAGE_BUCKET
-              value: {{ include "swanlab.s3.public.bucket" . }}
+              value: {{ include "swanlab.s3.public.bucket" . | quote }}
             - name: SS_AVATAR_DOMAIN
               value: {{ include "swanlab.s3.public.domain" . | quote }}
 
@@ -160,7 +160,7 @@ spec:
             - name: SS_PRIVATE_STORAGE_USE_SSL
               value: {{ include "swanlab.s3.private.ssl" . | quote }}
             - name: SS_PRIVATE_STORAGE_BUCKET
-              value: {{ include "swanlab.s3.private.bucket" . }}
+              value: {{ include "swanlab.s3.private.bucket" . | quote }}
 
             - name: ACCESS_KEY
               valueFrom:

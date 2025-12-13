@@ -29,11 +29,13 @@ spec:
         image: "{{ .Values.dependencies.postgres.image.repository }}:{{ .Values.dependencies.postgres.image.tag }}"
         imagePullPolicy: {{ .Values.dependencies.postgres.image.pullPolicy }}
         ports:
-          - containerPort: 5432
+          - containerPort: {{ include "swanlab.postgres.port" . }}
             name: postgres
         env:
           - name: TZ
             value: "UTC"
+          - name: POSTGRES_DB
+            value: {{ include "swanlab.postgres.database" . }}
           - name: POSTGRES_USER
             valueFrom:
               secretKeyRef:
@@ -44,11 +46,6 @@ spec:
               secretKeyRef:
                 name: {{ include "swanlab.postgres.secretName" . }}
                 key: password
-          - name: POSTGRES_DB
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "swanlab.postgres.secretName" . }}
-                key: database
         volumeMounts:
           # 不要直接挂载到 /var/lib/postgresql/data ，因为存在 lost+found 目录会导致 postgres 启动失败
           # 挂载到父目录，Postgres 会在其中创建 data 子目录
@@ -82,6 +79,6 @@ spec:
   selector:
   {{- include "swanlab.postgres.selectorLabels" . | nindent 4 }}
   ports:
-    - port: 5432
+    - port: {{ include "swanlab.postgres.port" . }}
       name: postgres
 {{- end }}

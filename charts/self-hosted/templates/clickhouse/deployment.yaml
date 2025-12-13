@@ -29,9 +29,9 @@ spec:
         image: "{{ .Values.dependencies.clickhouse.image.repository }}:{{ .Values.dependencies.clickhouse.image.tag }}"
         imagePullPolicy: {{ .Values.dependencies.clickhouse.image.pullPolicy }}
         ports:
-          - containerPort: 9000
+          - containerPort: {{ include "swanlab.clickhouse.tcpPort" . }}
             name: clickhouse-tcp
-          - containerPort: 8123
+          - containerPort: {{ include "swanlab.clickhouse.httpPort" . }}
             name: clickhouse-http
         env:
           - name: TZ
@@ -79,8 +79,8 @@ spec:
   selector:
   {{- include "swanlab.clickhouse.selectorLabels" . | nindent 4 }}
   ports:
-    - port: 9000
+    - port: {{ include "swanlab.clickhouse.tcpPort" . }}
       name: clickhouse-tcp
-    - port: 8123
+    - port: {{ include "swanlab.clickhouse.httpPort" . }}
       name: clickhouse-http
 {{- end }}

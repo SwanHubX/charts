@@ -47,3 +47,47 @@ Clickhouse PVC Name
 {{- define "swanlab.clickhouse.pvcName" -}}
 {{ .Values.dependencies.clickhouse.persistence.existingClaim | default (printf "%s-pvc" (include "swanlab.clickhouse.fullname" .)) }}
 {{- end -}}
+
+{{/*
+Clickhouse host
+*/}}
+{{- define "swanlab.clickhouse.host" -}}
+{{- if .Values.integrations.clickhouse.enabled -}}
+{{- required "If .Values.integrations.clickhouse.enabled is true, you must specify the host via .Values.integrations.clickhouse.host." .Values.integrations.clickhouse.host -}}
+{{- else -}}
+{{ include "swanlab.clickhouse.fullname" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Clickhouse http port
+*/}}
+{{- define "swanlab.clickhouse.httpPort" -}}
+{{- if .Values.integrations.clickhouse.enabled -}}
+{{- required "If .Values.integrations.clickhouse.enabled is true, you must specify the http port via .Values.integrations.clickhouse.httpPort." .Values.integrations.clickhouse.httpPort -}}
+{{- else -}}
+8123
+{{- end -}}
+{{- end -}}
+
+{{/*
+Clickhouse tcp port
+*/}}
+{{- define "swanlab.clickhouse.tcpPort" -}}
+{{- if .Values.integrations.clickhouse.enabled -}}
+{{- required "If .Values.integrations.clickhouse.enabled is true, you must specify the tcp port via .Values.integrations.clickhouse.tcpPort." .Values.integrations.clickhouse.tcpPort -}}
+{{- else -}}
+9000
+{{- end -}}
+{{- end -}}
+
+{{/*
+Clickhouse database
+*/}}
+{{- define "swanlab.clickhouse.database" -}}
+{{- if .Values.integrations.clickhouse.enabled -}}
+{{- required "If .Values.integrations.clickhouse.enabled is true, you must specify the database via .Values.integrations.clickhouse.database." .Values.integrations.clickhouse.database -}}
+{{- else -}}
+app
+{{- end -}}
+{{- end -}}
