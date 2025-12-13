@@ -312,12 +312,21 @@ integrations:
   s3:
     # Enable to use an external S3-compatible object storage.
     enabled: false
-    ssl: false
-    endpoint: ""
-    region: ""
-    port: 0
-    domain: ""
-    pathStyle: true
+    public:
+      ssl: false
+      endpoint: ""
+      region: ""
+      port: 0
+      domain: ""
+      pathStyle: true
+      bucket: ""
+    private:
+      ssl: false
+      endpoint: ""
+      region: ""
+      port: 0
+      pathStyle: true
+      bucket: ""
     # (Optional) Use an existing Secret for S3 credentials.
     # If set, 'accessKey' and 'secretKey' values above will be ignored.
     #
@@ -325,6 +334,4 @@ integrations:
     # |:---------------------|----------------------|
     # | accessKey            | string               |
     # | secretKey            | string               |
-    # | privateBucket        | string               |
-    # | publicBucket         | string               |
     existingSecret: ""

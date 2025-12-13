@@ -82,7 +82,7 @@ spec:
   selector:
   {{- include "swanlab.s3.selectorLabels" . | nindent 4 }}
   ports:
-    - port: {{ include "swanlab.s3.port" . }}
+    - port: {{ include "swanlab.s3.minio.port" . }}
       name: minio
     - port: 9001
       name: minio-console
@@ -114,7 +114,7 @@ spec:
               echo "MinIO Service is up!"
           env:
             - name: MINIO_ENDPOINT
-              value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"
+              value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.minio.port" . }}"
       containers:
         - name: minio-mc-job
           image: "{{ .Values.dependencies.s3.mcImage.repository }}:{{ .Values.dependencies.s3.mcImage.tag }}"
@@ -131,17 +131,11 @@ spec:
                   name: {{ include "swanlab.s3.secretName" . }}
                   key: accessKey
             - name: MINIO_ENDPOINT
-              value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"
+              value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.minio.port" . }}"
             - name: MINIO_PRIVATE_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" . }}
-                  key: privateBucket
+              value: "{{include "swanlab.s3.private.bucket" . }}"
             - name: MINIO_PUBLIC_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" . }}
-                  key: publicBucket
+              value: "{{include "swanlab.s3.public.bucket" . }}"
           command: ["/bin/sh", "-c"]
           args:
             - |
