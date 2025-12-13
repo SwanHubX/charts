@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "SwanLab Helm Chart Values",
-  "description": "Schema for SwanLab Helm Chart configuration",
+  "title": "SwanLab Self-Hosted Values Schema",
   "type": "object",
   "properties": {
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
+
     "global": {
       "type": "object",
       "properties": {
@@ -20,8 +20,7 @@
         "clusterDomain": { "type": "string", "default": "cluster.local" },
         "podAntiAffinityPreset": {
           "type": "string",
-          "enum": ["soft", "hard", "none"],
-          "description": "Configures how pods are distributed across nodes."
+          "enum": ["soft", "hard", "none"]
         },
         "settings": {
           "type": "object",
@@ -31,6 +30,7 @@
         }
       }
     },
+
     "gateway": {
       "type": "object",
       "properties": {
@@ -38,9 +38,14 @@
         "replicas": { "type": "integer", "minimum": 0 },
         "image": { "$ref": "#/definitions/image" },
         "identifyImage": { "$ref": "#/definitions/image" },
+        "customLabels": { "type": "object" },
+        "customAnnotations": { "type": "object" },
+        "customTolerations": { "type": "array" },
+        "customNodeSelector": { "type": "object" },
         "resources": { "$ref": "#/definitions/resources" }
       }
     },
+
     "helper": {
       "type": "object",
       "properties": {
@@ -49,12 +54,13 @@
         "pullPolicy": { "$ref": "#/definitions/pullPolicy" }
       }
     },
+
     "service": {
       "type": "object",
       "properties": {
-        "server": { "$ref": "#/definitions/serviceComponent" },
-        "cloud": { "$ref": "#/definitions/serviceComponent" },
-        "next": { "$ref": "#/definitions/serviceComponent" },
+        "server": { "$ref": "#/definitions/standardService" },
+        "cloud": { "$ref": "#/definitions/standardService" },
+        "next": { "$ref": "#/definitions/standardService" },
         "house": {
           "type": "object",
           "properties": {
@@ -63,58 +69,89 @@
             "image": { "$ref": "#/definitions/image" },
             "logImage": { "$ref": "#/definitions/image" },
             "fbImage": { "$ref": "#/definitions/image" },
+            "logResources": { "$ref": "#/definitions/resources" },
+            "fbResources": { "$ref": "#/definitions/resources" },
             "persistence": { "$ref": "#/definitions/persistence" },
             "retainPVC": { "type": "boolean" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" },
             "resources": { "$ref": "#/definitions/resources" }
           }
         }
       }
     },
+
     "dependencies": {
       "type": "object",
-      "description": "Internal infrastructure managed by the Chart",
+      "description": "Internal infrastructure configuration",
       "properties": {
         "postgres": {
           "type": "object",
           "properties": {
+            "fullnameOverride": { "type": "string" },
             "image": { "$ref": "#/definitions/image" },
             "username": { "type": "string" },
             "password": { "type": "string" },
-            "persistence": { "$ref": "#/definitions/persistence" }
+            "persistence": { "$ref": "#/definitions/persistence" },
+            "resources": { "$ref": "#/definitions/resources" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" }
           }
         },
         "redis": {
           "type": "object",
           "properties": {
+            "fullnameOverride": { "type": "string" },
             "image": { "$ref": "#/definitions/image" },
-            "persistence": { "$ref": "#/definitions/persistence" }
+            "persistence": { "$ref": "#/definitions/persistence" },
+            "resources": { "$ref": "#/definitions/resources" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" }
           }
         },
         "clickhouse": {
           "type": "object",
           "properties": {
+            "fullnameOverride": { "type": "string" },
             "image": { "$ref": "#/definitions/image" },
             "username": { "type": "string" },
             "password": { "type": "string" },
             "persistence": { "$ref": "#/definitions/persistence" },
-            "resources": { "$ref": "#/definitions/resources" }
+            "resources": { "$ref": "#/definitions/resources" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" }
           }
         },
         "s3": {
           "type": "object",
           "properties": {
+            "fullnameOverride": { "type": "string" },
             "image": { "$ref": "#/definitions/image" },
             "mcImage": { "$ref": "#/definitions/image" },
             "accessKey": { "type": "string" },
             "secretKey": { "type": "string" },
-            "persistence": { "$ref": "#/definitions/persistence" }
+            "persistence": { "$ref": "#/definitions/persistence" },
+            "resources": { "$ref": "#/definitions/resources" },
+            "customLabels": { "type": "object" },
+            "customAnnotations": { "type": "object" },
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" }
           }
         }
       }
     },
+
     "integrations": {
       "type": "object",
-      "description": "Configuration for external infrastructure",
+      "description": "External infrastructure connection settings",
       "properties": {
         "postgres": {
           "type": "object",
@@ -152,13 +189,14 @@
           "properties": {
             "enabled": { "type": "boolean" },
             "existingSecret": { "type": "string" },
-            "public": { "$ref": "#/definitions/s3Config" },
-            "private": { "$ref": "#/definitions/s3Config" }
+            "public": { "$ref": "#/definitions/s3ConnectionConfig" },
+            "private": { "$ref": "#/definitions/s3ConnectionConfig" }
           }
         }
       }
     }
   },
+
   "definitions": {
     "image": {
       "type": "object",
@@ -171,19 +209,6 @@
     "pullPolicy": {
       "type": "string",
       "enum": ["Always", "IfNotPresent", "Never"]
-    },
-    "serviceComponent": {
-      "type": "object",
-      "properties": {
-        "fullnameOverride": { "type": "string" },
-        "replicas": { "type": "integer", "minimum": 0 },
-        "image": { "$ref": "#/definitions/image" },
-        "resources": { "$ref": "#/definitions/resources" },
-        "customLabels": { "type": "object" },
-        "customAnnotations": { "type": "object" },
-        "customTolerations": { "type": "array" },
-        "customNodeSelector": { "type": "object" }
-      }
     },
     "resources": {
       "type": "object",
@@ -199,18 +224,31 @@
         "storageSize": {
           "type": "string",
           "pattern": "^[0-9]+(Gi|Mi|Ti)$",
-          "description": "Size of the volume (e.g. 10Gi)"
+          "description": "Must be a valid K8s quantity like 10Gi, 100Mi"
         },
         "existingClaim": { "type": "string" }
       }
     },
-    "s3Config": {
+    "standardService": {
+      "type": "object",
+      "properties": {
+        "fullnameOverride": { "type": "string" },
+        "replicas": { "type": "integer", "minimum": 0 },
+        "image": { "$ref": "#/definitions/image" },
+        "customLabels": { "type": "object" },
+        "customAnnotations": { "type": "object" },
+        "customTolerations": { "type": "array" },
+        "customNodeSelector": { "type": "object" },
+        "resources": { "$ref": "#/definitions/resources" }
+      }
+    },
+    "s3ConnectionConfig": {
       "type": "object",
       "properties": {
         "ssl": { "type": "boolean" },
         "endpoint": { "type": "string" },
         "region": { "type": "string" },
-        "port": { "type": "integer" },
+        "port": { "type": "integer", "minimum": 0, "maximum": 65535 },
         "domain": { "type": "string" },
         "pathStyle": { "type": "boolean" },
         "bucket": { "type": "string" }
