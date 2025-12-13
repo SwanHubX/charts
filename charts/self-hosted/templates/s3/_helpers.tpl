@@ -60,70 +60,159 @@ S3 Type
 {{- end -}}
 {{- end -}}
 
+{{/*
+S3 Minio Port
+*/}}
+{{- define "swanlab.s3.minio.port" }}
+{{- 9000 -}}
+{{- end -}}
+
 
 {{/*
-S3 SSL
+S3 Private SSL
 */}}
-{{- define "swanlab.s3.ssl" }}
+{{- define "swanlab.s3.private.ssl" }}
 {{- if .Values.integrations.s3.enabled -}}
-{{- .Values.integrations.s3.ssl | default false -}}
+{{- .Values.integrations.s3.private.ssl | default false -}}
 {{- else -}}
 {{- false -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-S3 Endpoint
+S3 Private Endpoint
 */}}
-{{- define "swanlab.s3.endpoint" }}
+{{- define "swanlab.s3.private.endpoint" }}
 {{- if .Values.integrations.s3.enabled -}}
-{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 endpoint via .Values.integrations.s3.endpoint." .Values.integrations.s3.endpoint -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 private endpoint via .Values.integrations.s3.private.endpoint." .Values.integrations.s3.private.endpoint -}}
 {{- else -}}
 {{- include "swanlab.s3.fullname" . -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-S3 Port
+S3 Private Region
 */}}
-{{- define "swanlab.s3.port" }}
+{{- define "swanlab.s3.private.region" }}
 {{- if .Values.integrations.s3.enabled -}}
-{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 port via .Values.integrations.s3.port." .Values.integrations.s3.port -}}
-{{- else -}}
-{{- 9000 -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-S3 Region
-*/}}
-{{- define "swanlab.s3.region" }}
-{{- if .Values.integrations.s3.enabled -}}
-{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 region via .Values.integrations.s3.region." .Values.integrations.s3.region -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 private region via .Values.integrations.s3.private.region." .Values.integrations.s3.private.region -}}
 {{- else -}}
 {{- "local" -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-S3 Domain
-*/}}
-{{- define "swanlab.s3.domain" }}
+S3 Private Port
+ */}}
+{{- define "swanlab.s3.private.port" }}
 {{- if .Values.integrations.s3.enabled -}}
-{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 domain via .Values.integrations.s3.domain." .Values.integrations.s3.domain -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 private port via .Values.integrations.s3.private.port." .Values.integrations.s3.private.port -}}
 {{- else -}}
-{{- "" -}}
+{{- include "swanlab.s3.minio.port" . -}}
 {{- end -}}
 {{- end -}}
 
 {{/*
-S3 Path Style
+S3 Private path style
 */}}
-{{- define "swanlab.s3.pathStyle" }}
+{{- define "swanlab.s3.private.pathStyle" }}
 {{- if .Values.integrations.s3.enabled -}}
-{{- .Values.integrations.s3.pathStyle | default true -}}
+{{- .Values.integrations.s3.private.pathStyle | default false -}}
 {{- else -}}
 {{- true -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+S3 Private Bucket
+*/}}
+{{- define "swanlab.s3.private.bucket" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 private bucket via .Values.integrations.s3.private.bucket." .Values.integrations.s3.private.bucket -}}
+{{- else -}}
+{{- "swanlab-private" -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+S3 Public SSL
+*/}}
+{{- define "swanlab.s3.public.ssl" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- .Values.integrations.s3.public.ssl | default false -}}
+{{- else -}}
+{{- false -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Public Endpoint
+*/}}
+{{- define "swanlab.s3.public.endpoint" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 public endpoint via .Values.integrations.s3.public.endpoint." .Values.integrations.s3.public.endpoint -}}
+{{- else -}}
+{{- include "swanlab.s3.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Public Region
+*/}}
+{{- define "swanlab.s3.public.region" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 public region via .Values.integrations.s3.public.region." .Values.integrations.s3.public.region -}}
+{{- else -}}
+{{- "local" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Public Port
+ */}}
+{{- define "swanlab.s3.public.port" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 public port via .Values.integrations.s3.public.port." .Values.integrations.s3.public.port -}}
+{{- else -}}
+{{- include "swanlab.s3.minio.port" . -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+S3 Public path style
+*/}}
+{{- define "swanlab.s3.public.pathStyle" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- .Values.integrations.s3.public.pathStyle | default false -}}
+{{- else -}}
+{{- true -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+S3 Public Bucket
+*/}}
+{{- define "swanlab.s3.public.bucket" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 public bucket via .Values.integrations.s3.public.bucket." .Values.integrations.s3.public.bucket -}}
+{{- else -}}
+{{- "swanlab-public" -}}
+{{- end -}}
+{{- end -}}
+
+
+
+{{/*
+S3 Public Domain
+*/}}
+{{- define "swanlab.s3.public.domain" }}
+{{- if .Values.integrations.s3.enabled -}}
+{{- required "If .Values.integrations.s3.enabled is true, you must specify the S3 public domain via .Values.integrations.s3.public.domain." .Values.integrations.s3.public.domain -}}
+{{- else -}}
+{{- "" -}}
 {{- end -}}
 {{- end -}}
 

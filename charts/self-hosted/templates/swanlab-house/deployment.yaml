@@ -17,7 +17,7 @@ spec:
           requests:
             storage: {{.Values.service.house.persistence.storageSize }}
   persistentVolumeClaimRetentionPolicy:
-    {{- if .Values.service.house.retainPVC }}
+    {{- if .Values.service.house.retainPVC | eq false }}
     whenDeleted: Delete
     whenScaled: Delete
     {{- end }}
@@ -50,15 +50,9 @@ spec:
                   name: {{ include "swanlab.redis.secretName" . }}
                   key: url
             - name: CLICKHOUSE_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
+              value: {{ include "swanlab.clickhouse.host" . | quote }}
             - name: CLICKHOUSE_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: tcpPort
+              value: {{ include "swanlab.clickhouse.tcpPort" . | quote }}
           # 核心检测逻辑
           command: [ "/bin/sh", "-c" ]
           args:
@@ -119,8 +113,16 @@ spec:
               value: "/api/house"
             - name: SH_LOG_PATH
               value: "/data/metrics/metrics.log"
+            - name: SH_DISTRIBUTED_ENABLE
+              value: "true"
             - name: SH_SERVER_URL
               value: "http://{{ include "swanlab.server.fullname" . }}:{{ include "swanlab.server.port" . }}/api"
+            - name: SH_DB_HOST
+              value: "{{ include "swanlab.clickhouse.host" . }}"
+            - name: SH_DB_PORT
+              value: "{{ include "swanlab.clickhouse.tcpPort" . }}"
+            - name: SH_DB_NAME
+              value: "{{ include "swanlab.clickhouse.database" . }}"
             - name: SH_DB_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -131,37 +133,23 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.clickhouse.secretName" . }}
                   key: password
-            - name: SH_DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
-            - name: SH_DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: tcpPort
-            - name: SH_DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: database
-            - name: SH_DISTRIBUTED_ENABLE
-              value: "true"
             - name: SH_REDIS_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ include "swanlab.redis.secretName" . }}
                   key: url
+
             # s3
             - name: SH_MINIO_ENDPOINT
-              value: "{{ include "swanlab.s3.endpoint" . }}:{{ include "swanlab.s3.port" . }}"
+              value: "{{ include "swanlab.s3.private.endpoint" . }}:{{ include "swanlab.s3.private.port" . }}"
             - name: SH_MINIO_USE_SSL
-              value: {{ include "swanlab.s3.ssl" . | quote }}
+              value: {{ include "swanlab.s3.private.ssl" . | quote }}
             - name: SH_MINIO_REGION
-              value: {{ include "swanlab.s3.region" . | quote }}
+              value: {{ include "swanlab.s3.private.region" . | quote }}
             - name: SH_MINIO_PATH_STYLE
-              value: {{ include "swanlab.s3.pathStyle" . | quote }}
+              value: {{ include "swanlab.s3.private.pathStyle" . | quote }}
+            - name: SH_MINIO_PRIVATE_BUCKET
+              value: "{{ include "swanlab.s3.private.bucket" . }}"
 
             - name: SH_MINIO_SECRET_ID
               valueFrom:
@@ -173,11 +161,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.s3.secretName" .}}
                   key: secretKey
-            - name: SH_MINIO_PRIVATE_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.s3.secretName" .}}
-                  key: privateBucket
         {{- if .Values.service.house.resources }}
           resources:
         {{- toYaml .Values.service.house.resources | nindent 12 }}
@@ -209,15 +192,11 @@ spec:
             - name: LOG_PATH
               value: "/data/metrics/*.log"
             - name: CLICKHOUSE_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: host
+              value: {{ include "swanlab.clickhouse.host" . | quote }}
             - name: CLICKHOUSE_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: httpPort
+              value: {{ include "swanlab.clickhouse.httpPort" . | quote }}
+            - name: CLICKHOUSE_DATABASE
+              value: {{ include "swanlab.clickhouse.database" . | quote }}
             - name: CLICKHOUSE_USER
               valueFrom:
                 secretKeyRef:
@@ -228,11 +207,6 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.clickhouse.secretName" . }}
                   key: password
-            - name: CLICKHOUSE_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "swanlab.clickhouse.secretName" . }}
-                  key: database
           volumeMounts:
             - name: house
               mountPath: /data

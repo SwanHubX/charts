@@ -16,6 +16,9 @@ data:
     entryPoints:
       web:
         address: ":80"
+    #    for s3 upload files
+        forwardedHeaders:
+          insecure: true
       traefik:
         address: ":8080"
       metrics:
@@ -46,7 +49,7 @@ data:
   {{- $house := include "swanlab.house.fullname" . }}
   {{- $housePort := include "swanlab.house.port" . }}
   {{- $s3 := include "swanlab.s3.fullname" . }}
-  {{- $s3Port := include "swanlab.s3.port" . }}
+  {{- $s3Port := include "swanlab.s3.minio.port" . }}
   dynamic.yaml: |
     http:
       middlewares:
@@ -54,10 +57,13 @@ data:
           plugin:
             identify:
               AuthUrl: {{ include "swanlab.server.identify" . | quote }}
+        {{- if .Values.integrations.s3.enabled | eq false }}
         {{ include "swanlab.gateway.s3" . }}:
           headers:
             customRequestHeaders:
-              Host: "{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.port" . }}"
+    #          No need to use cluster DNS
+              Host: {{ printf "%s:%s" $s3 $s3Port | quote }}
+        {{- end }}
       routers:
         next-router:
           rule: {{ include "swanlab.gateway.match" (list $host "/") }}
@@ -92,8 +98,8 @@ data:
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
       {{- if .Values.integrations.s3.enabled | eq false }}
         s3-router:
-          {{ $s1 := include "swanlab.gateway.match" (list $host "/swanlab-private")}}
-          {{ $s2 := include "swanlab.gateway.match" (list $host "/swanlab-public")}}
+          {{- $s1 := include "swanlab.gateway.match" (list $host "/swanlab-private")}}
+          {{- $s2 := include "swanlab.gateway.match" (list $host "/swanlab-public")}}
           rule: {{ printf "(%s) || (%s)" $s1 $s2 }}
           service: "swanlab-s3"
           entryPoints:

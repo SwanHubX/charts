@@ -269,22 +269,26 @@ integrations:
   postgres:
     # Enable to use an external PostgreSQL database.
     enabled: false
+    host: ""
+    port: 5432
+    database: "app"
     # (Optional) Use an existing Secret for connection strings.
     # If set, 'primaryUrl' and 'replicaUrl' values above will be ignored.
     #
     # | .data.<key> in Secret |
     # |:----------------------|
-    # | database              |
     # | username              |
     # | password              |
-    # | port                  |
-    # | primaryUrl           |
-    # | replicaUrl           |
+    # | primaryUrl            |
+    # | replicaUrl            |
     existingSecret: ""
 
   redis:
     # Enable to use an external Redis service.
     enabled: false
+    host: ""
+    port: 6379
+    database: 0
     # (Optional) Use an existing Secret for the Redis URL.
     # If set, the 'url' value above will be ignored.
     #
@@ -296,6 +300,10 @@ integrations:
   clickhouse:
     # Enable to use an external ClickHouse server.
     enabled: false
+    host: ""
+    httpPort: 8123
+    tcpPort: 9000
+    database: "app"
     # (Optional) Use an existing Secret for authentication.
     # If set, 'user', 'password', 'host', 'httpPort', and 'database' values above will be ignored.
     #
@@ -303,21 +311,26 @@ integrations:
     # |:----------------------|
     # | username              |
     # | password              |
-    # | host                  |
-    # | httpPort              |
-    # | tcpPort               |
-    # | database              |
     existingSecret: ""
 
   s3:
     # Enable to use an external S3-compatible object storage.
     enabled: false
-    ssl: false
-    endpoint: ""
-    region: ""
-    port: 0
-    domain: ""
-    pathStyle: true
+    public:
+      ssl: true
+      endpoint: ""
+      region: ""
+      port: 443
+      domain: ""
+      pathStyle: true
+      bucket: ""
+    private:
+      ssl: true
+      endpoint: ""
+      region: ""
+      port: 443
+      pathStyle: true
+      bucket: ""
     # (Optional) Use an existing Secret for S3 credentials.
     # If set, 'accessKey' and 'secretKey' values above will be ignored.
     #
@@ -325,6 +338,4 @@ integrations:
     # |:---------------------|----------------------|
     # | accessKey            | string               |
     # | secretKey            | string               |
-    # | privateBucket        | string               |
-    # | publicBucket         | string               |
     existingSecret: ""

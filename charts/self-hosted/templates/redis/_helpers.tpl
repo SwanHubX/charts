@@ -47,3 +47,36 @@ Redis PVC Name
 {{- define "swanlab.redis.pvcName" -}}
 {{.Values.dependencies.redis.persistence.existingClaim | default (printf "%s-pvc" (include "swanlab.redis.fullname" .)) }}
 {{- end -}}
+
+{{/*
+Redis host
+*/}}
+{{- define "swanlab.redis.host" -}}
+{{- if .Values.integrations.redis.enabled -}}
+{{- required "If .Values.integrations.redis.enabled is true, you must specify the host via .Values.integrations.redis.host." .Values.integrations.redis.host -}}
+{{- else -}}
+{{ include "swanlab.redis.fullname" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Redis port
+*/}}
+{{- define "swanlab.redis.port" -}}
+{{- if .Values.integrations.redis.enabled -}}
+{{- required "If .Values.integrations.redis.enabled is true, you must specify the port via .Values.integrations.redis.port." .Values.integrations.redis.port -}}
+{{- else -}}
+{{ 6379 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Redis database
+*/}}
+{{- define "swanlab.redis.database" -}}
+{{- if .Values.integrations.redis.enabled -}}
+{{- required "If .Values.integrations.redis.enabled is true, you must specify the database via .Values.integrations.redis.database." .Values.integrations.redis.database -}}
+{{- else -}}
+{{ 0 }}
+{{- end -}}
+{{- end -}}

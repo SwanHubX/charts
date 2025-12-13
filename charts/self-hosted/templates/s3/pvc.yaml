@@ -3,7 +3,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{include "swanlab.s3.pvcName" .}}
+  name: {{ include "swanlab.s3.pvcName" .}}
   labels:
   {{- include "swanlab.s3.labels" . | nindent 4 }}
   {{- if .Values.dependencies.s3.customAnnotations }}

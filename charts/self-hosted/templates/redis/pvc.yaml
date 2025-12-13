@@ -3,7 +3,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{include "swanlab.redis.pvcName" .}}
+  name: {{ include "swanlab.redis.pvcName" .}}
   labels:
   {{- include "swanlab.redis.labels" . | nindent 4 }}
   {{- if .Values.dependencies.redis.customAnnotations }}

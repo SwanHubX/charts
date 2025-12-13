@@ -112,17 +112,17 @@ spec:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{include "swanlab.postgres.secretName" . }}
+                  name: {{ include "swanlab.postgres.secretName" . }}
                   key: primaryUrl
             - name: DATABASE_URL_REPLICA
               valueFrom:
                 secretKeyRef:
-                  name: {{include "swanlab.postgres.secretName" . }}
+                  name: {{ include "swanlab.postgres.secretName" . }}
                   key: replicaUrl
             - name: REDIS_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{include "swanlab.redis.secretName" . }}
+                  name: {{ include "swanlab.redis.secretName" . }}
                   key: url
             - name: VERSION
               value: {{ .Chart.AppVersion | quote }}
@@ -134,48 +134,44 @@ spec:
             - name: SS_STORAGE_TYPE
               value: {{ include "swanlab.s3.type" . | quote }}
             - name: SS_PUBLIC_STORAGE_ENDPOINT
-              value: {{ include "swanlab.s3.endpoint" . | quote }}
+              value: {{ include "swanlab.s3.public.endpoint" . | quote }}
+
             - name: SS_PUBLIC_STORAGE_REGION
-              value: {{ include "swanlab.s3.region" . }}
+              value: {{ include "swanlab.s3.public.region" . }}
             - name: SS_PUBLIC_STORAGE_PATH_STYLE
-              value: {{ include "swanlab.s3.pathStyle" . | quote }}
+              value: {{ include "swanlab.s3.public.pathStyle" . | quote }}
             - name: SS_PUBLIC_STORAGE_PORT
-              value: {{ include "swanlab.s3.port" . | quote }}
+              value: {{ include "swanlab.s3.public.port" . | quote }}
             - name: SS_PUBLIC_STORAGE_USE_SSL
-              value: {{ include "swanlab.s3.ssl" . | quote }}
-            - name: SS_PRIVATE_STORAGE_ENDPOINT
-              value: {{ include "swanlab.s3.endpoint" . | quote }}
-            - name: SS_PRIVATE_STORAGE_REGION
-              value: {{ include "swanlab.s3.region" . | quote }}
-            - name: SS_PRIVATE_STORAGE_PATH_STYLE
-              value: {{ include "swanlab.s3.pathStyle" . | quote }}
-            - name: SS_PRIVATE_STORAGE_PORT
-              value: {{ include "swanlab.s3.port" . | quote }}
-            - name: SS_PRIVATE_STORAGE_USE_SSL
-              value: {{ include "swanlab.s3.ssl" . | quote }}
+              value: {{ include "swanlab.s3.public.ssl" . | quote }}
+            - name: SS_PUBLIC_STORAGE_BUCKET
+              value: {{ include "swanlab.s3.public.bucket" . | quote }}
             - name: SS_AVATAR_DOMAIN
-              value: {{ include "swanlab.s3.domain" . | quote }}
+              value: {{ include "swanlab.s3.public.domain" . | quote }}
+
+            - name: SS_PRIVATE_STORAGE_ENDPOINT
+              value: {{ include "swanlab.s3.private.endpoint" . | quote }}
+            - name: SS_PRIVATE_STORAGE_REGION
+              value: {{ include "swanlab.s3.private.region" . | quote }}
+            - name: SS_PRIVATE_STORAGE_PATH_STYLE
+              value: {{ include "swanlab.s3.private.pathStyle" . | quote }}
+            - name: SS_PRIVATE_STORAGE_PORT
+              value: {{ include "swanlab.s3.private.port" . | quote }}
+            - name: SS_PRIVATE_STORAGE_USE_SSL
+              value: {{ include "swanlab.s3.private.ssl" . | quote }}
+            - name: SS_PRIVATE_STORAGE_BUCKET
+              value: {{ include "swanlab.s3.private.bucket" . | quote }}
 
             - name: ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{include "swanlab.s3.secretName" . }}
+                  name: {{ include "swanlab.s3.secretName" . }}
                   key: accessKey
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{include "swanlab.s3.secretName" . }}
+                  name: {{ include "swanlab.s3.secretName" . }}
                   key: secretKey
-            - name: SS_PRIVATE_STORAGE_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{include "swanlab.s3.secretName" . }}
-                  key: privateBucket
-            - name: SS_PUBLIC_STORAGE_BUCKET
-              valueFrom:
-                secretKeyRef:
-                  name: {{include "swanlab.s3.secretName" . }}
-                  key: publicBucket
         {{- if .Values.service.server.resources }}
           resources:
         {{- toYaml .Values.service.server.resources | nindent 12 }}

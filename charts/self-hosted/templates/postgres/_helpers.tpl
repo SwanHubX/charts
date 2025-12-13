@@ -48,3 +48,39 @@ PostgreSQL PVC Name
 {{- define "swanlab.postgres.pvcName" -}}
 {{.Values.dependencies.postgres.persistence.existingClaim | default (printf "%s-pvc" (include "swanlab.postgres.fullname" .)) }}
 {{- end -}}
+
+
+{{/*
+PostgreSQL host
+*/}}
+{{- define "swanlab.postgres.host" -}}
+{{- if .Values.integrations.postgres.enabled -}}
+{{- required "If .Values.integrations.postgres.enabled is true, you must specify the host via .Values.integrations.postgres.host." .Values.integrations.postgres.host -}}
+{{- else -}}
+{{ include "swanlab.postgres.fullname" . }}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+PostgreSQL port
+*/}}
+{{- define "swanlab.postgres.port" -}}
+{{- if .Values.integrations.postgres.enabled -}}
+{{- required "If .Values.integrations.postgres.enabled is true, you must specify the port via .Values.integrations.postgres.port." .Values.integrations.postgres.port -}}
+{{- else -}}
+{{ 5432 }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+PostgreSQL database
+*/}}
+{{- define "swanlab.postgres.database" -}}
+{{- if .Values.integrations.postgres.enabled -}}
+{{- required "If .Values.integrations.postgres.enabled is true, you must specify the database via .Values.integrations.postgres.database." .Values.integrations.postgres.database -}}
+{{- else -}}
+{{ "app" }}
+{{- end -}}
+{{- end -}}
+
