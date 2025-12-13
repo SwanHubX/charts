@@ -189,8 +189,8 @@
           "properties": {
             "enabled": { "type": "boolean" },
             "existingSecret": { "type": "string" },
-            "public": { "$ref": "#/definitions/s3ConnectionConfig" },
-            "private": { "$ref": "#/definitions/s3ConnectionConfig" }
+            "public": { "$ref": "#/definitions/s3PublicConfig" },
+            "private": { "$ref": "#/definitions/s3PrivateConfig" }
           }
         }
       }
@@ -242,17 +242,30 @@
         "resources": { "$ref": "#/definitions/resources" }
       }
     },
-    "s3ConnectionConfig": {
+    "s3PrivateConfig": {
       "type": "object",
       "properties": {
         "ssl": { "type": "boolean" },
         "endpoint": { "type": "string" },
         "region": { "type": "string" },
-        "port": { "type": "integer", "minimum": 0, "maximum": 65535 },
-        "domain": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
         "pathStyle": { "type": "boolean" },
         "bucket": { "type": "string" }
-      }
+      },
+      "required": ["bucket", "endpoint", "region", "port", "pathStyle", "ssl"]
+    },
+    "s3PublicConfig": {
+      "type": "object",
+      "properties": {
+        "ssl": { "type": "boolean" },
+        "endpoint": { "type": "string" },
+        "region": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "pathStyle": { "type": "boolean" },
+        "bucket": { "type": "string" },
+        "domain": { "type": "string", "format": "uri-reference" }
+      },
+      "required": ["bucket", "endpoint", "region", "port", "pathStyle", "ssl", "domain"]
     }
   }
 }

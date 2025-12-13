@@ -133,9 +133,9 @@ spec:
             - name: MINIO_ENDPOINT
               value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.minio.port" . }}"
             - name: MINIO_PRIVATE_BUCKET
-              value: "{{include "swanlab.s3.private.bucket" . }}"
+              value: "{{ include "swanlab.s3.private.bucket" . }}"
             - name: MINIO_PUBLIC_BUCKET
-              value: "{{include "swanlab.s3.public.bucket" . }}"
+              value: "{{ include "swanlab.s3.public.bucket" . }}"
           command: ["/bin/sh", "-c"]
           args:
             - |

@@ -317,18 +317,18 @@ integrations:
     # Enable to use an external S3-compatible object storage.
     enabled: false
     public:
-      ssl: false
+      ssl: true
       endpoint: ""
       region: ""
-      port: 0
+      port: 443
       domain: ""
       pathStyle: true
       bucket: ""
     private:
-      ssl: false
+      ssl: true
       endpoint: ""
       region: ""
-      port: 0
+      port: 443
       pathStyle: true
       bucket: ""
     # (Optional) Use an existing Secret for S3 credentials.
