@@ -6,6 +6,7 @@ metadata:
   {{- include "swanlab.house.labels" . | nindent 4 }}
 
 spec:
+  serviceName: {{ include "swanlab.house.fullname" . }}
   volumeClaimTemplates:
     - metadata:
         name: house
@@ -16,11 +17,6 @@ spec:
         resources:
           requests:
             storage: {{.Values.service.house.persistence.storageSize }}
-  persistentVolumeClaimRetentionPolicy:
-    {{- if .Values.service.house.retainPVC | eq false }}
-    whenDeleted: Delete
-    whenScaled: Delete
-    {{- end }}
   replicas: {{ default 0 .Values.service.house.replicas }}
   selector:
     matchLabels:

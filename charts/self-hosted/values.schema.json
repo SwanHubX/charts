@@ -72,7 +72,6 @@
             "logResources": { "$ref": "#/definitions/resources" },
             "fbResources": { "$ref": "#/definitions/resources" },
             "persistence": { "$ref": "#/definitions/persistence" },
-            "retainPVC": { "type": "boolean" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
