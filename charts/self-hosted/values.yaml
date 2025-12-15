@@ -104,8 +104,6 @@ service:
       storageClass: ""
       # Volume size for the database data.
       storageSize: "10Gi"
-    # Retain PVC on deletion. In the vast majority of cases, this is unnecessary.
-    retainPVC: false
 
   # Configuration of our frontend service
   cloud:
