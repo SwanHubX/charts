@@ -28,6 +28,8 @@ traefik:
     # Plugins must be defined via args (additionalArguments), otherwise, static configuration might fail.
     # Defines the local plugin 'identify' and its module path.
     - "--experimental.localPlugins.identify.modulename=github.com/swanhubx/swanlab-helper/identify"
+    # Defines the local plugin 'robots' and its module path.
+    - "--experimental.localPlugins.robots.modulename=github.com/swanhubx/swanlab-helper/robots"
 
   # IngressRoute configuration
   ingressRoute:
@@ -66,26 +68,37 @@ traefik:
 
     # Plugin configuration: volumes for loading the identity middleware
     additionalVolumes:
-      - name: identify-plugin
+      - name: helper-plugin
         # Volume used to share the plugin files between initContainer and main container
         emptyDir: { }
 
     initContainers:
       - name: download-identify
         # Image for the init container that downloads the custom plugin files
-        image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.2
+        image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.3
         env:
           - name: COPY_TO
             # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
-            value: /plugins-tmp
+            value: /plugins-tmp/identify
         volumeMounts:
-          - name: identify-plugin
+          - name: helper-plugin
+            # Mount path for the shared volume
+            mountPath: /plugins-tmp
+      - name: download-robots
+        # Image for the init container that downloads the custom plugin files
+        image: repo.swanlab.cn/self-hosted/swanlab-helper/robots:v1.0
+        env:
+          - name: COPY_TO
+            # The download-robots script automatically creates the 'robots' folder in the /plugins-tmp directory.
+            value: /plugins-tmp/robots
+        volumeMounts:
+          - name: helper-plugin
             # Mount path for the shared volume
             mountPath: /plugins-tmp
 
   # Volume mounts for the main Traefik container
   additionalVolumeMounts:
-    - name: identify-plugin
+    - name: helper-plugin
       # Mount the volume to the specific path where Traefik expects to find the local plugin source code.
       mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
 
