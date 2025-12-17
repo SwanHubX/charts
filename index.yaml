@@ -249,6 +249,26 @@ entries:
     version: 0.1.0
   traefik-proxy:
   - apiVersion: v2
+    created: "2025-12-17T13:32:25.455942834Z"
+    dependencies:
+    - name: traefik
+      repository: https://helm.traefik.io/traefik
+      version: 37.3.0
+    description: A Helm chart app encapsulating most of the Traefik resource configurations.
+    digest: 4c42ee2bc3d7eaf3e057c79b5182643b658af5bb971743f720949531bc53be4b
+    home: https://swanlab.cn
+    icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
+    maintainers:
+    - email: team@swanhub.co
+      name: cunyue
+    name: traefik-proxy
+    sources:
+    - https://github.com/SwanHubX/charts/tree/main/charts/traefik-proxy
+    type: application
+    urls:
+    - https://github.com/SwanHubX/charts/releases/download/traefik-proxy-1.1.0/traefik-proxy-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
     created: "2025-12-02T10:51:22.530704543Z"
     dependencies:
     - name: traefik
@@ -328,4 +348,4 @@ entries:
     urls:
     - https://github.com/SwanHubX/charts/releases/download/traefik-proxy-1.0.0/traefik-proxy-1.0.0.tgz
     version: 1.0.0
-generated: "2025-12-15T05:13:45.892605348Z"
+generated: "2025-12-17T13:32:25.455993188Z"
