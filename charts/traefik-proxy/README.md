@@ -9,7 +9,7 @@ helm repo add swanlab https://helm.swanlab.cn
 helm install traefik-proxy swanlab/traefik-proxy
 ```
 
-We have built in a local plugin:
+We have built in some local plugin:
 
 ```yaml
 apiVersion: traefik.io/v1alpha1
@@ -20,6 +20,17 @@ spec:
   plugin:
     identify:
       AuthUrl: "http://swanlab-server:3000/api/identity"
+
+---
+
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: robots
+spec:
+  plugin:
+    robots:
+      Content: "" # User-agent: *\nDisallow: /\n
 ```
 
 For flexibility, we have not predefined a schema for traefik-proxy.
