@@ -66,7 +66,7 @@ traefik:
     # List of secrets used to pull the Traefik image
     imagePullSecrets: [ ]
 
-    # Plugin configuration: volumes for loading the identity middleware
+    # Plugin configuration: volumes for loading the local plugins
     additionalVolumes:
       - name: helper-plugin
         # Volume used to share the plugin files between initContainer and main container
@@ -78,7 +78,6 @@ traefik:
         image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.3
         env:
           - name: COPY_TO
-            # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
             value: /plugins-tmp/identify
         volumeMounts:
           - name: helper-plugin
@@ -89,7 +88,6 @@ traefik:
         image: repo.swanlab.cn/self-hosted/swanlab-helper/robots:v1.0
         env:
           - name: COPY_TO
-            # The download-robots script automatically creates the 'robots' folder in the /plugins-tmp directory.
             value: /plugins-tmp/robots
         volumeMounts:
           - name: helper-plugin
