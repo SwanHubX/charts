@@ -14,8 +14,8 @@ Cut of 40 chars to comply with k8s name limit.
 SwanLab-House Image
 */}}
 {{- define "swanlab.house.image" -}}
-{{- $defaultTag := printf "v%s" .Chart.AppVersion }}
-{{- $tag := default $defaultTag .Values.service.house.image.tag }}
+{{- $rawVersion := default .Chart.AppVersion .Values.service.house.image.tag | toString -}}
+{{- $tag := printf "v%s" (trimPrefix "v" $rawVersion) -}}
 {{- printf "%s:%s" .Values.service.house.image.repository $tag -}}
 {{- end -}}
 
