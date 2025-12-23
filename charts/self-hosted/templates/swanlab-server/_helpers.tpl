@@ -11,11 +11,11 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 
 {{/*
-SwanLab-ServerImage
+SwanLab-Server Image
 */}}
 {{- define "swanlab.server.image" -}}
-{{- $defaultTag := printf "v%s" .Chart.AppVersion }}
-{{- $tag := default $defaultTag .Values.service.server.image.tag }}
+{{- $rawVersion := default .Chart.AppVersion .Values.service.server.image.tag | toString -}}
+{{- $tag := printf "v%s" (trimPrefix "v" $rawVersion) -}}
 {{- printf "%s:%s" .Values.service.server.image.repository $tag -}}
 {{- end -}}
 

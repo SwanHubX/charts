@@ -14,8 +14,8 @@ Cut of 40 chars to comply with k8s name limit.
 SwanLab-Next Image
 */}}
 {{- define "swanlab.next.image" -}}
-{{- $defaultTag := printf "v%s" .Chart.AppVersion }}
-{{- $tag := default $defaultTag .Values.service.next.image.tag}}
+{{- $rawVersion := default .Chart.AppVersion .Values.service.next.image.tag | toString -}}
+{{- $tag := printf "v%s" (trimPrefix "v" $rawVersion) -}}
 {{- printf "%s:%s" .Values.service.next.image.repository $tag -}}
 {{- end -}}
 
