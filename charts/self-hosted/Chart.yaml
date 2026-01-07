@@ -1,12 +1,12 @@
 apiVersion: v2
 name: self-hosted
-kubeVersion: '>=1.22.0-0'
+kubeVersion: ">=1.22.0-0"
 description: A Helm chart for deploying SwanLab, an open-source ML experiment tracking platform, on Kubernetes.
 icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
 home: https://swanlab.cn
 type: application
-version: 0.2.2
-appVersion: 2.6.2
+version: 0.2.3
+appVersion: 2.6.3
 keywords:
   - swanlab
   - ml-ops
