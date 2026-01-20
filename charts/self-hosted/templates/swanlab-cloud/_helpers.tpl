@@ -15,7 +15,7 @@ SwanLab-Cloud Image
 */}}
 {{- define "swanlab.cloud.image" -}}
 {{- $tag := .Values.service.cloud.image.tag | toString -}}
-{{- if not $tag -}}
+{{- if empty $tag -}}
   {{- $tag = printf "v%s" (trimPrefix "v" .Chart.AppVersion) -}}
 {{- end -}}
 {{- printf "%s:%s" .Values.service.cloud.image.repository $tag -}}
