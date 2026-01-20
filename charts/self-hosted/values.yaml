@@ -59,7 +59,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-server
       # For patch update delivery
-      tag: "2.6.3"
+      tag: "v2.6.3"
       pullPolicy: "IfNotPresent"
 
     customLabels: {}
@@ -113,7 +113,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-cloud
       # For patch update delivery
-      tag: "2.6.3"
+      tag: "v2.6.3"
       pullPolicy: "IfNotPresent"
 
 
@@ -131,7 +131,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-next
       # For patch update delivery
-      tag: "2.6.3"
+      tag: "v2.6.3"
       pullPolicy: "IfNotPresent"
 
 
