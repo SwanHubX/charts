@@ -134,7 +134,8 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.redis.secretName" . }}
                   key: url
-
+            - name: SH_FLAG_ID_IGNORE
+              value: "true"
             # s3
             - name: SH_MINIO_ENDPOINT
               value: "{{ include "swanlab.s3.private.endpoint" . }}:{{ include "swanlab.s3.private.port" . }}"
