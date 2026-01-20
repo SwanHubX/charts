@@ -15,7 +15,7 @@ SwanLab-House Image
 */}}
 {{- define "swanlab.house.image" -}}
 {{- $tag := .Values.service.house.image.tag | toString -}}
-{{- if empty $tag  -}}
+{{- if empty $tag -}}
   {{- $tag = printf "v%s" (trimPrefix "v" .Chart.AppVersion) -}}
 {{- end -}}
 {{- printf "%s:%s" .Values.service.house.image.repository $tag -}}
