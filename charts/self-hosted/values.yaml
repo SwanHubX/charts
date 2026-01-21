@@ -113,7 +113,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-cloud
       # For patch update delivery
-      tag: "v2.6.3"
+      tag: ""
       pullPolicy: "IfNotPresent"
 
 
