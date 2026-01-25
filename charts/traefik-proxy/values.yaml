@@ -75,7 +75,7 @@ traefik:
     initContainers:
       - name: download-identify
         # Image for the init container that downloads the custom plugin files
-        image: repo.swanlab.cn/self-hosted/swanlab-helper/identify:v1.3
+        image: repo.swanlab.cn/public/swanlab-helper/identify:v1.3
         env:
           - name: COPY_TO
             value: /plugins-tmp/identify
@@ -85,7 +85,7 @@ traefik:
             mountPath: /plugins-tmp
       - name: download-robots
         # Image for the init container that downloads the custom plugin files
-        image: repo.swanlab.cn/self-hosted/swanlab-helper/robots:v1.0
+        image: repo.swanlab.cn/public/swanlab-helper/robots:v1.0
         env:
           - name: COPY_TO
             value: /plugins-tmp/robots

@@ -24,13 +24,13 @@ gateway:
   replicas: 2
 
   image:
-    repository: repo.swanlab.cn/self-hosted/traefik
+    repository: repo.swanlab.cn/public/traefik
     # For patch update delivery
     tag: "3.6"
     pullPolicy: "IfNotPresent"
 
   identifyImage:
-    repository: repo.swanlab.cn/self-hosted/swanlab-helper/identify
+    repository: repo.swanlab.cn/public/swanlab-helper/identify
     tag: "v1.2"
     pullPolicy: "IfNotPresent"
 
@@ -43,7 +43,7 @@ gateway:
 # Configuration for test image used in various components
 helper: # Test Image Configuration
   # Repository path for the test image
-  repository: repo.swanlab.cn/self-hosted/busybox
+  repository: repo.swanlab.cn/public/busybox
   # Tag for the test image
   tag: '1.37.0'
   # Image pull policy for the test pod
