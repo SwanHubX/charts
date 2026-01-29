@@ -25,10 +25,16 @@ spec:
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       # 部分存储类创建的卷权限不是 postgres 用户可写，使用 initContainer 修正权限
+      # 实测部分存储、k8s版本下单纯设置 fsGroup 无效，需要用 initContainer 修改目录属主
+      securityContext:
+        fsGroup: 999
       initContainers:
         - name: init-postgres-fs
           image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
-          command: ["sh", "-c", "chown -R 999:999 /var/lib/postgresql"]
+          command:
+            - "sh"
+            - "-c"
+            - "mkdir -p /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data && chown -R 999:999 /var/lib/postgresql/data"
           securityContext:
             runAsUser: 0
           volumeMounts:
@@ -44,6 +50,8 @@ spec:
         env:
           - name: TZ
             value: "UTC"
+          - name: PGDATA
+            value: /var/lib/postgresql/data
           - name: POSTGRES_DB
             value: {{ include "swanlab.postgres.database" . }}
           - name: POSTGRES_USER
