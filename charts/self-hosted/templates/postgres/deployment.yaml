@@ -24,6 +24,16 @@ spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      # 部分存储类创建的卷权限不是 postgres 用户可写，使用 initContainer 修正权限
+      initContainers:
+        - name: init-postgres-fs
+          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
+          command: ["sh", "-c", "chown -R 999:999 /var/lib/postgresql"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: {{ include "swanlab.postgres.fullname" . }}-volume
+              mountPath: /var/lib/postgresql
       containers:
       - name: postgres
         image: "{{ .Values.dependencies.postgres.image.repository }}:{{ .Values.dependencies.postgres.image.tag }}"

@@ -5,8 +5,8 @@ description: A Helm chart for deploying SwanLab, an open-source ML experiment tr
 icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
 home: https://swanlab.cn
 type: application
-version: 0.2.6
-appVersion: 2.6.4
+version: 0.3.0
+appVersion: 2.7.0
 keywords:
   - swanlab
   - ml-ops
