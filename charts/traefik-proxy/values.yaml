@@ -3,7 +3,7 @@ test:
     # Registry for the test image (e.g., busybox)
     registry: repo.swanlab.cn
     # Repository path for the test image
-    repository: self-hosted/busybox
+    repository: public/busybox
     # Tag for the test image
     tag: '1.37.0'
     # Image pull policy for the test pod
@@ -17,7 +17,7 @@ traefik:
     # Registry for the main Traefik image
     registry: repo.swanlab.cn
     # Repository path for the Traefik image
-    repository: self-hosted/traefik
+    repository: public/traefik
     # Tag for the Traefik image
     tag: '3.6'
     # Image pull policy for the Traefik pods
