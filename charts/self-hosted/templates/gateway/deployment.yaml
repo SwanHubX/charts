@@ -41,11 +41,13 @@ spec:
             - "--configfile=/etc/traefik/traefik.yaml"
           ports:
             - name: web
-              containerPort: 80
-            - name: metrics
-              containerPort: 9100
+              containerPort: {{ include "swanlab.gateway.web" . }}
+            - name: internal
+              containerPort: {{ include "swanlab.gateway.internal" . }}
             - name: traefik
-              containerPort: 8080
+              containerPort: {{ include "swanlab.gateway.traefik" . }}
+            - name: metrics
+              containerPort: {{ include "swanlab.gateway.metrics" . }}
           volumeMounts:
             - name: config
               mountPath: "/etc/traefik/traefik.yaml"
@@ -86,5 +88,7 @@ spec:
   selector:
   {{- include "swanlab.gateway.selectorLabels" . | nindent 4 }}
   ports:
-    - port: 80
+    - port: {{ include "swanlab.gateway.web" . }}
       name: web
+    - port: {{ include "swanlab.gateway.internal" . }}
+      name: internal

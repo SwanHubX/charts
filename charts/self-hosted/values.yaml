@@ -34,6 +34,19 @@ gateway:
     tag: "v1.2"
     pullPolicy: "IfNotPresent"
 
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      # Port for the unsecure entrypoint, which can be accessed from outside the cluster.
+      web: 80
+      # Port for the internal entrypoint, which should only be accessed from within the cluster.
+      internal: 8080
+      # Port for Traefik dashboard.
+      traefik: 8081
+      # Port for Prometheus metrics.
+      metrics: 9100
+
   customLabels: {}
   customAnnotations: {}
   customTolerations: []

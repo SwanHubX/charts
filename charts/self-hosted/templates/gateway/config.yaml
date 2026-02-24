@@ -15,14 +15,16 @@ data:
     # 定义入口点
     entryPoints:
       web:
-        address: ":80"
+        address: ":{{ include "swanlab.gateway.web" . }}"
     #    for s3 upload files
         forwardedHeaders:
           insecure: true
+      internal:
+        address: ":{{ include "swanlab.gateway.internal" . }}"
       traefik:
-        address: ":8080"
+        address: ":{{ include "swanlab.gateway.traefik" . }}"
       metrics:
-        address: ":9100"
+        address: ":{{ include "swanlab.gateway.metrics" . }}"
     # File Provider
     providers:
       file:
@@ -82,19 +84,27 @@ data:
           entryPoints:
             - "web"
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
+        server-router-block:
+          rule: {{ include "swanlab.gateway.match" (list $host "/api/internal") }}
+          service: "noop@internal"
+          entryPoints:
+            - "web"
+        house-router-block:
+          rule: {{ include "swanlab.gateway.match" (list $host "/api/house/internal") }}
+          service: "noop@internal"
+          entryPoints:
+            - "web"
         server-router-internal:
-    #      rule: PathPrefix(`/api`) && Header(`X-Requested-By`, `swanlab-next`)
           rule: PathPrefix(`/api`)
           service: "swanlab-server"
           entryPoints:
-            - "web"
+            - "internal"
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
         house-router-internal:
-    #      rule: PathPrefix(`/api/house`) && Header(`X-Requested-By`, `swanlab-next`)
           rule: PathPrefix(`/api/house`)
           service: "swanlab-house"
           entryPoints:
-            - "web"
+            - "internal"
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
       {{- if .Values.integrations.s3.enabled | eq false }}
         s3-router:

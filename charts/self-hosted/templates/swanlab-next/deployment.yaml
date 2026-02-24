@@ -97,11 +97,11 @@ spec:
             - name: CLOUD_URL
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: API_URL
-              value: "http://{{ include "swanlab.gateway.fullname" . }}:80/api"
+              value: "http://{{ include "swanlab.gateway.fullname" . }}:{{ include "swanlab.gateway.internal" . }}/api"
             - name: API_VERIFIER_URL
               value: {{ include "swanlab.server.identify" . | quote }}
             - name: API_INTERNAL_URL
-              value: "http://{{ include "swanlab.gateway.fullname" . }}:80/api"
+              value: "http://{{ include "swanlab.gateway.fullname" . }}:{{ include "swanlab.gateway.internal" . }}/api"
             {{- $loginHost := .Values.global.settings.loginHost }}
             {{- if $loginHost | ne "" }}
             - name: API_DISPLAY_HOST
