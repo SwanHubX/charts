@@ -1,9 +1,18 @@
-name: 'Helm Chart Release'
+name: 'Helm Chart Lint'
 
 on:
+  # 当提交代码到 main 分支且 charts 目录有更改时触发
   push:
     branches:
       - main
+    paths:
+      - 'charts/**'
+  # 当发起 PR 合并到 main 分支且 charts 目录有更改时触发（推荐加上，方便在合并前拦截错误）
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'charts/**'
 
 # 允许同时运行一个作业，并取消旧的作业
 concurrency:
@@ -11,27 +20,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
-    permissions:
-      contents: write
+  lint:
     runs-on: ubuntu-latest
+    # 仅需只读权限即可进行 Lint 检查
+    permissions:
+      contents: read
 
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
-        with:
-          # 必须获取完整的 Git 历史，以便 chart-releaser 能够生成正确的 index 文件
-          fetch-depth: 0
-
-      - name: 🛠️ Set Git User
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        # Lint 阶段不需要完整的 Git 历史，默认的 fetch-depth: 1 即可，这样速度更快
 
       - name: 🛠️ Set up Helm
-        # helm v3.18+
         uses: azure/setup-helm@v4.3.0
-
+        
       - name: 📥 Add Traefik Helm Repo
         run: |
           helm repo add traefik https://helm.traefik.io/traefik
@@ -49,17 +51,3 @@ jobs:
             helm dependency update "$chart_dir"
             helm lint "$chart_dir"
           done
-
-#      - name: 👮 Move LICENSE to Chart Directories
-#        run: |
-#          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
-#            echo "Copying LICENSE to $chart_dir..."
-#            cp LICENSE "$chart_dir/"
-#          done
-
-      - name: 🚀 Release Helm Chart
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          charts_dir: ./charts
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
