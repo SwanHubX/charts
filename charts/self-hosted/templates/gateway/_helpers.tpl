@@ -102,20 +102,20 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 {{- end -}}
 
 {{- define "swanlab.gateway.web" -}}
-{{- printf "%s" .Values.gateway.service.ports.web -}}
+{{- .Values.gateway.service.ports.web -}}
 {{- end -}}
 
 {{- /* Helper function to get the internal port */ -}}
 {{- define "swanlab.gateway.internal" -}}
-{{- printf "%s" .Values.gateway.service.ports.internal -}}
+{{- .Values.gateway.service.ports.internal -}}
 {{- end -}}
 
 {{- /* Helper function to get the traefik port */ -}}
 {{- define "swanlab.gateway.traefik" -}}
-{{- printf "%s" .Values.gateway.service.ports.traefik -}}
+{{- .Values.gateway.service.ports.traefik -}}
 {{- end -}}
 
 {{- /* Helper function to get the metrics port */ -}}
 {{- define "swanlab.gateway.metrics" -}}
-{{- printf "%s" .Values.gateway.service.ports.metrics -}}
+{{- .Values.gateway.service.ports.metrics -}}
 {{- end -}}
