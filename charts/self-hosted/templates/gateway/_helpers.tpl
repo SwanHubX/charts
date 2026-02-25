@@ -102,7 +102,7 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 {{- end -}}
 
 {{- define "swanlab.gateway.web" -}}
-{{- printf "%s" .Values.gateway.service.ports.web -}}
+{{- printf "%s" .Values.gateway.service.ports.web  -}}
 {{- end -}}
 
 {{- /* Helper function to get the internal port */ -}}
