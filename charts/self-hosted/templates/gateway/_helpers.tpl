@@ -88,3 +88,34 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
     {{- printf "%s(`%s`)" $matcher $path -}}
 {{- end -}}
 {{- end -}}
+
+{{- /* Get a list of all defined ports */ -}}
+{{- $ports := list .Values.gateway.service.ports.web .Values.gateway.service.ports.internal .Values.gateway.service.ports.traefik .Values.gateway.service.ports.metrics -}}
+
+{{- /* Filter out empty values (if there are optional fields), then use uniq function to remove duplicates */ -}}
+{{- $compactPorts := compact $ports -}}
+{{- $uniquePorts := uniq $compactPorts -}}
+
+{{- /* Compare the original list and the list after removing duplicates, if they are not equal, it means there are duplicates */ -}}
+{{- if ne (len $compactPorts) (len $uniquePorts) -}}
+  {{- fail "Chart validation failed: The ports for 'web', 'internal', 'traefik', and 'metrics' MUST be mutually exclusive (different from each other)." -}}
+{{- end -}}
+
+{{- define "swanlab.gateway.web" -}}
+{{- printf "%s" .Values.gateway.service.ports.web -}}
+{{- end -}}
+
+{{- /* Helper function to get the internal port */ -}}
+{{- define "swanlab.gateway.internal" -}}
+{{- printf "%s" .Values.gateway.service.ports.internal -}}
+{{- end -}}
+
+{{- /* Helper function to get the traefik port */ -}}
+{{- define "swanlab.gateway.traefik" -}}
+{{- printf "%s" .Values.gateway.service.ports.traefik -}}
+{{- end -}}
+
+{{- /* Helper function to get the metrics port */ -}}
+{{- define "swanlab.gateway.metrics" -}}
+{{- printf "%s" .Values.gateway.service.ports.metrics -}}
+{{- end -}}
