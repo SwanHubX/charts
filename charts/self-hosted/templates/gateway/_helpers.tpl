@@ -101,22 +101,21 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
   {{- fail "Chart validation failed: The ports for 'web', 'internal', 'traefik', and 'metrics' MUST be mutually exclusive (different from each other)." -}}
 {{- end -}}
 
-{{- /* Helper function to get the web port */ -}}
 {{- define "swanlab.gateway.web" -}}
-{{- printf "%s" (index .Values.gateway.service.ports.web) -}}
+{{- printf "%s" .Values.gateway.service.ports.web -}}
 {{- end -}}
 
 {{- /* Helper function to get the internal port */ -}}
 {{- define "swanlab.gateway.internal" -}}
-{{- printf "%s" (index .Values.gateway.service.ports.internal) -}}
+{{- printf "%s" .Values.gateway.service.ports.internal -}}
 {{- end -}}
 
 {{- /* Helper function to get the traefik port */ -}}
 {{- define "swanlab.gateway.traefik" -}}
-{{- printf "%s" (index .Values.gateway.service.ports.traefik) -}}
+{{- printf "%s" .Values.gateway.service.ports.traefik -}}
 {{- end -}}
 
 {{- /* Helper function to get the metrics port */ -}}
 {{- define "swanlab.gateway.metrics" -}}
-{{- printf "%s" (index .Values.gateway.service.ports.metrics) -}}
+{{- printf "%s" .Values.gateway.service.ports.metrics -}}
 {{- end -}}
