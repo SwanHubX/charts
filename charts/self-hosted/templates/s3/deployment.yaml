@@ -5,6 +5,10 @@ metadata:
   name: {{ include "swanlab.s3.fullname" . }}
   labels:
   {{- include "swanlab.s3.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.s3.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.s3.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     matchLabels:

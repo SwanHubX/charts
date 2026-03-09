@@ -4,7 +4,10 @@ metadata:
   name: {{ include "swanlab.house.fullname" . }}
   labels:
   {{- include "swanlab.house.labels" . | nindent 4 }}
-
+  {{- if .Values.service.house.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.service.house.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   serviceName: {{ include "swanlab.house.fullname" . }}
   volumeClaimTemplates:

@@ -2,3 +2,4 @@ charts/*/charts
 playground
 .DS_Store
 *.tgz
+.idea

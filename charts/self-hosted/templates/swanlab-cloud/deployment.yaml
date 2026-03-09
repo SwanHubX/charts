@@ -4,6 +4,10 @@ metadata:
   name: {{ include "swanlab.cloud.fullname" . }}
   labels:
   {{- include "swanlab.cloud.labels" . | nindent 4 }}
+  {{- if .Values.service.cloud.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.service.cloud.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ default 0 .Values.service.cloud.replicas }}
   selector:
