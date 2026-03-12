@@ -1,3 +1,8 @@
+{{/* SwanLab installation requires Helm version 3.9.0 or higher. */}}
+{{- if not (semverCompare ">= 3.9.0" .Capabilities.HelmVersion.Version) -}}
+{{- fail "SwanLab installation failed: This chart requires Helm version 3.9.0 or higher." -}}
+{{- end -}}
+
 Thank you for installing {{ .Chart.Name }}!
 
 Get the application URL by running these commands:
