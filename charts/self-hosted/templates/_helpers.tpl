@@ -1,3 +1,8 @@
+{{/* 检查 Helm 版本，防止因为不支持短路求值等特性导致不可预期的错误 */}}
+{{- if not (semverCompare ">= 3.9.0" .Capabilities.HelmVersion.Version) -}}
+{{- fail "SwanLab installation failed: This chart requires Helm version 3.9.0 or higher. Please upgrade your Helm client." -}}
+{{- end -}}
+
 {{/*
 Expand the name of the chart.
 */}}
