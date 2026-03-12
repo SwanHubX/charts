@@ -77,10 +77,15 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 {{- $path := index . 1 -}}
 {{- /* 1. Set the default matcher to PathPrefix */ -}}
 {{- $matcher := "PathPrefix" -}}
+
 {{- /* 2. Check if there is a third parameter; if it exists and is not empty, override the default value. */ -}}
-{{- if and (gt (len .) 2) (index . 2) -}}
-    {{- $matcher = index . 2 -}}
+{{- /* 注意在低版本的 helm 中，短路逻辑可能不支持，需要使用 if 和 else 来实现 */ -}}
+{{- if gt (len .) 2 -}}
+    {{- if index . 2 -}}
+        {{- $matcher = index . 2 -}}
+    {{- end -}}
 {{- end -}}
+
 {{- /* 3. Generate rule string */ -}}
 {{- if $host -}}
     {{- printf "Host(`%s`) && %s(`%s`)" $host $matcher $path -}}
