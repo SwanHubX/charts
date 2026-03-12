@@ -25,6 +25,7 @@ jobs:
       # 开启矩阵测试，覆盖主流和历史版本的 Helm
       matrix:
         helm-version:
+          - 'v3.8.0'   # 注定失败的版本
           - 'v3.9.0'   # 要求的最低版本
           - 'v3.10.3'  # 稳定的旧版本
           - 'v3.14.4'  # 当前广泛使用的主流版本
@@ -61,11 +62,26 @@ jobs:
           
             helm dependency update "$chart_dir"
           
-            echo "-> Running helm lint..."
-            helm lint "$chart_dir"
+            # 针对 v3.8.0 执行负面测试（预期失败）
+            if [ "${{ matrix.helm-version }}" == "v3.8.0" ]; then
+              echo "-> Running negative test for v3.8.0 (Expected to FAIL)..."
           
-            echo "-> Running helm template (Dry run rendering)..."
-            # 使用 helm template 强制渲染所有模板，把渲染结果丢弃到 /dev/null
-            # 只要这里不报错退出，就证明模板逻辑（比如 index 越界问题）在当前版本是安全的
-            helm template swanlab-test "$chart_dir" > /dev/null
+              # 我们同时捕获 lint 和 template 的错误
+              # 如果两者都竟然成功了（退出码为0），说明 3.8 居然兼容，此时反而要抛出错误让 CI 挂掉
+              if helm lint "$chart_dir" > /dev/null 2>&1 && helm template swanlab-test "$chart_dir" > /dev/null 2>&1; then
+                echo "❌ ERROR: Helm v3.8.0 succeeded, but it was expected to FAIL!"
+                echo "This means our chart doesn't actually require v3.9.0 as a strict minimum."
+                exit 1
+              else
+                echo "✅ Success: Helm v3.8.0 failed as expected due to unsupported features."
+              fi
+          
+            # 针对 >= v3.9.0 执行正常测试（预期成功）
+            else
+              echo "-> Running helm lint..."
+              helm lint "$chart_dir"
+          
+              echo "-> Running helm template (Dry run rendering)..."
+              helm template swanlab-test "$chart_dir" > /dev/null
+            fi
           done
