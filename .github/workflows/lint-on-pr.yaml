@@ -1,20 +1,17 @@
 name: 'Helm Chart Lint'
 
 on:
-  # 当提交代码到 main 分支且 charts 目录有更改时触发
   push:
     branches:
       - main
     paths:
       - 'charts/**'
-  # 当发起 PR 合并到 main 分支且 charts 目录有更改时触发（推荐加上，方便在合并前拦截错误）
   pull_request:
     branches:
       - main
     paths:
       - 'charts/**'
 
-# 允许同时运行一个作业，并取消旧的作业
 concurrency:
   cancel-in-progress: true
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,18 +19,30 @@ concurrency:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    # 仅需只读权限即可进行 Lint 检查
     permissions:
       contents: read
+    strategy:
+      # 开启矩阵测试，覆盖主流和历史版本的 Helm
+      matrix:
+        helm-version:
+          - 'v3.8.0'   # 注定失败的版本
+          - 'v3.9.0'   # 要求的最低版本
+          - 'v3.10.3'  # 稳定的旧版本
+          - 'v3.14.4'  # 当前广泛使用的主流版本
+          - 'latest'   # 保持对最新版本的兼容性追踪
+      # 即使某个版本挂了，也让其他版本继续跑完，方便看整体兼容情况
+      fail-fast: false
 
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
-        # Lint 阶段不需要完整的 Git 历史，默认的 fetch-depth: 1 即可，这样速度更快
 
       - name: 🛠️ Set up Helm
         uses: azure/setup-helm@v4.3.0
-        
+        with:
+          # 动态读取矩阵里的 Helm 版本
+          version: ${{ matrix.helm-version }}
+
       - name: 📥 Add Traefik Helm Repo
         run: |
           helm repo add traefik https://helm.traefik.io/traefik
@@ -44,10 +53,35 @@ jobs:
           helm repo add swanlab https://helm.swanlab.cn
           helm repo update
 
-      - name: 🔍 Run Helm Lint
+      - name: 🔍 Run Helm Lint & Template
         run: |
           find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
-            echo "Linting $chart_dir..."
+            echo "================================================="
+            echo "Testing $chart_dir with Helm ${{ matrix.helm-version }}..."
+            echo "================================================="
+          
             helm dependency update "$chart_dir"
-            helm lint "$chart_dir"
+          
+            # 针对 v3.8.0 执行负面测试（预期失败）
+            if [ "${{ matrix.helm-version }}" == "v3.8.0" ]; then
+              echo "-> Running negative test for v3.8.0 (Expected to FAIL)..."
+          
+              # 我们同时捕获 lint 和 template 的错误
+              # 如果两者都竟然成功了（退出码为0），说明 3.8 居然兼容，此时反而要抛出错误让 CI 挂掉
+              if helm lint "$chart_dir" > /dev/null 2>&1 && helm template swanlab-test "$chart_dir" > /dev/null 2>&1; then
+                echo "❌ ERROR: Helm v3.8.0 succeeded, but it was expected to FAIL!"
+                echo "This means our chart doesn't actually require v3.9.0 as a strict minimum."
+                exit 1
+              else
+                echo "✅ Success: Helm v3.8.0 failed as expected due to unsupported features."
+              fi
+          
+            # 针对 >= v3.9.0 执行正常测试（预期成功）
+            else
+              echo "-> Running helm lint..."
+              helm lint "$chart_dir"
+          
+              echo "-> Running helm template (Dry run rendering)..."
+              helm template swanlab-test "$chart_dir" > /dev/null
+            fi
           done
