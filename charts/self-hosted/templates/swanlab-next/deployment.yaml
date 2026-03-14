@@ -18,9 +18,10 @@ spec:
       labels:
       {{- include "swanlab.next.labels" . | nindent 8 }}
       {{- include "swanlab.next.selectorLabels" . | nindent 8 }}
-      {{- if .Values.service.next.customAnnotations }}
+      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.service.next.customPodLabels) | nindent 8 }}
+      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.service.next.customPodAnnotations)) }}
       annotations:
-      {{- toYaml .Values.service.next.customAnnotations | nindent 8 }}
+      {{- . | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.next.selectorLabels" . ) | nindent 6 }}

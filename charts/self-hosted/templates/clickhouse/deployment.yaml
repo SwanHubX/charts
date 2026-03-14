@@ -20,9 +20,13 @@ spec:
       labels:
       {{- include "swanlab.clickhouse.labels" . | nindent 8 }}
       {{- include "swanlab.clickhouse.selectorLabels" . | nindent 8 }}
-      {{- if .Values.dependencies.clickhouse.customAnnotations }}
+      {{- with .Values.dependencies.clickhouse.customPodLabels }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
+      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.dependencies.clickhouse.customPodAnnotations)) }}
       annotations:
-      {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 8 }}
+      {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always

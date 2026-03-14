@@ -20,9 +20,10 @@ spec:
       labels:
       {{- include "swanlab.redis.labels" . | nindent 8 }}
       {{- include "swanlab.redis.selectorLabels" . | nindent 8 }}
-      {{- if .Values.dependencies.redis.customAnnotations }}
+      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
+      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations nil)) }}
       annotations:
-      {{- toYaml .Values.dependencies.redis.customAnnotations | nindent 8 }}
+      {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always

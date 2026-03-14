@@ -20,9 +20,10 @@ spec:
       labels:
       {{- include "swanlab.s3.labels" . | nindent 8 }}
       {{- include "swanlab.s3.selectorLabels" . | nindent 8 }}
-      {{- if .Values.dependencies.s3.customAnnotations }}
+      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
+      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations nil)) }}
       annotations:
-      {{- toYaml .Values.dependencies.s3.customAnnotations | nindent 8 }}
+      {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always
