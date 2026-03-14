@@ -4,7 +4,10 @@ metadata:
   name: {{ include "swanlab.house.fullname" . }}
   labels:
   {{- include "swanlab.house.labels" . | nindent 4 }}
-
+  {{- if .Values.service.house.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.service.house.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   serviceName: {{ include "swanlab.house.fullname" . }}
   volumeClaimTemplates:
@@ -26,9 +29,10 @@ spec:
       labels:
       {{- include "swanlab.house.labels" . | nindent 8 }}
       {{- include "swanlab.house.selectorLabels" . | nindent 8 }}
-      {{- if .Values.service.house.customAnnotations }}
+      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.service.house.customPodLabels) | nindent 8 }}
+      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.service.house.customPodAnnotations)) }}
       annotations:
-      {{- toYaml .Values.service.house.customAnnotations | nindent 8 }}
+      {{- . | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.house.selectorLabels" . ) | nindent 6 }}
