@@ -31,6 +31,51 @@ app.kubernetes.io/service: redis
 {{- end -}}
 
 {{/*
+Redis Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.redis.annotations" -}}
+{{- if .Values.dependencies.redis.customAnnotations }}
+{{- toYaml .Values.dependencies.redis.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Redis Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.redis.podLabels" -}}
+{{- if .Values.dependencies.redis.customPodLabels }}
+{{- toYaml .Values.dependencies.redis.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Redis Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.redis.podAnnotations" -}}
+{{- if .Values.dependencies.redis.customPodAnnotations }}
+{{- toYaml .Values.dependencies.redis.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Redis Tolerations
+*/}}
+{{- define "swanlab.redis.tolerations" -}}
+{{- if .Values.dependencies.redis.customTolerations }}
+{{- toYaml .Values.dependencies.redis.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Redis NodeSelector
+*/}}
+{{- define "swanlab.redis.nodeSelector" -}}
+{{- if .Values.dependencies.redis.customNodeSelector }}
+{{- toYaml .Values.dependencies.redis.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Redis Secret Name
 */}}
 {{- define "swanlab.redis.secretName" -}}

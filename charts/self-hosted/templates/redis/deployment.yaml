@@ -5,9 +5,9 @@ metadata:
   name: {{ include "swanlab.redis.fullname" . }}
   labels:
   {{- include "swanlab.redis.labels" . | nindent 4 }}
-  {{- if .Values.dependencies.redis.customAnnotations }}
+  {{- with (include "swanlab.redis.annotations" . | trim) }}
   annotations:
-  {{- toYaml .Values.dependencies.redis.customAnnotations | nindent 4 }}
+    {{- . | nindent 4 }}
   {{- end }}
 spec:
   selector:
@@ -19,16 +19,25 @@ spec:
     metadata:
       labels:
       {{- include "swanlab.redis.labels" . | nindent 8 }}
-      {{- include "swanlab.redis.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations nil)) }}
+      {{- with (include "swanlab.redis.podLabels" . | trim) }}
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.redis.podAnnotations" . | trim) }}
       annotations:
-      {{- . | nindent 8 }}
+        {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      {{- with (include "swanlab.redis.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.redis.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
       containers:
       - name: redis
         image: "{{ .Values.dependencies.redis.image.repository }}:{{ .Values.dependencies.redis.image.tag }}"
@@ -47,14 +56,6 @@ spec:
         - name: {{ include "swanlab.redis.fullname" . }}-volume
           persistentVolumeClaim:
             claimName: {{ include "swanlab.redis.pvcName" . }}
-      {{- if .Values.dependencies.redis.customNodeSelector }}
-      nodeSelector:
-      {{- toYaml .Values.dependencies.redis.customNodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.dependencies.redis.customTolerations }}
-      tolerations:
-      {{- toYaml .Values.dependencies.redis.customTolerations | nindent 8 }}
-      {{- end }}
 ---
 apiVersion: v1
 kind: Service

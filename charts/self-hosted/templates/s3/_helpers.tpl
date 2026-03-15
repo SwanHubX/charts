@@ -31,6 +31,51 @@ app.kubernetes.io/service: s3
 {{- end -}}
 
 {{/*
+S3 Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.s3.annotations" -}}
+{{- if .Values.dependencies.s3.customAnnotations }}
+{{- toYaml .Values.dependencies.s3.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+S3 Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.s3.podLabels" -}}
+{{- if .Values.dependencies.s3.customPodLabels }}
+{{- toYaml .Values.dependencies.s3.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+S3 Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.s3.podAnnotations" -}}
+{{- if .Values.dependencies.s3.customPodAnnotations }}
+{{- toYaml .Values.dependencies.s3.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+S3 Tolerations
+*/}}
+{{- define "swanlab.s3.tolerations" -}}
+{{- if .Values.dependencies.s3.customTolerations }}
+{{- toYaml .Values.dependencies.s3.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+S3 NodeSelector
+*/}}
+{{- define "swanlab.s3.nodeSelector" -}}
+{{- if .Values.dependencies.s3.customNodeSelector }}
+{{- toYaml .Values.dependencies.s3.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 S3 Secret Name
 */}}
 {{- define "swanlab.s3.secretName" -}}

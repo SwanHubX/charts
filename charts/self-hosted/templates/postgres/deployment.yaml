@@ -5,9 +5,9 @@ metadata:
   name: {{ include "swanlab.postgres.fullname" . }}
   labels:
   {{- include "swanlab.postgres.labels" . | nindent 4 }}
-  {{- if .Values.dependencies.postgres.customAnnotations }}
+  {{- with (include "swanlab.postgres.annotations" . | trim) }}
   annotations:
-  {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 4 }}
+    {{- . | nindent 4 }}
   {{- end }}
 spec:
   selector:
@@ -19,16 +19,25 @@ spec:
     metadata:
       labels:
       {{- include "swanlab.postgres.labels" . | nindent 8 }}
-      {{- include "swanlab.postgres.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations nil)) }}
+      {{- with (include "swanlab.postgres.podLabels" . | trim) }}
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.postgres.podAnnotations" . | trim) }}
       annotations:
-      {{- . | nindent 8 }}
+        {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      {{- with (include "swanlab.postgres.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.postgres.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
       # 部分存储类创建的卷权限不是 postgres 用户可写，使用 initContainer 修正权限
       # 实测部分存储、k8s版本下单纯设置 fsGroup 无效，需要用 initContainer 修改目录属主
       securityContext:
@@ -82,14 +91,6 @@ spec:
         - name: {{ include "swanlab.postgres.fullname" . }}-volume
           persistentVolumeClaim:
             claimName: {{ include "swanlab.postgres.pvcName" . }}
-      {{- if .Values.dependencies.postgres.customNodeSelector }}
-      nodeSelector:
-      {{- toYaml .Values.dependencies.postgres.customNodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.dependencies.postgres.customTolerations }}
-      tolerations:
-      {{- toYaml .Values.dependencies.postgres.customTolerations | nindent 8 }}
-      {{- end }}
 ---
 apiVersion: v1
 kind: Service

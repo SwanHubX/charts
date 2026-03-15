@@ -42,6 +42,51 @@ app.kubernetes.io/service: server
 {{- end -}}
 
 {{/*
+SwanLab-Server Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.server.annotations" -}}
+{{- if .Values.service.server.customAnnotations }}
+{{- toYaml .Values.service.server.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Server Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.server.podLabels" -}}
+{{- if .Values.service.server.customPodLabels }}
+{{- toYaml .Values.service.server.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Server Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.server.podAnnotations" -}}
+{{- if .Values.service.server.customPodAnnotations }}
+{{- toYaml .Values.service.server.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Server Tolerations
+*/}}
+{{- define "swanlab.server.tolerations" -}}
+{{- if .Values.service.server.customTolerations }}
+{{- toYaml .Values.service.server.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Server NodeSelector
+*/}}
+{{- define "swanlab.server.nodeSelector" -}}
+{{- if .Values.service.server.customNodeSelector }}
+{{- toYaml .Values.service.server.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 SwanLab-Server Port
 */}}
 {{- define "swanlab.server.port" -}}

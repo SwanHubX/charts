@@ -22,12 +22,6 @@
           "type": "string",
           "enum": ["soft", "hard", "none"]
         },
-        "customLabels": { "type": "object" },
-        "customAnnotations": { "type": "object" },
-        "customPodLabels": { "type": "object" },
-        "customPodAnnotations": { "type": "object" },
-        "customTolerations": { "type": "array" },
-        "customNodeSelector": { "type": "object" },
         "settings": {
           "type": "object",
           "properties": {
@@ -116,6 +110,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -129,6 +125,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -142,14 +140,12 @@
             "password": { "type": "string" },
             "persistence": { "$ref": "#/definitions/persistence" },
             "resources": { "$ref": "#/definitions/resources" },
-            "customCommonLabels": { "type": "object" },
-            "customCommonAnnotations": { "type": "object" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
             "customPodLabels": { "type": "object" },
             "customPodAnnotations": { "type": "object" },
-            "tolerations": { "type": "array" },
-            "nodeSelector": { "type": "object" }
+            "customTolerations": { "type": "array" },
+            "customNodeSelector": { "type": "object" }
           }
         },
         "s3": {
@@ -164,6 +160,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }

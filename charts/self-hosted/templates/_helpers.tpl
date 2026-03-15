@@ -94,37 +94,3 @@ topologySpreadConstraints:
         {{- include $selectorLabels $ctx | nindent 8 }}
 {{- end }}
 {{- end }}
-
-{{/*
-Merge global and component-specific custom pod labels
-Usage: {{ include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.component.customPodLabels) }}
-*/}}
-{{- define "swanlab.podLabels" -}}
-{{- $global := index . 0 -}}
-{{- $component := index . 1 -}}
-{{- if or $global $component }}
-{{- with $global }}
-{{- toYaml . }}
-{{- end }}
-{{- with $component }}
-{{- toYaml . }}
-{{- end }}
-{{- end }}
-{{- end }}
-
-{{/*
-Merge global and component-specific custom pod annotations
-Usage: {{ include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.component.customPodAnnotations) }}
-*/}}
-{{- define "swanlab.podAnnotations" -}}
-{{- $global := index . 0 -}}
-{{- $component := index . 1 -}}
-{{- if or $global $component }}
-{{- with $global }}
-{{- toYaml . }}
-{{- end }}
-{{- with $component }}
-{{- toYaml . }}
-{{- end }}
-{{- end }}
-{{- end }}
