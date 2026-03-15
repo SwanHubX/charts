@@ -17,7 +17,6 @@ spec:
     metadata:
       labels:
       {{- include "swanlab.server.labels" . | nindent 8 }}
-      {{- include "swanlab.server.selectorLabels" . | nindent 8 }}
       {{- with (include "swanlab.server.podLabels" . | trim) }}
         {{- . | nindent 8 }}
       {{- end }}

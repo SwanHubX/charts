@@ -19,7 +19,6 @@ spec:
     metadata:
       labels:
       {{- include "swanlab.clickhouse.labels" . | nindent 8 }}
-      {{- include "swanlab.clickhouse.selectorLabels" . | nindent 8 }}
       {{- with (include "swanlab.clickhouse.podLabels" . | trim) }}
         {{- . | nindent 8 }}
       {{- end }}

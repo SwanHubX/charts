@@ -19,7 +19,6 @@ spec:
     metadata:
       labels:
       {{- include "swanlab.postgres.labels" . | nindent 8 }}
-      {{- include "swanlab.postgres.selectorLabels" . | nindent 8 }}
       {{- with (include "swanlab.postgres.podLabels" . | trim) }}
         {{- . | nindent 8 }}
       {{- end }}
