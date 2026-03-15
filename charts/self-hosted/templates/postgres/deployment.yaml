@@ -5,10 +5,6 @@ metadata:
   name: {{ include "swanlab.postgres.fullname" . }}
   labels:
   {{- include "swanlab.postgres.labels" . | nindent 4 }}
-  {{- if .Values.dependencies.postgres.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -20,10 +16,9 @@ spec:
       labels:
       {{- include "swanlab.postgres.labels" . | nindent 8 }}
       {{- include "swanlab.postgres.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations nil)) }}
+      {{- if .Values.dependencies.postgres.customAnnotations }}
       annotations:
-      {{- . | nindent 8 }}
+      {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always

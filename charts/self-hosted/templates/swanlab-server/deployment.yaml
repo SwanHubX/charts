@@ -4,10 +4,6 @@ metadata:
   name: {{ include "swanlab.server.fullname" . }}
   labels:
   {{- include "swanlab.server.labels" . | nindent 4 }}
-  {{- if .Values.service.server.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.service.server.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   replicas: {{ default 0 .Values.service.server.replicas }}
   selector:
@@ -18,10 +14,9 @@ spec:
       labels:
       {{- include "swanlab.server.labels" . | nindent 8 }}
       {{- include "swanlab.server.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.service.server.customPodLabels) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.service.server.customPodAnnotations)) }}
+      {{- if .Values.service.server.customAnnotations }}
       annotations:
-      {{- . | nindent 8 }}
+      {{- toYaml .Values.service.server.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.server.selectorLabels" . ) | nindent 6 }}

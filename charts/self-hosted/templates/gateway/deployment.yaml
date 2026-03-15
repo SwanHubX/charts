@@ -4,10 +4,6 @@ metadata:
   name: {{ include "swanlab.gateway.fullname" . }}
   labels:
   {{- include "swanlab.gateway.labels" . | nindent 4 }}
-  {{- if .Values.gateway.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.gateway.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -18,10 +14,9 @@ spec:
       labels:
       {{- include "swanlab.gateway.labels" . | nindent 8 }}
       {{- include "swanlab.gateway.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.gateway.customPodLabels) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.gateway.customPodAnnotations)) }}
+      {{- if .Values.gateway.customAnnotations }}
       annotations:
-      {{- . | nindent 8 }}
+      {{- toYaml .Values.gateway.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.gateway.selectorLabels" . ) | nindent 6 }}

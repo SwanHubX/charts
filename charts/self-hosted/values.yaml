@@ -12,14 +12,6 @@ global:
   # We use Topology Spread Constraints to achieve pod distribution across nodes.
   podAntiAffinityPreset: "soft" # soft, hard, or none
 
-  # Global custom labels and annotations
-  customLabels: {}
-  customAnnotations: {}
-  customPodLabels: {}
-  customPodAnnotations: {}
-  customTolerations: []
-  customNodeSelector: {}
-
   # Global application settings
   settings:
     # Login Host will change the api-key login host displayed in the frontend application.
@@ -57,10 +49,8 @@ gateway:
 
   customLabels: {}
   customAnnotations: {}
-  customPodLabels: {}
-  customPodAnnotations: {}
   customTolerations: []
-  customNodeSelector: {}
+  customNodeSelector: { }
   resources: {}
 
 # Configuration for test image used in various components
@@ -87,10 +77,8 @@ service:
 
     customLabels: {}
     customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
     customTolerations: []
-    customNodeSelector: {}
+    customNodeSelector: { }
     resources: {}
 
   # Configuration of our data collection services
@@ -107,10 +95,8 @@ service:
 
     customLabels: {}
     customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
     customTolerations: []
-    customNodeSelector: {}
+    customNodeSelector: { }
     resources: {}
 
 
@@ -146,10 +132,8 @@ service:
 
     customLabels: {}
     customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
     customTolerations: []
-    customNodeSelector: {}
+    customNodeSelector: { }
     resources: {}
 
   # Configuration of our frontend service
@@ -166,10 +150,8 @@ service:
 
     customLabels: {}
     customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
     customTolerations: []
-    customNodeSelector: {}
+    customNodeSelector: { }
     resources: {}
 
 # Configuration for internal-deployed infrastructure (Chart-managed services).
@@ -252,14 +234,10 @@ dependencies:
       # Use an existing PVC by name (leave empty to create a new one)
       existingClaim: ""
 
-    customCommonLabels: {}
-    customCommonAnnotations: {}
     customLabels: {}
     customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
-    tolerations: []
-    nodeSelector: {}
+    customTolerations: []
+    customNodeSelector: { }
     resources: {} # K8s Resource Limits and Requests
 
   s3: # MinIO Object Storage Service

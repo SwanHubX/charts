@@ -4,10 +4,6 @@ metadata:
   name: {{ include "swanlab.cloud.fullname" . }}
   labels:
   {{- include "swanlab.cloud.labels" . | nindent 4 }}
-  {{- if .Values.service.cloud.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.service.cloud.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   replicas: {{ default 0 .Values.service.cloud.replicas }}
   selector:
@@ -18,10 +14,9 @@ spec:
       labels:
       {{- include "swanlab.cloud.labels" . | nindent 8 }}
       {{- include "swanlab.cloud.selectorLabels" . | nindent 8 }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels .Values.service.cloud.customPodLabels) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.service.cloud.customPodAnnotations)) }}
+      {{- if .Values.service.cloud.customAnnotations }}
       annotations:
-      {{- . | nindent 8 }}
+      {{- toYaml .Values.service.cloud.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.cloud.selectorLabels" . ) | nindent 6 }}

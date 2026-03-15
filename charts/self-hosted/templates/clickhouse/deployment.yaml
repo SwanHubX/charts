@@ -5,10 +5,6 @@ metadata:
   name: {{ include "swanlab.clickhouse.fullname" . }}
   labels:
   {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
-  {{- if .Values.dependencies.clickhouse.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -20,13 +16,9 @@ spec:
       labels:
       {{- include "swanlab.clickhouse.labels" . | nindent 8 }}
       {{- include "swanlab.clickhouse.selectorLabels" . | nindent 8 }}
-      {{- with .Values.dependencies.clickhouse.customPodLabels }}
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- include "swanlab.podLabels" (list .Values.global.customPodLabels nil) | nindent 8 }}
-      {{- with (include "swanlab.podAnnotations" (list .Values.global.customPodAnnotations .Values.dependencies.clickhouse.customPodAnnotations)) }}
+      {{- if .Values.dependencies.clickhouse.customAnnotations }}
       annotations:
-      {{- . | nindent 8 }}
+      {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always
