@@ -62,6 +62,10 @@ metadata:
   name: {{ include "swanlab.redis.fullname" . }}
   labels:
   {{- include "swanlab.redis.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.redis.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.redis.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   type: ClusterIP
   selector:

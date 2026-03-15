@@ -88,6 +88,10 @@ metadata:
   name: {{ include "swanlab.gateway.fullname" . }}
   labels:
   {{- include "swanlab.gateway.labels" . | nindent 4 }}
+  {{- if .Values.gateway.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.gateway.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   type: ClusterIP
   selector:

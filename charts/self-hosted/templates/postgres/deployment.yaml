@@ -97,6 +97,10 @@ metadata:
   name: {{ include "swanlab.postgres.fullname" . }}
   labels:
   {{- include "swanlab.postgres.labels" . | nindent 4 }}
+  {{- if .Values.dependencies.postgres.customAnnotations }}
+  annotations:
+  {{- toYaml .Values.dependencies.postgres.customAnnotations | nindent 4 }}
+  {{- end }}
 spec:
   type: ClusterIP
   selector:
