@@ -196,10 +196,6 @@ metadata:
   name: {{ include "swanlab.server.fullname" . }}
   labels:
   {{- include "swanlab.server.labels" . | nindent 4 }}
-  {{- if .Values.service.server.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.service.server.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   type: ClusterIP
   selector:

@@ -131,10 +131,6 @@ metadata:
   name: {{ include "swanlab.next.fullname" . }}
   labels:
   {{- include "swanlab.next.labels" . | nindent 4 }}
-  {{- if .Values.service.next.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.service.next.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   type: ClusterIP
   selector:

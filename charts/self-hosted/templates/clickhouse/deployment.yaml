@@ -82,10 +82,6 @@ metadata:
   name: {{ include "swanlab.clickhouse.fullname" . }}
   labels:
   {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
-  {{- if .Values.dependencies.clickhouse.customAnnotations }}
-  annotations:
-  {{- toYaml .Values.dependencies.clickhouse.customAnnotations | nindent 4 }}
-  {{- end }}
 spec:
   type: ClusterIP
   selector:
