@@ -42,6 +42,51 @@ app.kubernetes.io/service: next
 {{- end -}}
 
 {{/*
+SwanLab-Next Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.next.annotations" -}}
+{{- if .Values.service.next.customAnnotations }}
+{{- toYaml .Values.service.next.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Next Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.next.podLabels" -}}
+{{- if .Values.service.next.customPodLabels }}
+{{- toYaml .Values.service.next.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Next Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.next.podAnnotations" -}}
+{{- if .Values.service.next.customPodAnnotations }}
+{{- toYaml .Values.service.next.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Next Tolerations
+*/}}
+{{- define "swanlab.next.tolerations" -}}
+{{- if .Values.service.next.customTolerations }}
+{{- toYaml .Values.service.next.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Next NodeSelector
+*/}}
+{{- define "swanlab.next.nodeSelector" -}}
+{{- if .Values.service.next.customNodeSelector }}
+{{- toYaml .Values.service.next.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 SwanLab-Next Port
 */}}
 {{- define "swanlab.next.port" -}}

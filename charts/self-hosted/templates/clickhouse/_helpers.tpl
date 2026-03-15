@@ -30,6 +30,51 @@ app.kubernetes.io/service: clickhouse
 {{- end -}}
 
 {{/*
+Clickhouse Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.clickhouse.annotations" -}}
+{{- if .Values.dependencies.clickhouse.customAnnotations }}
+{{- toYaml .Values.dependencies.clickhouse.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Clickhouse Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.clickhouse.podLabels" -}}
+{{- if .Values.dependencies.clickhouse.customPodLabels }}
+{{- toYaml .Values.dependencies.clickhouse.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Clickhouse Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.clickhouse.podAnnotations" -}}
+{{- if .Values.dependencies.clickhouse.customPodAnnotations }}
+{{- toYaml .Values.dependencies.clickhouse.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Clickhouse Tolerations
+*/}}
+{{- define "swanlab.clickhouse.tolerations" -}}
+{{- if .Values.dependencies.clickhouse.customTolerations }}
+{{- toYaml .Values.dependencies.clickhouse.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Clickhouse NodeSelector
+*/}}
+{{- define "swanlab.clickhouse.nodeSelector" -}}
+{{- if .Values.dependencies.clickhouse.customNodeSelector }}
+{{- toYaml .Values.dependencies.clickhouse.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Clickhouse Secret Name
 */}}
 {{- define "swanlab.clickhouse.secretName" -}}

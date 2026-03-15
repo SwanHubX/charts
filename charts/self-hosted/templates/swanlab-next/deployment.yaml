@@ -4,6 +4,10 @@ metadata:
   name: {{ include "swanlab.next.fullname" . }}
   labels:
   {{- include "swanlab.next.labels" . | nindent 4 }}
+  {{- with (include "swanlab.next.annotations" . | trim) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ default 0 .Values.service.next.replicas }}
   selector:
@@ -14,12 +18,23 @@ spec:
       labels:
       {{- include "swanlab.next.labels" . | nindent 8 }}
       {{- include "swanlab.next.selectorLabels" . | nindent 8 }}
-      {{- if .Values.service.next.customAnnotations }}
+      {{- with (include "swanlab.next.podLabels" . | trim) }}
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.next.podAnnotations" . | trim) }}
       annotations:
-      {{- toYaml .Values.service.next.customAnnotations | nindent 8 }}
+        {{- . | nindent 8 }}
       {{- end }}
     spec:
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.next.selectorLabels" . ) | nindent 6 }}
+      {{- with (include "swanlab.next.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.next.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -111,14 +126,6 @@ spec:
           resources:
         {{- toYaml .Values.service.next.resources | nindent 12 }}
         {{- end }}
-      {{- if .Values.service.next.customNodeSelector }}
-      nodeSelector:
-      {{- toYaml .Values.service.next.customNodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.service.next.customTolerations }}
-      tolerations:
-      {{- toYaml .Values.service.next.customTolerations | nindent 8 }}
-      {{- end }}
 ---
 apiVersion: v1
 kind: Service

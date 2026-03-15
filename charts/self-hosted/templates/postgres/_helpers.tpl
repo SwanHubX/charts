@@ -31,6 +31,51 @@ app.kubernetes.io/service: postgres
 {{- end -}}
 
 {{/*
+PostgreSQL Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.postgres.annotations" -}}
+{{- if .Values.dependencies.postgres.customAnnotations }}
+{{- toYaml .Values.dependencies.postgres.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+PostgreSQL Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.postgres.podLabels" -}}
+{{- if .Values.dependencies.postgres.customPodLabels }}
+{{- toYaml .Values.dependencies.postgres.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+PostgreSQL Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.postgres.podAnnotations" -}}
+{{- if .Values.dependencies.postgres.customPodAnnotations }}
+{{- toYaml .Values.dependencies.postgres.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+PostgreSQL Tolerations
+*/}}
+{{- define "swanlab.postgres.tolerations" -}}
+{{- if .Values.dependencies.postgres.customTolerations }}
+{{- toYaml .Values.dependencies.postgres.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+PostgreSQL NodeSelector
+*/}}
+{{- define "swanlab.postgres.nodeSelector" -}}
+{{- if .Values.dependencies.postgres.customNodeSelector }}
+{{- toYaml .Values.dependencies.postgres.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 PostgreSQL Secret Name
 */}}
 {{- define "swanlab.postgres.secretName" -}}

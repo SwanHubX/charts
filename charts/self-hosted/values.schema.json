@@ -40,6 +40,8 @@
         "identifyImage": { "$ref": "#/definitions/image" },
         "customLabels": { "type": "object" },
         "customAnnotations": { "type": "object" },
+        "customPodLabels": { "type": "object" },
+        "customPodAnnotations": { "type": "object" },
         "customTolerations": { "type": "array" },
         "customNodeSelector": { "type": "object" },
         "service": {"type": "object", "properties": {
@@ -83,6 +85,8 @@
             "persistence": { "$ref": "#/definitions/persistence" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" },
             "resources": { "$ref": "#/definitions/resources" }
@@ -106,6 +110,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -119,6 +125,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -134,6 +142,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -150,6 +160,8 @@
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
+            "customPodLabels": { "type": "object" },
+            "customPodAnnotations": { "type": "object" },
             "customTolerations": { "type": "array" },
             "customNodeSelector": { "type": "object" }
           }
@@ -245,6 +257,8 @@
         "image": { "$ref": "#/definitions/image" },
         "customLabels": { "type": "object" },
         "customAnnotations": { "type": "object" },
+        "customPodLabels": { "type": "object" },
+        "customPodAnnotations": { "type": "object" },
         "customTolerations": { "type": "array" },
         "customNodeSelector": { "type": "object" },
         "resources": { "$ref": "#/definitions/resources" }

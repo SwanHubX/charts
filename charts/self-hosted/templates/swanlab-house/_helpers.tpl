@@ -41,6 +41,51 @@ app.kubernetes.io/service: house
 {{- end -}}
 
 {{/*
+SwanLab-House Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.house.annotations" -}}
+{{- if .Values.service.house.customAnnotations }}
+{{- toYaml .Values.service.house.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-House Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.house.podLabels" -}}
+{{- if .Values.service.house.customPodLabels }}
+{{- toYaml .Values.service.house.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-House Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.house.podAnnotations" -}}
+{{- if .Values.service.house.customPodAnnotations }}
+{{- toYaml .Values.service.house.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-House Tolerations
+*/}}
+{{- define "swanlab.house.tolerations" -}}
+{{- if .Values.service.house.customTolerations }}
+{{- toYaml .Values.service.house.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-House NodeSelector
+*/}}
+{{- define "swanlab.house.nodeSelector" -}}
+{{- if .Values.service.house.customNodeSelector }}
+{{- toYaml .Values.service.house.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
+{{/*
 SwanLab-House Port
 */}}
 {{- define "swanlab.house.port" -}}

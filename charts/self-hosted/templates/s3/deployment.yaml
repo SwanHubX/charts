@@ -5,6 +5,10 @@ metadata:
   name: {{ include "swanlab.s3.fullname" . }}
   labels:
   {{- include "swanlab.s3.labels" . | nindent 4 }}
+  {{- with (include "swanlab.s3.annotations" . | trim) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
 spec:
   selector:
     matchLabels:
@@ -16,14 +20,25 @@ spec:
       labels:
       {{- include "swanlab.s3.labels" . | nindent 8 }}
       {{- include "swanlab.s3.selectorLabels" . | nindent 8 }}
-      {{- if .Values.dependencies.s3.customAnnotations }}
+      {{- with (include "swanlab.s3.podLabels" . | trim) }}
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.s3.podAnnotations" . | trim) }}
       annotations:
-      {{- toYaml .Values.dependencies.s3.customAnnotations | nindent 8 }}
+        {{- . | nindent 8 }}
       {{- end }}
     spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      {{- with (include "swanlab.s3.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.s3.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
       containers:
       - name: s3
         image: "{{ .Values.dependencies.s3.image.repository }}:{{ .Values.dependencies.s3.image.tag }}"
@@ -62,14 +77,6 @@ spec:
         - name: {{ include "swanlab.s3.fullname" . }}-volume
           persistentVolumeClaim:
             claimName: {{ include "swanlab.s3.pvcName" . }}
-      {{- if .Values.dependencies.s3.customNodeSelector }}
-      nodeSelector:
-      {{- toYaml .Values.dependencies.s3.customNodeSelector | nindent 8 }}
-      {{- end }}
-      {{- if .Values.dependencies.s3.customTolerations }}
-      tolerations:
-      {{- toYaml .Values.dependencies.s3.customTolerations | nindent 8 }}
-      {{- end }}
 ---
 apiVersion: v1
 kind: Service

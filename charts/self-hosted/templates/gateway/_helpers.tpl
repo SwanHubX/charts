@@ -25,6 +25,51 @@ app.kubernetes.io/service: gateway
 {{- end }}
 {{- end -}}
 
+{{/*
+Gateway Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.gateway.annotations" -}}
+{{- if .Values.gateway.customAnnotations }}
+{{- toYaml .Values.gateway.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Gateway Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.gateway.podLabels" -}}
+{{- if .Values.gateway.customPodLabels }}
+{{- toYaml .Values.gateway.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Gateway Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.gateway.podAnnotations" -}}
+{{- if .Values.gateway.customPodAnnotations }}
+{{- toYaml .Values.gateway.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Gateway Tolerations
+*/}}
+{{- define "swanlab.gateway.tolerations" -}}
+{{- if .Values.gateway.customTolerations }}
+{{- toYaml .Values.gateway.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Gateway NodeSelector
+*/}}
+{{- define "swanlab.gateway.nodeSelector" -}}
+{{- if .Values.gateway.customNodeSelector }}
+{{- toYaml .Values.gateway.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
 
 {{/*
 Traefik identity middleware name

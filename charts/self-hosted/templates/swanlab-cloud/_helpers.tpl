@@ -41,6 +41,51 @@ app.kubernetes.io/service: cloud
 {{- end }}
 {{- end -}}
 
+{{/*
+SwanLab-Cloud Deployment / Service annotations (metadata.annotations)
+*/}}
+{{- define "swanlab.cloud.annotations" -}}
+{{- if .Values.service.cloud.customAnnotations }}
+{{- toYaml .Values.service.cloud.customAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Cloud Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.cloud.podLabels" -}}
+{{- if .Values.service.cloud.customPodLabels }}
+{{- toYaml .Values.service.cloud.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Cloud Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.cloud.podAnnotations" -}}
+{{- if .Values.service.cloud.customPodAnnotations }}
+{{- toYaml .Values.service.cloud.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Cloud Tolerations
+*/}}
+{{- define "swanlab.cloud.tolerations" -}}
+{{- if .Values.service.cloud.customTolerations }}
+{{- toYaml .Values.service.cloud.customTolerations }}
+{{- end }}
+{{- end -}}
+
+{{/*
+SwanLab-Cloud NodeSelector
+*/}}
+{{- define "swanlab.cloud.nodeSelector" -}}
+{{- if .Values.service.cloud.customNodeSelector }}
+{{- toYaml .Values.service.cloud.customNodeSelector }}
+{{- end }}
+{{- end -}}
+
 
 {{/*
 SwanLab-Cloud Port
