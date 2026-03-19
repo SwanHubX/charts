@@ -68,6 +68,8 @@ vector:
 
   customLabels: {}
   customAnnotations: {}
+  customPodLabels: {}
+  customPodAnnotations: {}
   customTolerations: []
   customNodeSelector: {}
   resources: {}

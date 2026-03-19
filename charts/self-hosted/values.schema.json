@@ -81,6 +81,8 @@
         },
         "customLabels": { "type": "object" },
         "customAnnotations": { "type": "object" },
+        "customPodLabels": { "type": "object" },
+        "customPodAnnotations": { "type": "object" },
         "customTolerations": { "type": "array" },
         "customNodeSelector": { "type": "object" },
         "resources": { "$ref": "#/definitions/resources" }
