@@ -39,6 +39,24 @@ Vector Deployment / Service annotations (metadata.annotations)
 {{- end -}}
 
 {{/*
+Vector Pod extra labels (template.metadata.labels)
+*/}}
+{{- define "swanlab.vector.podLabels" -}}
+{{- if .Values.vector.customPodLabels }}
+{{- toYaml .Values.vector.customPodLabels }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Vector Pod annotations (template.metadata.annotations)
+*/}}
+{{- define "swanlab.vector.podAnnotations" -}}
+{{- if .Values.vector.customPodAnnotations }}
+{{- toYaml .Values.vector.customPodAnnotations }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Vector Tolerations
 */}}
 {{- define "swanlab.vector.tolerations" -}}
