@@ -9,10 +9,10 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
+  replicas: {{ default 1 .Values.gateway.replicas }}
   selector:
     matchLabels:
     {{- include "swanlab.gateway.selectorLabels" . | nindent 6 }}
-  replicas: {{ default 1 .Values.gateway.replicas }}
   template:
     metadata:
       labels:
