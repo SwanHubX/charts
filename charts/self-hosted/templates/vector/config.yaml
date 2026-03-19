@@ -17,7 +17,7 @@ data:
     sources:
       http_metrics:
         type: http_server
-        address: "0.0.0.0:8686"
+        address: "0.0.0.0:{{ include "swanlab.vector.httpPort" . }}"
         encoding: json
         acknowledgements:
           enabled: true
@@ -82,7 +82,7 @@ data:
           timeout_secs: 5
         buffer:
           type: disk
-          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
           when_full: block
 
       clickhouse_media:
@@ -101,7 +101,7 @@ data:
           timeout_secs: 5
         buffer:
           type: disk
-          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
           when_full: block
 
       clickhouse_log:
@@ -120,5 +120,5 @@ data:
           timeout_secs: 5
         buffer:
           type: disk
-          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
           when_full: block

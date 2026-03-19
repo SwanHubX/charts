@@ -62,3 +62,24 @@ Vector ConfigMap name
 {{- define "swanlab.vector.configmap" -}}
 {{- printf "%s-config" (include "swanlab.vector.fullname" .) -}}
 {{- end -}}
+
+{{/*
+Vector http port (for dependency checks)
+*/}}
+{{- define "swanlab.vector.httpPort" -}}
+8686
+{{- end -}}
+
+{{/*
+Vector source port (for house -> vector data ingestion)
+*/}}
+{{- define "swanlab.vector.port" -}}
+6000
+{{- end -}}
+
+{{/*
+Vector host
+*/}}
+{{- define "swanlab.vector.host" -}}
+{{ include "swanlab.vector.fullname" . }}
+{{- end -}}

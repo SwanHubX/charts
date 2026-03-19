@@ -38,9 +38,9 @@ spec:
             - --config
             - /etc/vector/vector.yaml
           ports:
-            - containerPort: 8686
+            - containerPort: {{ include "swanlab.vector.httpPort" . }}
               name: http
-            - containerPort: 6000
+            - containerPort: {{ include "swanlab.vector.port" . }}
               name: vector
           env:
             - name: VECTOR_LOG
@@ -65,12 +65,12 @@ spec:
                   fieldPath: metadata.name
           livenessProbe:
             tcpSocket:
-              port: 8686
+              port: {{ include "swanlab.vector.httpPort" . }}
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             tcpSocket:
-              port: 8686
+              port: {{ include "swanlab.vector.httpPort" . }}
             initialDelaySeconds: 5
             periodSeconds: 10
           volumeMounts:
@@ -113,8 +113,8 @@ spec:
   {{- include "swanlab.vector.selectorLabels" . | nindent 4 }}
   ports:
     - name: http
-      port: 8686
-      targetPort: 8686
+      port: {{ include "swanlab.vector.httpPort" . }}
+      targetPort: {{ include "swanlab.vector.httpPort" . }}
     - name: vector
-      port: 6000
-      targetPort: 6000
+      port: {{ include "swanlab.vector.port" . }}
+      targetPort: {{ include "swanlab.vector.port" . }}

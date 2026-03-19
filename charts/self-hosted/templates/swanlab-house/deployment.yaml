@@ -138,7 +138,7 @@ spec:
             - name: SH_VECTOR_TIMEOUT
               value: "30s"
             - name: SH_VECTOR_URL
-              value: "http://{{ include "swanlab.vector.fullname" . }}:{{ include "swanlab.vector.port" . }}/api"
+              value: "http://{{ include "swanlab.vector.fullname" . }}:{{ include "swanlab.vector.httpPort" . }}"
             - name: SH_API_PREFIX
               value: "/api/house"
             - name: SH_DISTRIBUTED_ENABLE
