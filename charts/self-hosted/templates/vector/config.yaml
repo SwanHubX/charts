@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "swanlab.vector.configmap" . }}
+  labels:
+  {{- include "swanlab.vector.labels" . | nindent 4 }}
+data:
+  vector.yaml: |
+    data_dir: "/var/lib/vector"
+
+    api:
+      enabled: false
+
+    acknowledgements:
+      enabled: true
+
+    sources:
+      http_metrics:
+        type: http_server
+        address: "0.0.0.0:8686"
+        encoding: json
+        acknowledgements:
+          enabled: true
+
+    transforms:
+      process_metrics:
+        type: remap
+        inputs:
+          - http_metrics
+        source: |
+          .ts_obj = parse_timestamp(.time, "%Y-%m-%dT%H:%M:%S.%fZ") ?? now()
+          .timestamp = to_unix_timestamp(.ts_obj, unit: "milliseconds")
+          del(.time)
+          .uid = to_int!(.uid)
+          .epoch = to_int!(.epoch)
+          if .type != "log" {
+            .step = to_int!(.step)
+          }
+          if .type == "media" {
+            .indexing = to_int!(.indexing)
+            if is_null(.other) { .other = {} }
+          }
+
+      metric_router:
+        type: route
+        inputs:
+          - process_metrics
+        route:
+          scalar_stream: .type == "scalar"
+          media_stream:  .type == "media"
+          log_stream:    .type == "log"
+
+      clean_scalar:
+        type: remap
+        inputs: ["metric_router.scalar_stream"]
+        source: 'del(.type); del(.ts_obj)'
+
+      clean_media:
+        type: remap
+        inputs: ["metric_router.media_stream"]
+        source: 'del(.type); del(.ts_obj)'
+
+      clean_log:
+        type: remap
+        inputs: ["metric_router.log_stream"]
+        source: 'del(.type); del(.ts_obj)'
+
+    sinks:
+      clickhouse_scalar:
+        type: clickhouse
+        inputs: ["clean_scalar"]
+        endpoint: "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}"
+        database: "app"
+        table: "scalar"
+        compression: gzip
+        auth:
+          strategy: basic
+          user: "${CLICKHOUSE_USER}"
+          password: "${CLICKHOUSE_PASSWORD}"
+        batch:
+          max_events: 10000
+          timeout_secs: 5
+        buffer:
+          type: disk
+          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          when_full: block
+
+      clickhouse_media:
+        type: clickhouse
+        inputs: ["clean_media"]
+        endpoint: "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}"
+        database: "app"
+        table: "media"
+        compression: gzip
+        auth:
+          strategy: basic
+          user: "${CLICKHOUSE_USER}"
+          password: "${CLICKHOUSE_PASSWORD}"
+        batch:
+          max_events: 10000
+          timeout_secs: 5
+        buffer:
+          type: disk
+          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          when_full: block
+
+      clickhouse_log:
+        type: clickhouse
+        inputs: ["clean_log"]
+        endpoint: "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}"
+        database: "app"
+        table: "log"
+        compression: gzip
+        auth:
+          strategy: basic
+          user: "${CLICKHOUSE_USER}"
+          password: "${CLICKHOUSE_PASSWORD}"
+        batch:
+          max_events: 10000
+          timeout_secs: 5
+        buffer:
+          type: disk
+          max_size: {{ .Values.vector.sinks.bufferMaxSize }}
+          when_full: block

@@ -105,8 +105,8 @@ spec:
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-minio
-          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
-          imagePullPolicy: {{ .Values.helper.pullPolicy }}
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
           command: ["/bin/sh", "-c"]
           args:
             - |

@@ -25,7 +25,6 @@ gateway:
 
   image:
     repository: repo.swanlab.cn/public/traefik
-    # For patch update delivery
     tag: "3.6"
     pullPolicy: "IfNotPresent"
 
@@ -55,14 +54,37 @@ gateway:
   customNodeSelector: {}
   resources: {}
 
+vector:
+  fullnameOverride: ""
+  replicas: 2
+  image:
+    repository: repo.swanlab.cn/public/vector
+    tag: "0.51.1-debian"
+    pullPolicy: "IfNotPresent"
+
+  sinks:
+    # Ensure bufferMaxSize is smaller than persistence.storageSize / 3.
+    bufferMaxSize: 10737418240  # 10Gi
+
+  customLabels: {}
+  customAnnotations: {}
+  customTolerations: []
+  customNodeSelector: {}
+  resources: {}
+
+  persistence:
+    storageClass: ""
+    # At least 60Gi is recommended for Vector to store logs.
+    # Ensure storageSize is at least 3 times the bufferMaxSize.
+    storageSize: "40Gi"
+
+
 # Configuration for test image used in various components
 helper: # Test Image Configuration
-  # Repository path for the test image
-  repository: repo.swanlab.cn/public/busybox
-  # Tag for the test image
-  tag: '1.37.0'
-  # Image pull policy for the test pod
-  pullPolicy: IfNotPresent
+  image:
+    repository: repo.swanlab.cn/public/busybox
+    tag: "1.37.0"
+    pullPolicy: "IfNotPresent"
 
 # Configuration of main application services
 service:
@@ -74,7 +96,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-server
       # For patch update delivery
-      tag: ""
+      tag: "latest"
       pullPolicy: "IfNotPresent"
 
     customLabels: {}
@@ -93,7 +115,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-house
       # For patch update delivery
-      tag: ""
+      tag: "latest"
       pullPolicy: "IfNotPresent"
 
 
@@ -104,20 +126,6 @@ service:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-
-
-    # sidecar logging configuration
-    # TODO: We will delete these configurations in the future: https://github.com/SwanHubX/charts/issues/14
-    logResources: {}
-    fbResources: {}
-    logImage:
-      repository: repo.swanlab.cn/self-hosted/logrotate
-      tag: "1.0"
-      pullPolicy: "IfNotPresent"
-    fbImage:
-      repository: repo.swanlab.cn/self-hosted/fluent-bit
-      tag: "3.2"
-      pullPolicy: "IfNotPresent"
     persistence: # Persistent Storage Configuration
       # Kubernetes StorageClass to use for dynamic provisioning.
       storageClass: ""
@@ -132,7 +140,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-cloud
       # For patch update delivery
-      tag: ""
+      tag: "latest"
       pullPolicy: "IfNotPresent"
 
 
@@ -152,7 +160,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-next
       # For patch update delivery
-      tag: ""
+      tag: "latest"
       pullPolicy: "IfNotPresent"
 
 

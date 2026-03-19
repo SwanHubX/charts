@@ -67,6 +67,20 @@ Image pull secret
 {{- toYaml .Values.global.imagePullSecrets -}}
 {{- end }}
 
+{{/*
+Helper Image
+*/}}
+{{- define "swanlab.helperImage" -}}
+{{- $.Values.helper.image.repository }}:{{ $.Values.helper.image.tag }}
+{{- end }}
+
+{{/*
+Helper Image Pull Policy
+*/}}
+{{- define "swanlab.helperPullPolicy" -}}
+{{- $.Values.helper.image.pullPolicy }}
+{{- end }}
+
 
 {{/*
 Pod Distribution Constraints Configuration (Based on Topology Spread Constraints)
