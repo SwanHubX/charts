@@ -46,8 +46,8 @@ spec:
               value: "http://{{ include "swanlab.cloud.fullname" . }}:{{include "swanlab.cloud.port" . }}"
             - name: SWANLAB_HOUSE_URL
               value: "http://{{ include "swanlab.house.fullname" . }}:{{include "swanlab.house.port" . }}/api/house"
-          image: {{ .Values.helper.repository }}:{{ .Values.helper.tag }}
-          imagePullPolicy: {{ .Values.helper.pullPolicy }}
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
           command: [ "/bin/sh", "-c" ]
           args:
             - |

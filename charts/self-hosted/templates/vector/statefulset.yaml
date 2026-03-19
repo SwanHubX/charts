@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "swanlab.vector.fullname" . }}
+  labels:
+  {{- include "swanlab.vector.labels" . | nindent 4 }}
+  {{- with (include "swanlab.vector.annotations" . | trim) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ default 1 .Values.vector.replicas }}
+  selector:
+    matchLabels:
+    {{- include "swanlab.vector.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.vector.labels" . | nindent 8 }}
+    spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.vector.selectorLabels" . ) | nindent 6 }}
+      {{- with (include "swanlab.vector.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.vector.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      imagePullSecrets:
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      containers:
+        - name: vector
+          image: "{{ .Values.vector.image.repository }}:{{ .Values.vector.image.tag }}"
+          imagePullPolicy: {{ .Values.vector.image.pullPolicy }}
+          args:
+            - --config
+            - /etc/vector/vector.yaml
+          ports:
+            - containerPort: {{ include "swanlab.vector.httpPort" . }}
+              name: http
+            - containerPort: {{ include "swanlab.vector.port" . }}
+              name: vector
+          env:
+            - name: VECTOR_LOG
+              value: info
+            - name: CLICKHOUSE_HOST
+              value: {{ include "swanlab.clickhouse.host" . | quote }}
+            - name: CLICKHOUSE_PORT
+              value: {{ include "swanlab.clickhouse.httpPort" . | quote }}
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.clickhouse.secretName" . }}
+                  key: username
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.clickhouse.secretName" . }}
+                  key: password
+            - name: VECTOR_SELF_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          livenessProbe:
+            tcpSocket:
+              port: {{ include "swanlab.vector.httpPort" . }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: {{ include "swanlab.vector.httpPort" . }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/vector/vector.yaml
+              subPath: vector.yaml
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/vector
+          {{- if .Values.vector.resources }}
+          resources:
+          {{- toYaml .Values.vector.resources | nindent 12 }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "swanlab.vector.configmap" . }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.vector.persistence.storageClass }}
+        storageClassName: {{ .Values.vector.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.vector.persistence.storageSize }}
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.vector.fullname" . }}
+  labels:
+  {{- include "swanlab.vector.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.vector.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ include "swanlab.vector.httpPort" . }}
+      targetPort: {{ include "swanlab.vector.httpPort" . }}
+    - name: vector
+      port: {{ include "swanlab.vector.port" . }}
+      targetPort: {{ include "swanlab.vector.port" . }}

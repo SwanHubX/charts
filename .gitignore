@@ -3,3 +3,6 @@ playground
 .DS_Store
 *.tgz
 .idea
+
+# AI
+.claude/

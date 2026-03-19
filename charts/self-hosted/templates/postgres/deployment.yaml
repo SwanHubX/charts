@@ -44,7 +44,8 @@ spec:
         fsGroup: 999
       initContainers:
         - name: init-postgres-fs
-          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
           command:
             - "sh"
             - "-c"

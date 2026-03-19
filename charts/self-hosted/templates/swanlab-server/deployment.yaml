@@ -39,8 +39,8 @@ spec:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       initContainers:
         - name: ping
-          image: {{.Values.helper.repository}}:{{.Values.helper.tag}}
-          imagePullPolicy: {{.Values.helper.pullPolicy}}
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
           env:
             - name: REDIS_URL
               valueFrom:

@@ -57,12 +57,40 @@
       }
     },
 
+    "vector": {
+      "type": "object",
+      "properties": {
+        "fullnameOverride": { "type": "string" },
+        "replicas": { "type": "integer", "minimum": 0 },
+        "image": { "$ref": "#/definitions/image" },
+        "sinks": {
+          "type": "object",
+          "properties": {
+            "bufferMaxSize": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "persistence": {
+          "type": "object",
+          "properties": {
+            "storageClass": { "type": "string" },
+            "storageSize": {
+              "type": "string",
+              "pattern": "^[0-9]+(Gi|Mi|Ti)$"
+            }
+          }
+        },
+        "customLabels": { "type": "object" },
+        "customAnnotations": { "type": "object" },
+        "customTolerations": { "type": "array" },
+        "customNodeSelector": { "type": "object" },
+        "resources": { "$ref": "#/definitions/resources" }
+      }
+    },
+
     "helper": {
       "type": "object",
       "properties": {
-        "repository": { "type": "string" },
-        "tag": { "type": "string" },
-        "pullPolicy": { "$ref": "#/definitions/pullPolicy" }
+        "image": { "$ref": "#/definitions/image" }
       }
     },
 
@@ -78,10 +106,6 @@
             "fullnameOverride": { "type": "string" },
             "replicas": { "type": "integer", "minimum": 0 },
             "image": { "$ref": "#/definitions/image" },
-            "logImage": { "$ref": "#/definitions/image" },
-            "fbImage": { "$ref": "#/definitions/image" },
-            "logResources": { "$ref": "#/definitions/resources" },
-            "fbResources": { "$ref": "#/definitions/resources" },
             "persistence": { "$ref": "#/definitions/persistence" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
