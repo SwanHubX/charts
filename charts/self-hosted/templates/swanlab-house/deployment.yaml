@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: {{ include "swanlab.house.fullname" . }}
+  name: {{ printf "%s-tmp" (include "swanlab.house.fullname" .) }}
   labels:
   {{- include "swanlab.house.labels" . | nindent 4 }}
   {{- with (include "swanlab.house.annotations" . | trim) }}
@@ -10,17 +10,6 @@ metadata:
   {{- end }}
 
 spec:
-  serviceName: {{ include "swanlab.house.fullname" . }}
-  volumeClaimTemplates:
-    - metadata:
-        name: house
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: {{.Values.service.house.persistence.storageClass }}
-        resources:
-          requests:
-            storage: {{.Values.service.house.persistence.storageSize }}
   replicas: {{ default 0 .Values.service.house.replicas }}
   selector:
     matchLabels:
@@ -46,7 +35,6 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
-      restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
       initContainers:
@@ -67,7 +55,6 @@ spec:
               value: {{ include "swanlab.vector.host" . | quote }}
             - name: VECTOR_PORT
               value: {{ include "swanlab.vector.httpPort" . | quote }}
-          # 核心检测逻辑
           command: [ "/bin/sh", "-c" ]
           args:
             - |
@@ -76,25 +63,18 @@ spec:
               # ---------------------------------------------------------
               # 1. Parse Redis URL (extract host and port from redis://user:pass@host:port/db)
               # ---------------------------------------------------------
-              # Remove protocol prefix (redis://)
               tmp="${REDIS_URL#*://}"
-              # Remove path suffix (/0 or /db)
               tmp="${tmp%%/*}"
-              # Remove auth info (user:pass@), keep content after the last @
               host_port="${tmp##*@}"
 
-              # Extract Host (remove port after colon)
               r_host="${host_port%:*}"
-              # Extract Port (remove host before colon)
               r_port="${host_port##*:}"
 
-              # If no port specified, default to 6379
               if [ "$r_host" = "$r_port" ]; then
               r_port="6379"
               fi
 
               echo "➡️ Checking Redis ($r_host:$r_port)..."
-              # Loop check until success
               until nc -z -w 1 "$r_host" "$r_port"; do
               echo "   Waiting for Redis to be ready..."
               sleep 2
@@ -102,7 +82,7 @@ spec:
               echo "✅ Redis is ready!"
 
               # ---------------------------------------------------------
-              # 2. Check ClickHouse (variables provided directly, no parsing needed)
+              # 2. Check ClickHouse
               # ---------------------------------------------------------
               echo "➡️ Checking ClickHouse ($CLICKHOUSE_HOST:$CLICKHOUSE_PORT)..."
               until nc -z -w 1 "$CLICKHOUSE_HOST" "$CLICKHOUSE_PORT"; do
@@ -112,7 +92,7 @@ spec:
               echo "✅ ClickHouse is ready!"
 
               # ---------------------------------------------------------
-              # 3. Check Vector (variables provided directly, no parsing needed)
+              # 3. Check Vector
               # ---------------------------------------------------------
               echo "➡️ Checking Vector ($VECTOR_HOST:$VECTOR_PORT)..."
               until nc -z -w 1 "$VECTOR_HOST" "$VECTOR_PORT"; do
@@ -129,9 +109,6 @@ spec:
           ports:
             - containerPort: 3000
               name: house
-          volumeMounts:
-            - name: house
-              mountPath: /data
           env:
             - name: SH_VECTOR_ENABLE
               value: "true"
@@ -168,7 +145,6 @@ spec:
                   key: url
             - name: SH_FLAG_ID_IGNORE
               value: "true"
-            # s3
             - name: SH_MINIO_ENDPOINT
               value: "{{ include "swanlab.s3.private.endpoint" . }}:{{ include "swanlab.s3.private.port" . }}"
             - name: SH_MINIO_USE_SSL
@@ -179,7 +155,6 @@ spec:
               value: {{ include "swanlab.s3.private.pathStyle" . | quote }}
             - name: SH_MINIO_PRIVATE_BUCKET
               value: "{{ include "swanlab.s3.private.bucket" . }}"
-
             - name: SH_MINIO_SECRET_ID
               valueFrom:
                 secretKeyRef:
@@ -207,7 +182,6 @@ spec:
   type: ClusterIP
   selector:
   {{- include "swanlab.house.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/variant: current
   ports:
     - port: {{ include "swanlab.house.port" . }}
       targetPort: house
