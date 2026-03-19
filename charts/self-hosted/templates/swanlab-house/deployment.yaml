@@ -207,6 +207,7 @@ spec:
   type: ClusterIP
   selector:
   {{- include "swanlab.house.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/variant: current
   ports:
     - port: {{ include "swanlab.house.port" . }}
       targetPort: house
