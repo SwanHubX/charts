@@ -9,6 +9,7 @@ metadata:
     {{- . | nindent 4 }}
   {{- end }}
 spec:
+  serviceName: {{ include "swanlab.vector.fullname" . }}
   replicas: {{ default 1 .Values.vector.replicas }}
   selector:
     matchLabels:
