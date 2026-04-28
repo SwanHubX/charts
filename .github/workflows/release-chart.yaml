@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 # 允许同时运行一个作业，并取消旧的作业
 concurrency:
