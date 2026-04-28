@@ -63,3 +63,24 @@ jobs:
           charts_dir: ./charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: 📦 Push Charts to Alibaba Cloud ACR
+        env:
+          HELM_REPO_USERNAME: "${{ secrets.ACR_HELM_USERNAME }}"
+          HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
+        run: |
+          # Install helm-acr plugin
+          helm plugin install https://github.com/AliyunContainerService/helm-acr
+
+          # Add ACR chart repo
+          helm repo add acr-swanlab acr://swanlab-chart.cn-hangzhou.cr.aliyuncs.com/swanlab/self-hosted \
+            --username "$HELM_REPO_USERNAME" \
+            --password "$HELM_REPO_PASSWORD"
+
+          # Push each chart (use plugin binary directly for Helm 3/4 compat)
+          CM_PUSH="$(helm env HELM_PLUGINS)/helm-acr/bin/helm-cm-push"
+          find ./charts -maxdepth 1 -mindepth 1 -type d | while read chart_dir; do
+            echo "Pushing $chart_dir to ACR..."
+            helm dependency update "$chart_dir"
+            "$CM_PUSH" "$chart_dir" acr-swanlab
+          done
