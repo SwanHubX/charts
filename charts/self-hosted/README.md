@@ -6,5 +6,5 @@ You can install the chart with the command:
 
 ```bash
 helm repo add swanlab https://helm.swanlab.cn
-helm install self-hosted swanlab/self-hosted
+helm install swanlab-self-hosted swanlab/self-hosted
 ```
