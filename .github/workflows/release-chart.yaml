@@ -71,7 +71,7 @@ jobs:
           HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
         run: |
           # Install helm-acr plugin
-          helm plugin install https://github.com/AliyunContainerService/helm-acr
+          helm plugin install https://github.com/AliyunContainerService/helm-acr --verify=false
 
           # Add ACR chart repo
           helm repo add acr-swanlab acr://swanlab-chart.cn-hangzhou.cr.aliyuncs.com/swanlab/self-hosted \
