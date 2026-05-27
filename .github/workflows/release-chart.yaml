@@ -62,31 +62,41 @@ jobs:
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: ./charts
+          skip_existing: true
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: 📦 Push Charts to Alibaba Cloud ACR
+      - name: 📦 Push Charts to Alibaba Cloud ACR (OCI)
         env:
           HELM_REPO_USERNAME: "${{ secrets.ACR_HELM_USERNAME }}"
           HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
+          OCI_REGISTRY: "swanlab-chart.cn-hangzhou.cr.aliyuncs.com"
         run: |
-          # Install helm-acr plugin
-          helm plugin install https://github.com/AliyunContainerService/helm-acr --verify=false
-
-          # Add ACR chart repo
-          helm repo add acr-swanlab acr://swanlab-chart.cn-hangzhou.cr.aliyuncs.com/swanlab/self-hosted \
-            --username "$HELM_REPO_USERNAME" \
-            --password "$HELM_REPO_PASSWORD"
-
-          # Push self-hosted chart only (use plugin binary directly for Helm 3/4 compat)
-          CM_PUSH="$(helm env HELM_PLUGINS)/helm-acr/bin/helm-cm-push"
           helm dependency update ./charts/self-hosted
 
-          # Skip if chart version already exists in ACR
+          # Login to ACR OCI registry
+          echo "$HELM_REPO_PASSWORD" | helm registry login "$OCI_REGISTRY" \
+            --username "$HELM_REPO_USERNAME" \
+            --password-stdin
+
+          # Package chart
           CHART_VERSION=$(yq '.version' ./charts/self-hosted/Chart.yaml)
-          helm repo update acr-swanlab
-          if helm search repo "acr-swanlab/self-hosted" --version "$CHART_VERSION" | grep -q "self-hosted"; then
-            echo "Chart self-hosted:$CHART_VERSION already exists in ACR, skipping push"
-          else
-            "$CM_PUSH" ./charts/self-hosted acr-swanlab
-          fi
+          CHART_ARCHIVE="./charts/self-hosted-${CHART_VERSION}.tgz"
+          helm package ./charts/self-hosted -d ./charts
+
+          # Push to OCI registry (skip if tag already exists)
+          OCI_REF="oci://${OCI_REGISTRY}/swanlab/self-hosted"
+          PUSH_OUTPUT=$(helm push "$CHART_ARCHIVE" "$OCI_REF" 2>&1) || {
+            if echo "$PUSH_OUTPUT" | grep -qi "already exists"; then
+              echo "Chart self-hosted:$CHART_VERSION already exists in ACR, skipping push"
+              helm registry logout "$OCI_REGISTRY" 2>/dev/null || true
+              exit 0
+            else
+              echo "$PUSH_OUTPUT"
+              helm registry logout "$OCI_REGISTRY" 2>/dev/null || true
+              exit 1
+            fi
+          }
+          echo "$PUSH_OUTPUT"
+
+          helm registry logout "$OCI_REGISTRY"
