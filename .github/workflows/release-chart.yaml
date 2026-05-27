@@ -70,7 +70,8 @@ jobs:
         env:
           HELM_REPO_USERNAME: "${{ secrets.ACR_HELM_USERNAME }}"
           HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
-          OCI_REGISTRY: "swanlab-chart.cn-hangzhou.cr.aliyuncs.com"
+          OCI_REGISTRY: "swanlab-chart-registry.cn-hangzhou.cr.aliyuncs.com"
+          HELM_EXPERIMENTAL_OCI: 1
         run: |
           helm dependency update ./charts/self-hosted
 
@@ -84,9 +85,9 @@ jobs:
           CHART_ARCHIVE="./charts/self-hosted-${CHART_VERSION}.tgz"
           helm package ./charts/self-hosted -d ./charts
 
-          # Push to OCI registry (skip if tag already exists)
-          OCI_REF="oci://${OCI_REGISTRY}/swanlab/self-hosted"
-          PUSH_OUTPUT=$(helm push "$CHART_ARCHIVE" "$OCI_REF" 2>&1) || {
+          # Push to OCI registry (namespace-level only, Helm auto-creates repo by chart name)
+          OCI_PUSH_REF="oci://${OCI_REGISTRY}/swanlab"
+          PUSH_OUTPUT=$(helm push "$CHART_ARCHIVE" "$OCI_PUSH_REF" 2>&1) || {
             if echo "$PUSH_OUTPUT" | grep -qi "already exists"; then
               echo "Chart self-hosted:$CHART_VERSION already exists in ACR, skipping push"
               helm registry logout "$OCI_REGISTRY" 2>/dev/null || true
