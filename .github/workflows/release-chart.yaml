@@ -86,7 +86,7 @@ jobs:
           helm package ./charts/self-hosted -d ./charts
 
           # Push to OCI registry (namespace-level only, Helm auto-creates repo by chart name)
-          OCI_PUSH_REF="oci://${OCI_REGISTRY}/swanlab"
+          OCI_PUSH_REF="oci://${OCI_REGISTRY}/chart"
           PUSH_OUTPUT=$(helm push "$CHART_ARCHIVE" "$OCI_PUSH_REF" 2>&1) || {
             if echo "$PUSH_OUTPUT" | grep -qi "already exists"; then
               echo "Chart self-hosted:$CHART_VERSION already exists in ACR, skipping push"
