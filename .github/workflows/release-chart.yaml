@@ -66,7 +66,7 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: 📦 Push Charts to Alibaba Cloud ACR (OCI)
+      - name: 📦 Push Charts to Alibaba Cloud ACR
         env:
           HELM_REPO_USERNAME: "${{ secrets.ACR_HELM_USERNAME }}"
           HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
@@ -74,22 +74,31 @@ jobs:
           HELM_EXPERIMENTAL_OCI: 1
         run: |
           helm dependency update ./charts/self-hosted
+          CHART_VERSION=$(yq '.version' ./charts/self-hosted/Chart.yaml)
 
-          # Login to ACR OCI registry
+          # --- Push via ACR (acr:// protocol) ---
+          helm plugin install https://github.com/AliyunContainerService/helm-acr --verify=false
+          helm repo add acr-swanlab acr://swanlab-chart.cn-hangzhou.cr.aliyuncs.com/swanlab/self-hosted \
+            --username "$HELM_REPO_USERNAME" \
+            --password "$HELM_REPO_PASSWORD"
+          CM_PUSH="$(helm env HELM_PLUGINS)/helm-acr/bin/helm-cm-push"
+          helm repo update acr-swanlab
+          if helm search repo "acr-swanlab/self-hosted" --version "$CHART_VERSION" | grep -q "self-hosted"; then
+            echo "[ACR] Chart self-hosted:$CHART_VERSION already exists, skipping push"
+          else
+            "$CM_PUSH" ./charts/self-hosted acr-swanlab
+          fi
+
+          # --- Push via OCI ---
           echo "$HELM_REPO_PASSWORD" | helm registry login "$OCI_REGISTRY" \
             --username "$HELM_REPO_USERNAME" \
             --password-stdin
-
-          # Package chart
-          CHART_VERSION=$(yq '.version' ./charts/self-hosted/Chart.yaml)
           CHART_ARCHIVE="./charts/self-hosted-${CHART_VERSION}.tgz"
           helm package ./charts/self-hosted -d ./charts
-
-          # Push to OCI registry (namespace-level only, Helm auto-creates repo by chart name)
           OCI_PUSH_REF="oci://${OCI_REGISTRY}/chart"
           PUSH_OUTPUT=$(helm push "$CHART_ARCHIVE" "$OCI_PUSH_REF" 2>&1) || {
             if echo "$PUSH_OUTPUT" | grep -qi "already exists"; then
-              echo "Chart self-hosted:$CHART_VERSION already exists in ACR, skipping push"
+              echo "[OCI] Chart self-hosted:$CHART_VERSION already exists, skipping push"
               helm registry logout "$OCI_REGISTRY" 2>/dev/null || true
               exit 0
             else
@@ -99,5 +108,4 @@ jobs:
             fi
           }
           echo "$PUSH_OUTPUT"
-
           helm registry logout "$OCI_REGISTRY"
