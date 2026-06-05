@@ -2,7 +2,11 @@ charts/*/charts
 playground
 .DS_Store
 *.tgz
-.idea
+
+# IDE
+.vscode/
+.zed/
+.idea/
 
 # AI
 .claude/
