@@ -10,3 +10,9 @@ playground
 
 # AI
 .claude/
+.omx/
+.codegraph/
+CLAUDE.md
+AGENTS.md
+CODEBUDDY.md
+.opencode/
