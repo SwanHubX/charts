@@ -25,7 +25,7 @@
         "settings": {
           "type": "object",
           "properties": {
-            "loginHost": { "type": "string" }
+            "host": { "type": "string" }
           }
         }
       }
@@ -100,6 +100,7 @@
       "type": "object",
       "properties": {
         "server": { "$ref": "#/definitions/standardService" },
+        "auth": { "$ref": "#/definitions/standardService" },
         "cloud": { "$ref": "#/definitions/standardService" },
         "next": { "$ref": "#/definitions/standardService" },
         "house": {

@@ -48,6 +48,8 @@ data:
   {{- $nextPort := include "swanlab.next.port" . }}
   {{- $server := include "swanlab.server.fullname" . }}
   {{- $serverPort := include "swanlab.server.port" .}}
+  {{- $auth := include "swanlab.auth.fullname" . }}
+  {{- $authPort := include "swanlab.auth.port" . }}
   {{- $house := include "swanlab.house.fullname" . }}
   {{- $housePort := include "swanlab.house.port" . }}
   {{- $s3 := include "swanlab.s3.fullname" . }}
@@ -78,6 +80,12 @@ data:
           entryPoints:
             - "web"
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
+        auth-router:
+          rule: {{ include "swanlab.gateway.match" (list $host "/api/auth") }}
+          service: "swanlab-auth"
+          entryPoints:
+            - "web"
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
         house-router:
           rule: {{ include "swanlab.gateway.match" (list $host "/api/house") }}
           service: "swanlab-house"
@@ -97,6 +105,12 @@ data:
         server-router-internal:
           rule: PathPrefix(`/api`)
           service: "swanlab-server"
+          entryPoints:
+            - "internal"
+          middlewares: [{{ include "swanlab.gateway.identify" . }}]
+        auth-router-internal:
+          rule: PathPrefix(`/api/auth`)
+          service: "swanlab-auth"
           entryPoints:
             - "internal"
           middlewares: [{{ include "swanlab.gateway.identify" . }}]
@@ -129,6 +143,10 @@ data:
           loadBalancer:
             servers:
               - url: {{ include "swanlab.gateway.url" (list $server $namespace $cluster $serverPort) }}
+        swanlab-auth:
+          loadBalancer:
+            servers:
+              - url: {{ include "swanlab.gateway.url" (list $auth $namespace $cluster $authPort) }}
         swanlab-house:
           loadBalancer:
             servers:
@@ -139,4 +157,3 @@ data:
             servers:
               - url: {{ include "swanlab.gateway.url" (list $s3 $namespace $cluster $s3Port) }}
         {{- end }}
-

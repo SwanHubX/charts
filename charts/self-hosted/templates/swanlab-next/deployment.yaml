@@ -116,10 +116,9 @@ spec:
               value: {{ include "swanlab.server.identify" . | quote }}
             - name: API_INTERNAL_URL
               value: "http://{{ include "swanlab.gateway.fullname" . }}:{{ include "swanlab.gateway.internal" . }}/api"
-            {{- $loginHost := .Values.global.settings.loginHost }}
-            {{- if $loginHost | ne "" }}
+            {{- with .Values.global.settings.host }}
             - name: API_DISPLAY_HOST
-              value: {{ $loginHost | quote }}
+              value: {{ . | quote }}
             {{- end }}
         {{- if .Values.service.next.resources }}
           resources:
