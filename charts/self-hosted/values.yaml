@@ -120,6 +120,14 @@ service:
       tag: ""
       pullPolicy: "IfNotPresent"
 
+    customLabels: {}
+    customAnnotations: {}
+    customPodLabels: {}
+    customPodAnnotations: {}
+    customTolerations: []
+    customNodeSelector: {}
+    resources: {}
+
   # Configuration of our data collection services
   house:
     fullnameOverride: ""
