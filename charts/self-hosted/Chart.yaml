@@ -6,7 +6,7 @@ icon: https://raw.githubusercontent.com/SwanHubX/charts/main/assets/icon.png
 home: https://swanlab.cn
 type: application
 version: 0.5.0
-appVersion: "2.8.1"
+appVersion: "2.9.0"
 keywords:
   - swanlab
   - ml-ops

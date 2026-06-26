@@ -67,6 +67,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: 📦 Push Charts to Alibaba Cloud ACR
+        id: push_acr
         env:
           HELM_REPO_USERNAME: "${{ secrets.ACR_HELM_USERNAME }}"
           HELM_REPO_PASSWORD: "${{ secrets.ACR_HELM_PASSWORD }}"
@@ -75,6 +76,8 @@ jobs:
         run: |
           helm dependency update ./charts/self-hosted
           CHART_VERSION=$(yq '.version' ./charts/self-hosted/Chart.yaml)
+          ACR_PUSHED="false"
+          OCI_PUSHED="false"
 
           # --- Push via ACR (acr:// protocol) ---
           helm plugin install https://github.com/AliyunContainerService/helm-acr --verify=false
@@ -87,6 +90,11 @@ jobs:
             echo "[ACR] Chart self-hosted:$CHART_VERSION already exists, skipping push"
           else
             "$CM_PUSH" ./charts/self-hosted acr-swanlab
+            # cm-push 无可靠 exit code，push 后重新 search 复查此次推送是否生效
+            helm repo update acr-swanlab
+            if helm search repo "acr-swanlab/self-hosted" --version "$CHART_VERSION" | grep -q "self-hosted"; then
+              ACR_PUSHED="true"
+            fi
           fi
 
           # --- Push via OCI ---
@@ -100,6 +108,9 @@ jobs:
             if echo "$PUSH_OUTPUT" | grep -qi "already exists"; then
               echo "[OCI] Chart self-hosted:$CHART_VERSION already exists, skipping push"
               helm registry logout "$OCI_REGISTRY" 2>/dev/null || true
+              # 两路都成功推送才算新版本发布，汇总输出后退出
+              echo "acr_pushed=$ACR_PUSHED" >> "$GITHUB_OUTPUT"
+              echo "oci_pushed=false" >> "$GITHUB_OUTPUT"
               exit 0
             else
               echo "$PUSH_OUTPUT"
@@ -109,3 +120,79 @@ jobs:
           }
           echo "$PUSH_OUTPUT"
           helm registry logout "$OCI_REGISTRY"
+          OCI_PUSHED="true"
+          echo "acr_pushed=$ACR_PUSHED" >> "$GITHUB_OUTPUT"
+          echo "oci_pushed=$OCI_PUSHED" >> "$GITHUB_OUTPUT"
+
+      - name: 📢 Notify Feishu on New Release
+        # 仅当 ACR 与 OCI 两路均为本次新推送成功时才通知
+        if: steps.push_acr.outputs.acr_pushed == 'true' && steps.push_acr.outputs.oci_pushed == 'true'
+        env:
+          FEISHU_WEBHOOK_URL: "${{ secrets.FEISHU_WEBHOOK_URL }}"
+          FEISHU_WEBHOOK_SECRET: "${{ secrets.FEISHU_WEBHOOK_SECRET }}"
+        run: |
+          CHART_VERSION=$(yq '.version' ./charts/self-hosted/Chart.yaml)
+          APP_VERSION=$(yq '.appVersion' ./charts/self-hosted/Chart.yaml)
+          echo "Notifying Feishu: chart v${CHART_VERSION}, app v${APP_VERSION}"
+
+          # 飞书交互式卡片(schema 2.0)：markdown 正文(两行版本) + 按钮(open_url 跳转 release tag 页)。
+          # 自定义机器人 post 不支持 strong/lark_md 标签，故用 interactive 卡片渲染富文本。
+          PAYLOAD=$(CHART_VERSION="$CHART_VERSION" APP_VERSION="$APP_VERSION" python3 -c '
+          import os, json
+          chart_ver, app_ver = os.environ["CHART_VERSION"], os.environ["APP_VERSION"]
+          release_url = f"https://github.com/SwanHubX/charts/releases/tag/self-hosted-{chart_ver}"
+          md = f"Chart 版本: v{chart_ver}\nApp 版本: v{app_ver}"
+          body = {
+              "msg_type": "interactive",
+              "card": {
+                  "schema": "2.0",
+                  "config": {"update_multi": True},
+                  "header": {
+                      "title": {"tag": "plain_text", "content": "📢 SwanLab Self-Hosted 版本更新通知"},
+                      "template": "blue",
+                  },
+                  "body": {
+                      "direction": "vertical",
+                      "elements": [
+                          {"tag": "markdown", "content": md, "text_align": "left"},
+                          {
+                              "tag": "button",
+                              "text": {"tag": "plain_text", "content": f"📎 self-hosted-v{chart_ver}"},
+                              "type": "default",
+                              "size": "medium",
+                              "behaviors": [
+                                  {"type": "open_url", "default_url": release_url}
+                              ],
+                          },
+                      ],
+                  },
+              },
+          }
+          print(json.dumps(body, ensure_ascii=False))
+          ')
+
+          # 飞书加签：timestamp(秒) + "\n" + secret 做 HMAC-SHA256，base64 后 urlencode。
+          # 仅在配置 secret 时加签，否则按普通 webhook 发送。
+          WEBHOOK_URL="$FEISHU_WEBHOOK_URL"
+          if [ -n "$FEISHU_WEBHOOK_SECRET" ]; then
+            TIMESTAMP=$(python3 -c 'import time; print(int(time.time()))')
+            SIGN=$(FEISHU_TS="$TIMESTAMP" FEISHU_WEBHOOK_SECRET="$FEISHU_WEBHOOK_SECRET" python3 -c '
+          import os, hmac, hashlib, base64, urllib.parse
+          ts = os.environ["FEISHU_TS"]
+          secret = os.environ["FEISHU_WEBHOOK_SECRET"]
+          string_to_sign = f"{ts}\n{secret}"
+          digest = hmac.new(string_to_sign.encode("utf-8"), digestmod=hashlib.sha256).digest()
+          print(urllib.parse.quote_plus(base64.b64encode(digest).decode("utf-8")))
+          ')
+            # webhook URL 可能已带 query 参数，按需选择 ? 或 & 拼接签名
+            case "$WEBHOOK_URL" in
+              *\?*) SEP="&" ;;
+              *)    SEP="?" ;;
+            esac
+            WEBHOOK_URL="${WEBHOOK_URL}${SEP}timestamp=${TIMESTAMP}&sign=${SIGN}"
+          fi
+
+          curl -sS -X POST "$WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"
+
