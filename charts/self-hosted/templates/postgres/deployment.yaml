@@ -80,9 +80,9 @@ spec:
                 name: {{ include "swanlab.postgres.secretName" . }}
                 key: password
         volumeMounts:
-          # 不要直接挂载到 /var/lib/postgresql/data ，因为存在 lost+found 目录会导致 postgres 启动失败
-          # 挂载到父目录，Postgres 会在其中创建 data 子目录
-          - mountPath: /var/lib/postgresql
+          # 确保挂载路径正确，且与 initContainer 中一致，避免挂载到临时盘导致数据丢失
+          - mountPath: /var/lib/postgresql/data
+            subPath: data
             name: {{ include "swanlab.postgres.fullname" . }}-volume
         {{- if .Values.dependencies.postgres.resources }}
         resources:

@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "swanlab.auth.fullname" . }}
+  labels:
+  {{- include "swanlab.auth.labels" . | nindent 4 }}
+  {{- with (include "swanlab.auth.annotations" . | trim) }}
+  annotations:
+    {{- . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ default 0 .Values.service.auth.replicas }}
+  selector:
+    matchLabels:
+    {{- include "swanlab.auth.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "swanlab.auth.labels" . | nindent 8 }}
+      {{- with (include "swanlab.auth.podLabels" . | trim) }}
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.auth.podAnnotations" . | trim) }}
+      annotations:
+        {{- . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.auth.selectorLabels" . ) | nindent 6 }}
+      {{- with (include "swanlab.auth.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.auth.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Always
+      imagePullSecrets:
+      {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      initContainers:
+        - name: ping
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.redis.secretName" . }}
+                  key: url
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # Define a function to parse URL and check port
+              check_service() {
+                service_name=$1
+                url=$2
+                default_port=$3
+
+                # If env var is empty, skip check (e.g., Replica might be optional)
+                if [ -z "$url" ]; then
+                echo "⚪ $service_name URL not set, skipping check."
+                return
+                fi
+
+                # --- URL parsing logic (compatible with BusyBox sh) ---
+                # 1. Remove protocol header (e.g., postgres://)
+                tmp="${url#*://}"
+                # 2. Remove path/params (e.g., /dbname?sslmode=disable)
+                tmp="${tmp%%/*}"
+                tmp="${tmp%%\?*}"
+                # 3. Remove auth info (e.g., user:password@), keep only content after @
+                host_port="${tmp##*@}"
+
+                # 4. Separate host and port
+                host="${host_port%:*}"
+                port="${host_port##*:}"
+
+                # If host equals port, no port specified in URL (e.g., host/db)
+                if [ "$host" = "$port" ]; then
+                port="$default_port"
+                fi
+
+                # --- Check logic ---
+                echo "➡️  Checking $service_name ($host:$port)..."
+                until nc -z -w 1 "$host" "$port"; do
+                echo "   ⏳ Waiting for $service_name to be ready..."
+                sleep 2
+                done
+                echo "✅ $service_name is ready!"
+              }
+
+              echo "🔍 Starting dependency check..."
+
+              # Check Redis
+              check_service "Redis" "$REDIS_URL" "6379"
+
+              echo "🎉 All dependencies are reachable!"
+      containers:
+        - name: auth
+          image: {{ include "swanlab.auth.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.auth.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+              name: auth
+          env:
+            - name: SA_OAUTH_ENABLED
+              value: "false"
+            - name: SA_REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.redis.secretName" . }}
+                  key: url
+            - name: SA_SERVER_URL
+              value: "http://{{ include "swanlab.server.fullname" . }}:{{ include "swanlab.server.port" . }}/api"
+            {{- with .Values.global.settings.host }}
+            - name: SA_SSO_PUBLIC_URL
+              value: {{ . | quote }}
+            {{- end }}
+        {{- if .Values.service.auth.resources }}
+          resources:
+        {{- toYaml .Values.service.auth.resources | nindent 12 }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.auth.fullname" . }}
+  labels:
+  {{- include "swanlab.auth.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+  {{- include "swanlab.auth.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.auth.port" . }}
+      targetPort: auth

@@ -14,9 +14,9 @@ global:
 
   # Global application settings
   settings:
-    # Login Host will change the api-key login host displayed in the frontend application.
-    # Note that this setting does not affect the actual backend service address.
-    loginHost: ""
+    # The public URL through which users access the application.
+    # If you use SSO features, this is recommended to be set to the external URL of your gateway (e.g., https://app.example.com).
+    host: ""
 
 gateway:
   fullnameOverride: ""
@@ -98,7 +98,26 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-server
       # For patch update delivery
-      tag: "latest"
+      tag: ""
+      pullPolicy: "IfNotPresent"
+
+    customLabels: {}
+    customAnnotations: {}
+    customPodLabels: {}
+    customPodAnnotations: {}
+    customTolerations: []
+    customNodeSelector: {}
+    resources: {}
+
+  # Configuration of our auth service
+  auth:
+    fullnameOverride: ""
+    replicas: 2
+
+    image:
+      repository: repo.swanlab.cn/self-hosted/swanlab-auth
+      # For patch update delivery
+      tag: ""
       pullPolicy: "IfNotPresent"
 
     customLabels: {}
@@ -117,7 +136,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-house
       # For patch update delivery
-      tag: "latest"
+      tag: ""
       pullPolicy: "IfNotPresent"
 
 
@@ -142,7 +161,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-cloud
       # For patch update delivery
-      tag: "latest"
+      tag: ""
       pullPolicy: "IfNotPresent"
 
 
@@ -162,7 +181,7 @@ service:
     image:
       repository: repo.swanlab.cn/self-hosted/swanlab-next
       # For patch update delivery
-      tag: "latest"
+      tag: ""
       pullPolicy: "IfNotPresent"
 
 
