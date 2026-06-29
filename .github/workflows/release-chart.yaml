@@ -86,15 +86,13 @@ jobs:
             --password "$HELM_REPO_PASSWORD"
           CM_PUSH="$(helm env HELM_PLUGINS)/helm-acr/bin/helm-cm-push"
           helm repo update acr-swanlab
-          if helm search repo "acr-swanlab/self-hosted" --version "$CHART_VERSION" | grep -q "self-hosted"; then
-            echo "[ACR] Chart self-hosted:$CHART_VERSION already exists, skipping push"
+          # cm-push 无可靠 exit code，以输出中出现 "Done" 作为推送成功标志
+          CM_PUSH_OUTPUT=$("$CM_PUSH" ./charts/self-hosted acr-swanlab 2>&1) || true
+          echo "$CM_PUSH_OUTPUT"
+          if echo "$CM_PUSH_OUTPUT" | grep -q "Done"; then
+            ACR_PUSHED="true"
           else
-            "$CM_PUSH" ./charts/self-hosted acr-swanlab
-            # cm-push 无可靠 exit code，push 后重新 search 复查此次推送是否生效
-            helm repo update acr-swanlab
-            if helm search repo "acr-swanlab/self-hosted" --version "$CHART_VERSION" | grep -q "self-hosted"; then
-              ACR_PUSHED="true"
-            fi
+            echo "[ACR] Push did not confirm success (no 'Done' in output)"
           fi
 
           # --- Push via OCI ---
