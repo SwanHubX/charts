@@ -147,7 +147,7 @@ spec:
             - name: SS_EXPERIMENT_MAX_COLUMNS
               value: {{ .Values.global.settings.limits.maxMetricsPerCopy | quote }}
             - name: SS_EXPERIMENT_MAX_CHARTS
-              value: {{ .Values.global.settings.limits.maxChartsPerCopy | quote }}
+              value: {{ .Values.global.settings.limits.maxMetricsPerCopy | quote }}
 
             # s3
             - name: SS_STORAGE_TYPE
