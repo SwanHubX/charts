@@ -18,6 +18,14 @@ global:
     # If you use SSO features, this is recommended to be set to the external URL of your gateway (e.g., https://app.example.com).
     host: ""
 
+    # Global resource limits (apply across all modules)
+    # These are safety guardrails to prevent excessive resource usage
+    limits:
+      # Maximum number of metrics/charts allowed per single copy operation
+      maxMetricsPerCopy: 20000
+
+
+
 gateway:
   fullnameOverride: ""
 
@@ -119,14 +127,6 @@ service:
       # For patch update delivery
       tag: ""
       pullPolicy: "IfNotPresent"
-
-    customLabels: {}
-    customAnnotations: {}
-    customPodLabels: {}
-    customPodAnnotations: {}
-    customTolerations: []
-    customNodeSelector: {}
-    resources: {}
 
   # Configuration of our data collection services
   house:
