@@ -114,6 +114,10 @@ service:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
+    # Service clusterIP 控制：
+    #   留空(默认) = 普通 ClusterIP（带 VIP，负载均衡）
+    #   "None"     = Headless Service（DNS 直接返回 Pod IP）
+    clusterIP: ""
 
   # Configuration of our auth service
   auth:
@@ -158,6 +162,10 @@ service:
       storageClass: ""
       # Volume size for the database data.
       storageSize: "10Gi"
+    # Service clusterIP 控制：
+    #   留空(默认) = 普通 ClusterIP（带 VIP，负载均衡）
+    #   "None"     = Headless Service（DNS 直接返回 Pod IP）
+    clusterIP: ""
 
   # Configuration of our frontend service
   cloud:
