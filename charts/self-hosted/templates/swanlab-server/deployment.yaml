@@ -144,6 +144,11 @@ spec:
               value: "/api"
             - name: SS_HOUSE_URL
               value: "http://{{ include "swanlab.house.fullname" . }}:{{ include "swanlab.house.port" . }}/api/house"
+            - name: SS_EXPERIMENT_MAX_COLUMNS
+              value: {{ .Values.global.settings.limits.maxMetricsPerCopy | quote }}
+            - name: SS_EXPERIMENT_MAX_CHARTS
+              value: {{ .Values.global.settings.limits.maxMetricsPerCopy | quote }}
+
             # s3
             - name: SS_STORAGE_TYPE
               value: {{ include "swanlab.s3.type" . | quote }}
