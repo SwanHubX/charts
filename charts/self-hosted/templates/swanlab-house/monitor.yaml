@@ -10,7 +10,7 @@ Monitoring Headless Service for SwanLab-House
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "swanlab.house.fullname" . }}-monitoring
+  name: {{ include "swanlab.house.fullname" . }}-monitor
   labels:
   {{- include "swanlab.house.labels" . | nindent 4 }}
 spec:
