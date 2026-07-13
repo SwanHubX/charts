@@ -1,12 +1,12 @@
 {{/*
-Monitoring Headless Service for SwanLab-House
+Monitor Headless Service for SwanLab-House
 
 仅用于 Prometheus dns_sd_configs 发现所有 Pod IP。
 - clusterIP: None → DNS A 记录返回每个 Pod IP（而非一个 VIP）
 - 零业务流量：不分配 VIP、不写 iptables，kube-proxy 不参与
 - 选中与主 Service 相同的 Pod，通过 .Values.service.house.monitoringService 开关控制
 */}}
-{{- if .Values.service.house.monitoringService }}
+{{- if .Values.service.house.monitorService }}
 apiVersion: v1
 kind: Service
 metadata:

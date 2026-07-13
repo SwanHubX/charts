@@ -115,9 +115,9 @@ service:
     customNodeSelector: {}
     resources: {}
     # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true  = 创建 <fullname>-monitoring Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
+    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
     #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-    monitoringService: false
+    monitorService: false
 
   # Configuration of our auth service
   auth:
@@ -163,9 +163,9 @@ service:
       # Volume size for the database data.
       storageSize: "10Gi"
     # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true  = 创建 <fullname>-monitoring Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
+    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
     #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-    monitoringService: false
+    monitorService: false
 
   # Configuration of our frontend service
   cloud:
