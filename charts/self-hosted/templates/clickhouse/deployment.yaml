@@ -47,7 +47,7 @@ spec:
             name: clickhouse-tcp
           - containerPort: {{ include "swanlab.clickhouse.httpPort" . }}
             name: clickhouse-http
-          {{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitorService }}
+          {{- if .Values.dependencies.clickhouse.monitor.enable }}
           - containerPort: {{ include "swanlab.clickhouse.metricsPort" . }}
             name: metrics
           {{- end }}
@@ -69,7 +69,7 @@ spec:
         volumeMounts:
           - mountPath: /var/lib/clickhouse
             name: {{ include "swanlab.clickhouse.fullname" . }}-volume
-          {{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitorService }}
+          {{- if .Values.dependencies.clickhouse.monitor.enable }}
           - mountPath: /etc/clickhouse-server/config.d/prometheus.xml
             name: metrics-config
             subPath: prometheus.xml
@@ -83,7 +83,7 @@ spec:
         - name: {{ include "swanlab.clickhouse.fullname" . }}-volume
           persistentVolumeClaim:
             claimName: {{ include "swanlab.clickhouse.pvcName" . }}
-        {{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitorService }}
+        {{- if .Values.dependencies.clickhouse.monitor.enable }}
         - name: metrics-config
           configMap:
             name: {{ include "swanlab.clickhouse.fullname" . }}-metrics

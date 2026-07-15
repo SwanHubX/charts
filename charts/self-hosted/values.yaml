@@ -89,7 +89,8 @@ vector:
   # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
   #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
   #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-  monitorService: false
+  monitor:
+    enable: false
 
 
 # Configuration for test image used in various components
@@ -122,7 +123,8 @@ service:
     # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
     #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
     #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-    monitorService: false
+    monitor:
+      enable: false
 
   # Configuration of our auth service
   auth:
@@ -170,7 +172,8 @@ service:
     # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
     #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
     #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-    monitorService: false
+    monitor:
+      enable: false
 
   # Configuration of our frontend service
   cloud:
@@ -307,7 +310,8 @@ dependencies:
     #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
     #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
     #   仅在非外部托管时生效（integrations.clickhouse.enabled = false）
-    monitorService: false
+    monitor:
+      enable: false
 
   s3: # MinIO Object Storage Service
     fullnameOverride: ""

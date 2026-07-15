@@ -128,7 +128,7 @@ data:
           max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
           when_full: block
 
-      # Prometheus 抓取端点（监听 9090，由 chart values 中 vector.monitorService: true 暴露）
+      # Prometheus 抓取端点（监听 9090，由 chart values 中 vector.monitor.enable: true 暴露）
       prometheus_exporter:
         type: prometheus_exporter
         inputs:
