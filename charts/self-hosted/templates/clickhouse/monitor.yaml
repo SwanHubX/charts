@@ -1,0 +1,26 @@
+{{/*
+Monitor Headless Service for ClickHouse
+
+仅用于 Prometheus dns_sd_configs 发现所有 Pod IP。
+- clusterIP: None → DNS A 记录返回每个 Pod IP（而非一个 VIP）
+- 零业务流量：不分配 VIP、不写 iptables，kube-proxy 不参与
+- 选中与主 Service 相同的 Pod，通过 .Values.dependencies.clickhouse.monitorService 开关控制
+- 仅在非外部托管时生效（integrations.clickhouse.enabled = false）
+- 抓取 ClickHouse 内置 prometheus exporter（端口 9363，路径 /metrics）
+*/}}
+{{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitorService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.clickhouse.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.clickhouse.metricsPort" . }}
+      targetPort: metrics
+      name: metrics
+{{- end }}

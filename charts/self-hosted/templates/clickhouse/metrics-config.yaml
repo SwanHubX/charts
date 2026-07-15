@@ -1,0 +1,28 @@
+{{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitorService }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}-metrics
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+data:
+  # 挂载到 /etc/clickhouse-server/config.d/prometheus.xml
+  # 启用 ClickHouse 内置 Prometheus exporter
+  # 端口 9363（CH 默认 prometheus 端口，独立于 HTTP 8123）
+  prometheus.xml: |
+    <clickhouse>
+        <prometheus>
+            <endpoint>/metrics</endpoint>
+            <port>9363</port>
+            <metrics>true</metrics>
+            <events>true</events>
+            <asynchronous_metrics>true</asynchronous_metrics>
+            <status_info>true</status_info>
+        </prometheus>
+
+        <asynchronous_metrics_update_period_s>60</asynchronous_metrics_update_period_s>
+        <asynchronous_metric_log>
+            <enabled>false</enabled>
+        </asynchronous_metric_log>
+    </clickhouse>
+{{- end }}

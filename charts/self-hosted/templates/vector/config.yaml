@@ -22,6 +22,11 @@ data:
         acknowledgements:
           enabled: true
 
+      # Vector 自身内部指标（CPU/内存/吞吐/utilization 等）
+      internal_metrics:
+        type: internal_metrics
+        scrape_interval_secs: 30
+
     transforms:
       process_metrics:
         type: remap
@@ -122,3 +127,10 @@ data:
           type: disk
           max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
           when_full: block
+
+      # Prometheus 抓取端点（监听 9090，由 chart values 中 vector.monitorService: true 暴露）
+      prometheus_exporter:
+        type: prometheus_exporter
+        inputs:
+          - internal_metrics
+        address: "0.0.0.0:{{ include "swanlab.vector.metricsPort" . }}"

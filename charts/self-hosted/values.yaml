@@ -86,6 +86,11 @@ vector:
     # Ensure storageSize is at least 3 times the bufferMaxSize.
     storageSize: "40Gi"
 
+  # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
+  #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
+  #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
+  monitorService: false
+
 
 # Configuration for test image used in various components
 helper: # Test Image Configuration
@@ -298,6 +303,11 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
+    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
+    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
+    #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
+    #   仅在非外部托管时生效（integrations.clickhouse.enabled = false）
+    monitorService: false
 
   s3: # MinIO Object Storage Service
     fullnameOverride: ""
