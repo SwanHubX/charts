@@ -129,3 +129,10 @@ PostgreSQL database
 {{- end -}}
 {{- end -}}
 
+{{/*
+PostgreSQL exporter prometheus metrics port (postgres-exporter 默认端口)
+*/}}
+{{- define "swanlab.postgres.metricsPort" -}}
+9187
+{{- end -}}
+

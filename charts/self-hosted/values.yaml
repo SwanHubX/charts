@@ -250,6 +250,11 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
+    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
+    #   true = 创建 <fullname>-monitor Headless Service，供 telemetry 层的 postgres-exporter 发现 PG Pod
+    #   仅在非外部托管时生效（integrations.postgres.enabled = false）
+    monitor:
+      enable: false
 
   redis: # Redis Configuration
     fullnameOverride: ""

@@ -1,8 +1,6 @@
 {{/*
 ClickHouse monitoring resources — ConfigMap (prometheus.xml) + Headless Service
 
-合并自原 metrics-config.yaml + monitor.yaml，两者同属监控功能、共用相同条件。
-
 ConfigMap:
   挂载到 /etc/clickhouse-server/config.d/prometheus.xml，启用 CH 内置 Prometheus exporter
   端口 9363（CH 默认 prometheus 端口，独立于 HTTP 8123）
