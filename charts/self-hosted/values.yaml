@@ -281,6 +281,11 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
+    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
+    #   true = 创建 <fullname>-monitor Headless Service，供 telemetry 层的 redis-exporter 发现 Redis Pod
+    #   仅在非外部托管时生效（integrations.redis.enabled = false）
+    monitor:
+      enable: false
 
   clickhouse: # ClickHouse Configuration
     fullnameOverride: ""

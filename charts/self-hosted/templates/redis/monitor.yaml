@@ -1,0 +1,26 @@
+{{/*
+Monitor Headless Service for Redis
+
+仅用于标记"此 Redis 实例需要被监控"，结构上与 PostgreSQL / ClickHouse 对齐。
+Redis 本身无内置 Prometheus exporter（不像 CH），redis-exporter Deployment 部署在 telemetry 层，
+通过主 ClusterIP Service 连接 Redis（Redis 为单副本 + Recreate，无需逐 Pod 发现）。
+此 Headless Service 留作"逐 Pod 抓取"的预留入口，当前抓取不依赖它。
+
+仅在非外部托管时生效（integrations.redis.enabled = false）
+*/}}
+{{- if and (not .Values.integrations.redis.enabled) .Values.dependencies.redis.monitor.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.redis.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.redis.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.redis.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.redis.port" . }}
+      targetPort: redis
+      name: redis
+{{- end }}
