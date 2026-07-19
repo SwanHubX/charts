@@ -5,7 +5,7 @@ test:
     # Repository path for the test image
     repository: public/busybox
     # Tag for the test image
-    tag: '1.37.0'
+    tag: '1.38.0'
     # Image pull policy for the test pod
     pullPolicy: IfNotPresent
   # List of secrets used to pull the test image
