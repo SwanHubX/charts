@@ -1,0 +1,23 @@
+{{/*
+Monitor Headless Service for SwanLab-Server
+
+仅用于 Prometheus dns_sd_configs 发现所有 Pod IP。
+- clusterIP: None → DNS A 记录返回每个 Pod IP（而非一个 VIP）
+- 零业务流量：不分配 VIP、不写 iptables，kube-proxy 不参与
+- 选中与主 Service 相同的 Pod，通过 .Values.service.server.monitor.enable 开关控制
+*/}}
+{{- if .Values.service.server.monitor.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.server.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.server.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.server.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.server.port" . }}
+      targetPort: server
+{{- end }}

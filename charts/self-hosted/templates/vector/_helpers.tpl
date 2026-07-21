@@ -96,6 +96,13 @@ Vector source port (for house -> vector data ingestion)
 {{- end -}}
 
 {{/*
+Vector metrics port (prometheus_exporter)
+*/}}
+{{- define "swanlab.vector.metricsPort" -}}
+9090
+{{- end -}}
+
+{{/*
 Vector host
 */}}
 {{- define "swanlab.vector.host" -}}

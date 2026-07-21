@@ -16,7 +16,7 @@ data:
     entryPoints:
       web:
         address: ":{{ include "swanlab.gateway.web" . }}"
-    #    for s3 upload files
+    # S3 文件上传需要透传 Forwarded 头
         forwardedHeaders:
           insecure: true
       internal:
@@ -65,7 +65,7 @@ data:
         {{ include "swanlab.gateway.s3" . }}:
           headers:
             customRequestHeaders:
-    #          No need to use cluster DNS
+              # 集群内使用短域名即可，无需完整 cluster DNS 名称
               Host: {{ printf "%s:%s" $s3 $s3Port | quote }}
         {{- end }}
       routers:

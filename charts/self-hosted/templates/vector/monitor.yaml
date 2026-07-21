@@ -1,0 +1,25 @@
+{{/*
+Monitor Headless Service for Vector
+
+仅用于 Prometheus dns_sd_configs 发现所有 Pod IP。
+- clusterIP: None → DNS A 记录返回每个 Pod IP（而非一个 VIP）
+- 零业务流量：不分配 VIP、不写 iptables，kube-proxy 不参与
+- 选中与主 Service 相同的 Pod，通过 .Values.vector.monitor.enable 开关控制
+- 抓取 Vector 内置 prometheus_exporter（端口 9090，路径 /metrics）
+*/}}
+{{- if .Values.vector.monitor.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.vector.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.vector.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.vector.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.vector.metricsPort" . }}
+      targetPort: metrics
+      name: metrics
+{{- end }}

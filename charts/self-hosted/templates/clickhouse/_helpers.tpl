@@ -127,6 +127,13 @@ Clickhouse tcp port
 {{- end -}}
 
 {{/*
+Clickhouse prometheus metrics port (内置 prometheus exporter)
+*/}}
+{{- define "swanlab.clickhouse.metricsPort" -}}
+9363
+{{- end -}}
+
+{{/*
 Clickhouse database
 */}}
 {{- define "swanlab.clickhouse.database" -}}

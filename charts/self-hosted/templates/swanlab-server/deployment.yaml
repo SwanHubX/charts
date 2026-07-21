@@ -123,6 +123,12 @@ spec:
             - -c
             - npx prisma migrate deploy && node migrate.js && pm2-runtime app.js
           env:
+            # K8s downward API：kubelet 注入 pod 名，不调 API server
+            # 应用读取 POD_NAME 暴露 swanlab_pod_info{pod=...}=1，供 Grafana join 显示 pod 名
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -204,6 +210,9 @@ metadata:
   {{- include "swanlab.server.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
+  {{- with .Values.service.server.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
   selector:
   {{- include "swanlab.server.selectorLabels" . | nindent 4 }}
   ports:

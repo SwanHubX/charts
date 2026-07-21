@@ -1,0 +1,24 @@
+{{/*
+Monitor Headless Service for Redis
+
+Redis 无内置 Prometheus exporter，需由外部 redis-exporter 抓取。
+此 Headless Service 预留用于逐 Pod 抓取发现。
+
+仅在非外部托管时生效（integrations.redis.enabled = false）
+*/}}
+{{- if and (not .Values.integrations.redis.enabled) .Values.dependencies.redis.monitor.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.redis.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.redis.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.redis.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.redis.port" . }}
+      targetPort: redis
+      name: redis
+{{- end }}

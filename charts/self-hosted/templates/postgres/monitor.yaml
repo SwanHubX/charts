@@ -1,0 +1,24 @@
+{{/*
+Monitor Headless Service for PostgreSQL
+
+PostgreSQL 无内置 Prometheus exporter，需由外部 postgres-exporter 抓取。
+此 Headless Service 供监控抓取方通过 DNS 发现 PG Pod IP。
+
+仅在非外部托管时生效（integrations.postgres.enabled = false）
+*/}}
+{{- if and (not .Values.integrations.postgres.enabled) .Values.dependencies.postgres.monitor.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.postgres.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.postgres.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.postgres.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.postgres.port" . }}
+      targetPort: postgres
+      name: postgres
+{{- end }}

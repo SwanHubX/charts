@@ -1,0 +1,58 @@
+{{/*
+ClickHouse monitoring resources — ConfigMap (prometheus.xml) + Headless Service
+
+ConfigMap:
+  挂载到 /etc/clickhouse-server/config.d/prometheus.xml，启用 CH 内置 Prometheus exporter
+  端口 9363（CH 默认 prometheus 端口，独立于 HTTP 8123）
+
+Headless Service:
+  仅用于 Prometheus dns_sd_configs 发现所有 Pod IP。
+  - clusterIP: None → DNS A 记录返回每个 Pod IP（而非一个 VIP）
+  - 零业务流量：不分配 VIP、不写 iptables，kube-proxy 不参与
+  - 选中与主 Service 相同的 Pod，通过 .Values.dependencies.clickhouse.monitor.enable 开关控制
+
+仅在非外部托管时生效（integrations.clickhouse.enabled = false）
+*/}}
+{{- if and (not .Values.integrations.clickhouse.enabled) .Values.dependencies.clickhouse.monitor.enable }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}-metrics
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+data:
+  # 挂载到 /etc/clickhouse-server/config.d/prometheus.xml
+  # 启用 ClickHouse 内置 Prometheus exporter
+  # 端口 9363（CH 默认 prometheus 端口，独立于 HTTP 8123）
+  prometheus.xml: |
+    <clickhouse>
+        <prometheus>
+            <endpoint>/metrics</endpoint>
+            <port>9363</port>
+            <metrics>true</metrics>
+            <events>true</events>
+            <asynchronous_metrics>true</asynchronous_metrics>
+            <status_info>true</status_info>
+        </prometheus>
+
+        <asynchronous_metrics_update_period_s>60</asynchronous_metrics_update_period_s>
+        <asynchronous_metric_log>
+            <enabled>false</enabled>
+        </asynchronous_metric_log>
+    </clickhouse>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "swanlab.clickhouse.fullname" . }}-monitor
+  labels:
+  {{- include "swanlab.clickhouse.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+  {{- include "swanlab.clickhouse.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ include "swanlab.clickhouse.metricsPort" . }}
+      targetPort: metrics
+      name: metrics
+{{- end }}
