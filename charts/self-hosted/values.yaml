@@ -86,9 +86,9 @@ vector:
     # Ensure storageSize is at least 3 times the bufferMaxSize.
     storageSize: "40Gi"
 
-  # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-  #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
-  #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
+  # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+  #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
+  #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)
   monitor:
     enable: false
 
@@ -120,9 +120,9 @@ service:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
-    #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
+    # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+    #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
+    #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)
     monitor:
       enable: false
 
@@ -169,9 +169,9 @@ service:
       storageClass: ""
       # Volume size for the database data.
       storageSize: "10Gi"
-    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
-    #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
+    # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+    #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
+    #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)
     monitor:
       enable: false
 
@@ -250,9 +250,9 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true = 创建 <fullname>-monitor Headless Service，供 telemetry 层的 postgres-exporter 发现 PG Pod
-    #   仅在非外部托管时生效（integrations.postgres.enabled = false）
+    # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+    #   true = create a <fullname>-monitor headless Service so the postgres-exporter in the telemetry layer can discover the PG Pod
+    #   Only takes effect when not using an external managed instance (integrations.postgres.enabled = false)
     monitor:
       enable: false
 
@@ -281,9 +281,9 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true = 创建 <fullname>-monitor Headless Service，供 telemetry 层的 redis-exporter 发现 Redis Pod
-    #   仅在非外部托管时生效（integrations.redis.enabled = false）
+    # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+    #   true = create a <fullname>-monitor headless Service so the redis-exporter in the telemetry layer can discover the Redis Pod
+    #   Only takes effect when not using an external managed instance (integrations.redis.enabled = false)
     monitor:
       enable: false
 
@@ -316,10 +316,10 @@ dependencies:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-    # 监控采集专用 Headless Service（不影响主 Service 的业务流量）
-    #   true  = 创建 <fullname>-monitor Headless Service，供 Prometheus dns_sd 发现所有 Pod IP
-    #   false = 不创建（需自行用 kubernetes_sd_configs 或其他方式发现 Pod）
-    #   仅在非外部托管时生效（integrations.clickhouse.enabled = false）
+    # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
+    #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
+    #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)
+    #   Only takes effect when not using an external managed instance (integrations.clickhouse.enabled = false)
     monitor:
       enable: false
 

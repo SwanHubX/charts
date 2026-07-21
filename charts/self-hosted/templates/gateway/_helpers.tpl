@@ -124,7 +124,7 @@ Usage: {{ include "swanlab.gateway.matchExpression" (list $host $path) }}
 {{- $matcher := "PathPrefix" -}}
 
 {{- /* 2. Check if there is a third parameter; if it exists and is not empty, override the default value. */ -}}
-{{- /* if and (gt (len .) 2) (index . 2) 是不行的，在低版本的 helm 中，短路逻辑可能不支持 */ -}}
+{{- /* 使用嵌套 if 而非 and()：低版本 Helm 不支持 and 的短路求值 */ -}}
 {{- if gt (len .) 2 -}}
     {{- if index . 2 -}}
         {{- $matcher = index . 2 -}}

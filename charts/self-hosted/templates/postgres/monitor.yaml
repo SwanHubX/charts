@@ -1,10 +1,8 @@
 {{/*
 Monitor Headless Service for PostgreSQL
 
-仅用于标记"此 PG 实例需要被监控"。
-PG 本身无内置 exporter（不像 CH），postgres-exporter Deployment 部署在 telemetry 层。
-此 Headless Service 让 telemetry scrape job 能通过 DNS 发现 PG Pod IP，
-同时作为 monitor.enable 开关的锚点（与 CH / Vector / server / house 结构一致）。
+PostgreSQL 无内置 Prometheus exporter，需由外部 postgres-exporter 抓取。
+此 Headless Service 供监控抓取方通过 DNS 发现 PG Pod IP。
 
 仅在非外部托管时生效（integrations.postgres.enabled = false）
 */}}
