@@ -12,6 +12,17 @@ global:
   # We use Topology Spread Constraints to achieve pod distribution across nodes.
   podAntiAffinityPreset: "soft" # soft, hard, or none
 
+  # ── Pod & Container Security Context ────────────────────────
+  # Baseline hardening (enabled by default):
+  #   Pod-level:        seccompProfile RuntimeDefault
+  #   Container-level:  allowPrivilegeEscalation=false, capabilities drop ALL
+  # Non-root UIDs/GIDs are selected per workload to match the bundled images.
+  # Disable only as a temporary compatibility escape hatch for custom images or
+  # storage drivers that cannot apply fsGroup ownership to mounted volumes.
+  securityContext:
+    enabled: true
+    runAsNonRoot: true
+
   # Global application settings
   settings:
     # The public URL through which users access the application.

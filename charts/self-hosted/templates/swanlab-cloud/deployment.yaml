@@ -25,6 +25,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
+      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 101 "gid" 101) | nindent 6 }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.cloud.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.cloud.nodeSelector" . | trim) }}
       nodeSelector:
@@ -44,10 +45,21 @@ spec:
           ports:
             - containerPort: 80
               name: web
+          volumeMounts:
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /var/run
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "addCaps" (list "NET_BIND_SERVICE")) | nindent 10 }}
         {{- if .Values.service.cloud.resources }}
           resources:
         {{- toYaml .Values.service.cloud.resources | nindent 12 }}
         {{- end }}
+      volumes:
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

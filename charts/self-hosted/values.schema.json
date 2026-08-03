@@ -22,6 +22,14 @@
           "type": "string",
           "enum": ["soft", "hard", "none"]
         },
+        "securityContext": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "runAsNonRoot": { "type": "boolean" }
+          },
+          "required": ["enabled", "runAsNonRoot"]
+        },
         "settings": {
           "type": "object",
           "properties": {

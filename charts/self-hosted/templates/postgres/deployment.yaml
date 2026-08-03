@@ -38,10 +38,8 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
-      # 部分存储类创建的卷权限不是 postgres 用户可写，使用 initContainer 修正权限
-      # 实测部分存储、k8s版本下单纯设置 fsGroup 无效，需要用 initContainer 修改目录属主
-      securityContext:
-        fsGroup: 999
+      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 999 "gid" 999) | nindent 6 }}
+      # 预创建 subPath；卷的组权限由 fsGroup 处理，不再使用 root chown。
       initContainers:
         - name: init-postgres-fs
           image: {{ include "swanlab.helperImage" . }}
@@ -49,9 +47,8 @@ spec:
           command:
             - "sh"
             - "-c"
-            - "mkdir -p /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data && chown -R 999:999 /var/lib/postgresql/data"
-          securityContext:
-            runAsUser: 0
+            - "mkdir -p /var/lib/postgresql/data"
+          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
           volumeMounts:
             - name: {{ include "swanlab.postgres.fullname" . }}-volume
               mountPath: /var/lib/postgresql
@@ -84,6 +81,7 @@ spec:
           - mountPath: /var/lib/postgresql/data
             subPath: data
             name: {{ include "swanlab.postgres.fullname" . }}-volume
+        {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 8 }}
         {{- if .Values.dependencies.postgres.resources }}
         resources:
         {{- toYaml .Values.dependencies.postgres.resources | nindent 12 }}
