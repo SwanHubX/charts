@@ -27,7 +27,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 101 "gid" 101) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.clickhouse.securityContext "uid" 101 "gid" 101) | nindent 6 }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -76,7 +76,7 @@ spec:
             subPath: prometheus.xml
             readOnly: true
           {{- end }}
-        {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 8 }}
+        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.clickhouse.securityContext) | nindent 8 }}
         {{- if .Values.dependencies.clickhouse.resources }}
         resources:
         {{- toYaml .Values.dependencies.clickhouse.resources | nindent 12 }}

@@ -27,7 +27,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -43,13 +43,18 @@ spec:
       - name: redis
         image: "{{ .Values.dependencies.redis.image.repository }}:{{ .Values.dependencies.redis.image.tag }}"
         imagePullPolicy: {{ .Values.dependencies.redis.image.pullPolicy }}
+        {{- if .Values.dependencies.redis.persistence.aof.enabled }}
+        env:
+          - name: REDIS_ARGS
+            value: "--appendonly yes --appendfsync {{ .Values.dependencies.redis.persistence.aof.appendFsync }}"
+        {{- end }}
         ports:
           - containerPort: {{ include "swanlab.redis.port" . }}
             name: redis
         volumeMounts:
           - mountPath: /data
             name: {{ include "swanlab.redis.fullname" . }}-volume
-        {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 8 }}
+        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext) | nindent 8 }}
         {{- if .Values.dependencies.redis.resources }}
         resources:
         {{- toYaml .Values.dependencies.redis.resources | nindent 12 }}

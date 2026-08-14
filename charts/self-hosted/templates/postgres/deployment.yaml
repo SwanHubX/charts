@@ -38,8 +38,9 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 999 "gid" 999) | nindent 6 }}
-      # 预创建 subPath；卷的组权限由 fsGroup 处理，不再使用 root chown。
+      {{- if .Values.dependencies.postgres.securityContext.enabled }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext "uid" 999 "gid" 999) | nindent 6 }}
+      {{- end }}
       initContainers:
         - name: init-postgres-fs
           image: {{ include "swanlab.helperImage" . }}
@@ -47,8 +48,16 @@ spec:
           command:
             - "sh"
             - "-c"
-            - "mkdir -p /var/lib/postgresql/data"
-          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
+            - >-
+              mkdir -p /var/lib/postgresql/data &&
+              {{- if .Values.dependencies.postgres.securityContext.enabled }}
+              true
+              {{- else }}
+              chmod 700 /var/lib/postgresql/data && chown -R 999:999 /var/lib/postgresql/data
+              {{- end }}
+          {{- if .Values.dependencies.postgres.securityContext.enabled }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext) | nindent 10 }}
+          {{- end }}
           volumeMounts:
             - name: {{ include "swanlab.postgres.fullname" . }}-volume
               mountPath: /var/lib/postgresql
@@ -81,7 +90,9 @@ spec:
           - mountPath: /var/lib/postgresql/data
             subPath: data
             name: {{ include "swanlab.postgres.fullname" . }}-volume
-        {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 8 }}
+        {{- if .Values.dependencies.postgres.securityContext.enabled }}
+        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext) | nindent 8 }}
+        {{- end }}
         {{- if .Values.dependencies.postgres.resources }}
         resources:
         {{- toYaml .Values.dependencies.postgres.resources | nindent 12 }}

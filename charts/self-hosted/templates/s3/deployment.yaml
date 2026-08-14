@@ -27,7 +27,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -69,7 +69,7 @@ spec:
         volumeMounts:
           - mountPath: /data
             name: {{ include "swanlab.s3.fullname" . }}-volume
-        {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 8 }}
+        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 8 }}
         {{- if .Values.dependencies.s3.resources }}
         resources:
         {{- toYaml .Values.dependencies.s3.resources | nindent 12 }}
@@ -104,7 +104,7 @@ spec:
   completions: 1
   template:
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-minio
@@ -124,7 +124,7 @@ spec:
           env:
             - name: MINIO_ENDPOINT
               value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.minio.port" . }}"
-          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 10 }}
       containers:
         - name: minio-mc-job
           image: "{{ .Values.dependencies.s3.mcImage.repository }}:{{ .Values.dependencies.s3.mcImage.tag }}"
@@ -159,5 +159,5 @@ spec:
               # 3. public bucket
               mc mb --ignore-existing swanlab-minio/$MINIO_PUBLIC_BUCKET
               mc anonymous set public swanlab-minio/$MINIO_PUBLIC_BUCKET
-          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 10 }}
 {{- end }}

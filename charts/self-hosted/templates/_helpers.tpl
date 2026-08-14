@@ -83,22 +83,20 @@ Helper Image Pull Policy
 
 {{/*
 Pod-level security context.
-Generates a securityContext block for the pod spec based on global.securityContext settings.
+Generates a securityContext block for the pod spec based on the owning service's settings.
 
-Usage: {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 1000 "gid" 1000) | nindent 6 }}
-The uid and gid are used as runAsUser/runAsGroup/fsGroup when global.securityContext.runAsNonRoot is true.
+Usage: {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
+The uid and gid are used when the owning service's securityContext.enabled is true.
 */}}
 {{- define "swanlab.podSecurityContext" -}}
-{{- $sc := .root.Values.global.securityContext -}}
+{{- $sc := .securityContext | default (dict "enabled" false) -}}
 {{- if $sc.enabled }}
 securityContext:
-  {{- if $sc.runAsNonRoot }}
   runAsNonRoot: true
   runAsUser: {{ .uid | int }}
   runAsGroup: {{ .gid | int }}
   fsGroup: {{ .gid | int }}
   fsGroupChangePolicy: OnRootMismatch
-  {{- end }}
   seccompProfile:
     type: RuntimeDefault
 {{- end }}
@@ -114,7 +112,7 @@ Usage (with extra capabilities, e.g., NET_BIND_SERVICE for ports < 1024):
   {{- include "swanlab.containerSecurityContext" (dict "root" . "addCaps" (list "NET_BIND_SERVICE")) | nindent 10 }}
 */}}
 {{- define "swanlab.containerSecurityContext" -}}
-{{- $sc := .root.Values.global.securityContext -}}
+{{- $sc := .securityContext | default (dict "enabled" false) -}}
 {{- if $sc.enabled }}
 securityContext:
   allowPrivilegeEscalation: false

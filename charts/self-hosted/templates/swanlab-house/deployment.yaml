@@ -26,7 +26,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "uid" 65532 "gid" 65532) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext "uid" 65532 "gid" 65532) | nindent 6 }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.house.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.house.nodeSelector" . | trim) }}
       nodeSelector:
@@ -103,7 +103,7 @@ spec:
               echo "✅ Vector is ready!"
 
               echo "🎉 All dependencies are ready. Proceeding to main container..."
-          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | nindent 10 }}
       containers:
         - name: house
           image: {{ include "swanlab.house.image" . | quote }}
@@ -176,7 +176,7 @@ spec:
           volumeMounts:
             - name: house-workdir
               mountPath: /app/playground
-          {{- include "swanlab.containerSecurityContext" (dict "root" .) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | nindent 10 }}
         {{- if .Values.service.house.resources }}
           resources:
         {{- toYaml .Values.service.house.resources | nindent 12 }}

@@ -22,14 +22,6 @@
           "type": "string",
           "enum": ["soft", "hard", "none"]
         },
-        "securityContext": {
-          "type": "object",
-          "properties": {
-            "enabled": { "type": "boolean" },
-            "runAsNonRoot": { "type": "boolean" }
-          },
-          "required": ["enabled", "runAsNonRoot"]
-        },
         "settings": {
           "type": "object",
           "properties": {
@@ -49,6 +41,7 @@
       "type": "object",
       "properties": {
         "fullnameOverride": { "type": "string" },
+        "securityContext": { "$ref": "#/definitions/securityContext" },
         "replicas": { "type": "integer", "minimum": 0 },
         "image": { "$ref": "#/definitions/image" },
         "identifyImage": { "$ref": "#/definitions/image" },
@@ -92,6 +85,7 @@
       "type": "object",
       "properties": {
         "fullnameOverride": { "type": "string" },
+        "securityContext": { "$ref": "#/definitions/securityContext" },
         "replicas": { "type": "integer", "minimum": 0 },
         "image": { "$ref": "#/definitions/image" },
         "sinks": {
@@ -138,6 +132,7 @@
           "type": "object",
           "properties": {
             "fullnameOverride": { "type": "string" },
+            "securityContext": { "$ref": "#/definitions/securityContext" },
             "replicas": { "type": "integer", "minimum": 0 },
             "image": { "$ref": "#/definitions/image" },
             "persistence": { "$ref": "#/definitions/persistence" },
@@ -161,6 +156,7 @@
           "type": "object",
           "properties": {
             "fullnameOverride": { "type": "string" },
+            "securityContext": { "$ref": "#/definitions/securityContext" },
             "image": { "$ref": "#/definitions/image" },
             "username": { "type": "string" },
             "password": { "type": "string" },
@@ -178,8 +174,9 @@
           "type": "object",
           "properties": {
             "fullnameOverride": { "type": "string" },
+            "securityContext": { "$ref": "#/definitions/securityContext" },
             "image": { "$ref": "#/definitions/image" },
-            "persistence": { "$ref": "#/definitions/persistence" },
+            "persistence": { "$ref": "#/definitions/redisPersistence" },
             "resources": { "$ref": "#/definitions/resources" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
@@ -193,6 +190,7 @@
           "type": "object",
           "properties": {
             "fullnameOverride": { "type": "string" },
+            "securityContext": { "$ref": "#/definitions/securityContext" },
             "image": { "$ref": "#/definitions/image" },
             "username": { "type": "string" },
             "password": { "type": "string" },
@@ -210,6 +208,7 @@
           "type": "object",
           "properties": {
             "fullnameOverride": { "type": "string" },
+            "securityContext": { "$ref": "#/definitions/securityContext" },
             "image": { "$ref": "#/definitions/image" },
             "mcImage": { "$ref": "#/definitions/image" },
             "accessKey": { "type": "string" },
@@ -295,6 +294,36 @@
         "requests": { "type": "object" }
       }
     },
+    "securityContext": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false }
+      },
+      "required": ["enabled"]
+    },
+    "redisPersistence": {
+      "type": "object",
+      "properties": {
+        "storageClass": { "type": "string" },
+        "storageSize": {
+          "type": "string",
+          "pattern": "^[0-9]+(Gi|Mi|Ti)$"
+        },
+        "existingClaim": { "type": "string" },
+        "aof": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": false },
+            "appendFsync": {
+              "type": "string",
+              "enum": ["always", "everysec", "no"],
+              "default": "everysec"
+            }
+          },
+          "required": ["enabled", "appendFsync"]
+        }
+      }
+    },
     "persistence": {
       "type": "object",
       "properties": {
@@ -311,6 +340,7 @@
       "type": "object",
       "properties": {
         "fullnameOverride": { "type": "string" },
+        "securityContext": { "$ref": "#/definitions/securityContext" },
         "replicas": { "type": "integer", "minimum": 0 },
         "image": { "$ref": "#/definitions/image" },
         "customLabels": { "type": "object" },
