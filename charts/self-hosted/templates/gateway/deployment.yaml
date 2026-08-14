@@ -27,7 +27,7 @@ spec:
         {{- . | nindent 8 }}
         {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.gateway.securityContext "uid" 65532 "gid" 65532) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.gateway.securityContext "uid" 65532 "gid" 65532 "allowPrivilegedPorts" true) | nindent 6 }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.gateway.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.gateway.nodeSelector" . | trim) }}
       nodeSelector:
@@ -75,7 +75,7 @@ spec:
               subPath: "dynamic.yaml"
             - name: identify-plugin
               mountPath: /plugins-local/src/github.com/swanhubx/swanlab-helper
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.gateway.securityContext "addCaps" (list "NET_BIND_SERVICE")) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.gateway.securityContext) | nindent 10 }}
         {{- if .Values.gateway.resources }}
           resources:
         {{- toYaml .Values.gateway.resources | nindent 12 }}

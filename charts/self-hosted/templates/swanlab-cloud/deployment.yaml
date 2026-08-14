@@ -25,7 +25,7 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext "uid" 101 "gid" 101) | nindent 6 }}
+      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext "uid" 101 "gid" 101 "allowPrivilegedPorts" true) | nindent 6 }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.cloud.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.cloud.nodeSelector" . | trim) }}
       nodeSelector:
@@ -50,7 +50,7 @@ spec:
               mountPath: /var/cache/nginx
             - name: nginx-run
               mountPath: /var/run
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext "addCaps" (list "NET_BIND_SERVICE")) | nindent 10 }}
+          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext) | nindent 10 }}
         {{- if .Values.service.cloud.resources }}
           resources:
         {{- toYaml .Values.service.cloud.resources | nindent 12 }}

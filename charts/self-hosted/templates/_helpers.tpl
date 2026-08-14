@@ -99,6 +99,15 @@ securityContext:
   fsGroupChangePolicy: OnRootMismatch
   seccompProfile:
     type: RuntimeDefault
+  {{- /* 容器需监听 <1024 特权端口时（如 traefik/nginx 的 80），降低本 pod 网络命名空间的
+       非特权端口起始值，使非 root 进程可直接绑定。相比 NET_BIND_SERVICE capability
+       更可靠：capability 在 containerd 运行时下经 shell entrypoint exec 后会丢失，
+       而 sysctl 是内核级检查，与运行时无关。要求节点内核 >= 4.11。 */ -}}
+  {{- if .allowPrivilegedPorts }}
+  sysctls:
+    - name: net.ipv4.ip_unprivileged_port_start
+      value: "80"
+  {{- end }}
 {{- end }}
 {{- end -}}
 
