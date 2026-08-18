@@ -139,6 +139,47 @@ securityContext:
 
 
 {{/*
+Root initContainer that aligns data-volume ownership with the service user before
+startup. Rendered automatically when the owning service enables securityContext.
+Needed for volumes whose files are owned by root (e.g. data written before
+hardening), or clusters whose CSI fsGroupPolicy makes fsGroup ineffective.
+Incompatible with the restricted PodSecurityStandard (root initContainer).
+
+Usage:
+  {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000 "volumeName" "<volume-name>" "mountPath" "/data") | trim) }}
+  initContainers:
+    {{- . | nindent 8 }}
+  {{- end }}
+*/}}
+{{- define "swanlab.volumePermissionsInit" -}}
+{{- $sc := .sc | default (dict "enabled" false) -}}
+{{- if $sc.enabled -}}
+- name: init-volume-permissions
+  image: {{ include "swanlab.helperImage" .root }}
+  imagePullPolicy: {{ include "swanlab.helperPullPolicy" .root }}
+  command: ["/bin/sh", "-c"]
+  args:
+    - |
+      find {{ .mountPath }} ! -user {{ .uid }} -exec chown -R {{ .uid }}:{{ .gid }} {} \;
+  securityContext:
+    runAsUser: 0
+    runAsNonRoot: false
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - CHOWN
+        - DAC_OVERRIDE
+  volumeMounts:
+    - name: {{ .volumeName }}
+      mountPath: {{ .mountPath }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Pod Distribution Constraints Configuration (Based on Topology Spread Constraints)
 
 Usage: `{{ include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.component.selectorLabels" .) }}`

@@ -51,6 +51,9 @@ spec:
         fsGroup: 999
       {{- end }}
       initContainers:
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.postgres.securityContext "uid" 999 "gid" 999 "volumeName" (printf "%s-volume" (include "swanlab.postgres.fullname" .)) "mountPath" "/var/lib/postgresql") | trim) }}
+      {{- . | nindent 8 }}
+      {{- end }}
         - name: init-postgres-fs
           image: {{ include "swanlab.helperImage" . }}
           imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}

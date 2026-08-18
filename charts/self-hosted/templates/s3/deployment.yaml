@@ -41,6 +41,10 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000 "volumeName" (printf "%s-volume" (include "swanlab.s3.fullname" .)) "mountPath" "/data") | trim) }}
+      initContainers:
+        {{- . | nindent 8 }}
+      {{- end }}
       containers:
       - name: s3
         image: "{{ .Values.dependencies.s3.image.repository }}:{{ .Values.dependencies.s3.image.tag }}"

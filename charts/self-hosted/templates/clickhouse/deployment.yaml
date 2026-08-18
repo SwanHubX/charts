@@ -41,6 +41,10 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.clickhouse.securityContext "uid" 101 "gid" 101 "volumeName" (printf "%s-volume" (include "swanlab.clickhouse.fullname" .)) "mountPath" "/var/lib/clickhouse") | trim) }}
+      initContainers:
+        {{- . | nindent 8 }}
+      {{- end }}
       containers:
       - name: clickhouse
         image: "{{ .Values.dependencies.clickhouse.image.repository }}:{{ .Values.dependencies.clickhouse.image.tag }}"
