@@ -26,7 +26,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext "uid" 65532 "gid" 65532) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext "uid" 65532 "gid" 65532) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.house.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.house.nodeSelector" . | trim) }}
       nodeSelector:
@@ -103,7 +105,26 @@ spec:
               echo "✅ Vector is ready!"
 
               echo "🎉 All dependencies are ready. Proceeding to main container..."
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+        {{- if .Values.service.house.securityContext.enabled }}
+        # 非 root 运行时 /app/playground 不可写，挂 emptyDir 提供可写目录；
+        # 镜像内置的 playground 配置（如更新用 yaml 依赖）会在每次 pod 启动时由本 initContainer
+        # 从镜像层回填到 emptyDir，避免被遮蔽丢失，也保证镜像升级后配置始终以镜像内容为准
+        - name: init-config
+          image: {{ include "swanlab.house.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.house.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - '[ -d /app/playground ] && cp -r /app/playground/. /playground-workdir/ || true'
+          volumeMounts:
+            - name: house-workdir
+              mountPath: /playground-workdir
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+        {{- end }}
       containers:
         - name: house
           image: {{ include "swanlab.house.image" . | quote }}
@@ -173,17 +194,23 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.s3.secretName" .}}
                   key: secretKey
+          {{- if .Values.service.house.securityContext.enabled }}
           volumeMounts:
             - name: house-workdir
               mountPath: /app/playground
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | nindent 10 }}
+          {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.house.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
         {{- if .Values.service.house.resources }}
           resources:
         {{- toYaml .Values.service.house.resources | nindent 12 }}
         {{- end }}
+      {{- if .Values.service.house.securityContext.enabled }}
       volumes:
         - name: house-workdir
           emptyDir: {}
+      {{- end }}
 
 ---
 

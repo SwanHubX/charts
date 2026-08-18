@@ -25,7 +25,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext "uid" 1001 "gid" 1001) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext "uid" 1001 "gid" 1001) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.next.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.next.nodeSelector" . | trim) }}
       nodeSelector:
@@ -101,7 +103,9 @@ spec:
               check_url "SwanLab House" "$SWANLAB_HOUSE_URL"
 
               echo "🎉 All services are reachable!"
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
       containers:
         - name: server
           image: {{ include "swanlab.next.image" . | quote }}
@@ -122,7 +126,9 @@ spec:
             - name: API_DISPLAY_HOST
               value: {{ . | quote }}
             {{- end }}
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.next.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
         {{- if .Values.service.next.resources }}
           resources:
         {{- toYaml .Values.service.next.resources | nindent 12 }}

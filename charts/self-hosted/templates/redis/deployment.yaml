@@ -27,7 +27,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -54,7 +56,9 @@ spec:
         volumeMounts:
           - mountPath: /data
             name: {{ include "swanlab.redis.fullname" . }}-volume
-        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext) | nindent 8 }}
+        {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext) | trim) }}
+        {{- . | nindent 8 }}
+        {{- end }}
         {{- if .Values.dependencies.redis.resources }}
         resources:
         {{- toYaml .Values.dependencies.redis.resources | nindent 12 }}

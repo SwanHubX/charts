@@ -25,7 +25,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext "uid" 101 "gid" 101 "allowPrivilegedPorts" true) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext "uid" 101 "gid" 101 "allowPrivilegedPorts" true) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.cloud.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.cloud.nodeSelector" . | trim) }}
       nodeSelector:
@@ -45,21 +47,28 @@ spec:
           ports:
             - containerPort: 80
               name: web
+          {{- if .Values.service.cloud.securityContext.enabled }}
+          # 非 root 运行时 nginx 需要可写的缓存与 pid 目录
           volumeMounts:
             - name: nginx-cache
               mountPath: /var/cache/nginx
             - name: nginx-run
               mountPath: /var/run
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext) | nindent 10 }}
+          {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.cloud.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
         {{- if .Values.service.cloud.resources }}
           resources:
         {{- toYaml .Values.service.cloud.resources | nindent 12 }}
         {{- end }}
+      {{- if .Values.service.cloud.securityContext.enabled }}
       volumes:
         - name: nginx-cache
           emptyDir: {}
         - name: nginx-run
           emptyDir: {}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

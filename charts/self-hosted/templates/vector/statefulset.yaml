@@ -26,7 +26,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.vector.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.vector.nodeSelector" . | trim) }}
       nodeSelector:
@@ -91,7 +93,9 @@ spec:
               readOnly: true
             - name: data
               mountPath: /var/lib/vector
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
           {{- if .Values.vector.resources }}
           resources:
           {{- toYaml .Values.vector.resources | nindent 12 }}

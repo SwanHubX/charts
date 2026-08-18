@@ -27,7 +27,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -69,7 +71,9 @@ spec:
         volumeMounts:
           - mountPath: /data
             name: {{ include "swanlab.s3.fullname" . }}-volume
-        {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 8 }}
+        {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | trim) }}
+        {{- . | nindent 8 }}
+        {{- end }}
         {{- if .Values.dependencies.s3.resources }}
         resources:
         {{- toYaml .Values.dependencies.s3.resources | nindent 12 }}
@@ -104,7 +108,9 @@ spec:
   completions: 1
   template:
     spec:
-      {{- include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | nindent 6 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       restartPolicy: OnFailure
       initContainers:
         - name: wait-for-minio
@@ -124,7 +130,9 @@ spec:
           env:
             - name: MINIO_ENDPOINT
               value: "http://{{ include "swanlab.s3.fullname" . }}:{{ include "swanlab.s3.minio.port" . }}"
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
       containers:
         - name: minio-mc-job
           image: "{{ .Values.dependencies.s3.mcImage.repository }}:{{ .Values.dependencies.s3.mcImage.tag }}"
@@ -146,6 +154,11 @@ spec:
               value: "{{ include "swanlab.s3.private.bucket" . }}"
             - name: MINIO_PUBLIC_BUCKET
               value: "{{ include "swanlab.s3.public.bucket" . }}"
+            {{- if .Values.dependencies.s3.securityContext.enabled }}
+            # 非 root 运行时 mc 无法写默认 HOME（/root），重定向到 /tmp，否则 mc alias set 失败
+            - name: HOME
+              value: /tmp
+            {{- end }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -159,5 +172,7 @@ spec:
               # 3. public bucket
               mc mb --ignore-existing swanlab-minio/$MINIO_PUBLIC_BUCKET
               mc anonymous set public swanlab-minio/$MINIO_PUBLIC_BUCKET
-          {{- include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | nindent 10 }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
 {{- end }}
