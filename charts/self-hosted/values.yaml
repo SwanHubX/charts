@@ -240,11 +240,11 @@ dependencies:
       # Kubernetes image pull policy (Always, IfNotPresent, Never).
       pullPolicy: "IfNotPresent"
     persistence: # Persistent Storage Configuration
-      storageClass: ""
-      storageSize: "10Gi"
       aof:
         enabled: false
         appendFsync: everysec
+      storageClass: ""
+      storageSize: "10Gi"
       # Use an existing PVC by name (leave empty to create a new one)
       existingClaim: ""
     customLabels: {}
