@@ -109,9 +109,8 @@ spec:
           {{- . | nindent 10 }}
           {{- end }}
         {{- if .Values.service.house.securityContext.enabled }}
-        # 非 root 运行时 /app/playground 不可写，挂 emptyDir 提供可写目录；
-        # 镜像内置的 playground 配置（如更新用 yaml 依赖）会在每次 pod 启动时由本 initContainer
-        # 从镜像层回填到 emptyDir，避免被遮蔽丢失，也保证镜像升级后配置始终以镜像内容为准
+        # 非 root 运行时镜像内 /app/playground 不可写；每次启动将其内容拷入可写
+        # emptyDir，保证镜像升级后配置始终以镜像内容为准
         - name: init-config
           image: {{ include "swanlab.house.image" . | quote }}
           imagePullPolicy: {{ .Values.service.house.image.pullPolicy }}

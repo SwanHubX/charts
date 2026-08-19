@@ -130,7 +130,7 @@ spec:
             - npx prisma migrate deploy && node migrate.js && pm2-runtime app.js
           env:
             {{- if .Values.service.server.securityContext.enabled }}
-            # 非 root 运行时无法写默认 HOME，重定向到可写的 /tmp（emptyDir）
+            # 非 root 运行时 HOME 不可写，重定向到 /tmp（含 pm2）
             - name: HOME
               value: /tmp
             - name: PM2_HOME

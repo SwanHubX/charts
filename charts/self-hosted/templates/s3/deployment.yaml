@@ -41,7 +41,7 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
-      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000 "volumeName" (printf "%s-volume" (include "swanlab.s3.fullname" .)) "mountPath" "/data") | trim) }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.dependencies.s3.securityContext "uid" 1000 "gid" 1000 "volumeName" (printf "%s-volume" (include "swanlab.s3.fullname" .)) "mountPath" "/data") | trim) }}
       initContainers:
         {{- . | nindent 8 }}
       {{- end }}
@@ -159,7 +159,7 @@ spec:
             - name: MINIO_PUBLIC_BUCKET
               value: "{{ include "swanlab.s3.public.bucket" . }}"
             {{- if .Values.dependencies.s3.securityContext.enabled }}
-            # 非 root 运行时 mc 无法写默认 HOME（/root），重定向到 /tmp，否则 mc alias set 失败
+            # mc 配置写在 HOME 下；非 root 运行时 /root 不可写，重定向到 /tmp
             - name: HOME
               value: /tmp
             {{- end }}

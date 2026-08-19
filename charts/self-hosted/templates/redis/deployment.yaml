@@ -41,7 +41,7 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
-      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000 "volumeName" (printf "%s-volume" (include "swanlab.redis.fullname" .)) "mountPath" "/data") | trim) }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.dependencies.redis.securityContext "uid" 1000 "gid" 1000 "volumeName" (printf "%s-volume" (include "swanlab.redis.fullname" .)) "mountPath" "/data") | trim) }}
       initContainers:
         {{- . | nindent 8 }}
       {{- end }}

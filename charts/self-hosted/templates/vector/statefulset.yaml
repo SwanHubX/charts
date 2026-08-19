@@ -41,7 +41,7 @@ spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
-      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "sc" .Values.vector.securityContext "uid" 1000 "gid" 1000 "volumeName" "data" "mountPath" "/var/lib/vector") | trim) }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000 "volumeName" "data" "mountPath" "/var/lib/vector") | trim) }}
       initContainers:
         {{- . | nindent 8 }}
       {{- end }}
