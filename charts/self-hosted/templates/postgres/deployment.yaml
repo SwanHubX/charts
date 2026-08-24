@@ -38,20 +38,46 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
+      {{- if .Values.dependencies.postgres.securityContext.enabled }}
+      # 卷属主由下方 init-volume-permissions 修正：fsGroup 在部分 CSI 驱动上不可靠，
+      # 且 kubelet 不会递归修正 subPath 内部。该 initContainer 以 root 运行，
+      # 集群强制 restricted PSS 时请保持 securityContext.enabled=false。
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext "uid" 999 "gid" 999) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
+      {{- else }}
       # 部分存储类创建的卷权限不是 postgres 用户可写，使用 initContainer 修正权限
       # 实测部分存储、k8s版本下单纯设置 fsGroup 无效，需要用 initContainer 修改目录属主
       securityContext:
         fsGroup: 999
+      {{- end }}
       initContainers:
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext "uid" 999 "gid" 999 "volumeName" (printf "%s-volume" (include "swanlab.postgres.fullname" .)) "mountPath" "/var/lib/postgresql") | trim) }}
+      {{- . | nindent 8 }}
+      {{- end }}
         - name: init-postgres-fs
           image: {{ include "swanlab.helperImage" . }}
           imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
           command:
             - "sh"
             - "-c"
+            {{- if .Values.dependencies.postgres.securityContext.enabled }}
+            # PG >= 15 要求数据目录权限为 0700/0750，否则拒绝启动；
+            # 属主已由 init-volume-permissions 修正为 999，此容器以 999 运行，有权 chmod 自有目录
+            - >-
+              mkdir -p /var/lib/postgresql/data &&
+              chmod 700 /var/lib/postgresql/data
+            {{- else }}
             - "mkdir -p /var/lib/postgresql/data && chmod 700 /var/lib/postgresql/data && chown -R 999:999 /var/lib/postgresql/data"
+            {{- end }}
+          {{- if .Values.dependencies.postgres.securityContext.enabled }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+          {{- else }}
           securityContext:
             runAsUser: 0
+          {{- end }}
           volumeMounts:
             - name: {{ include "swanlab.postgres.fullname" . }}-volume
               mountPath: /var/lib/postgresql
@@ -84,6 +110,11 @@ spec:
           - mountPath: /var/lib/postgresql/data
             subPath: data
             name: {{ include "swanlab.postgres.fullname" . }}-volume
+        {{- if .Values.dependencies.postgres.securityContext.enabled }}
+        {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.postgres.securityContext) | trim) }}
+        {{- . | nindent 8 }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.dependencies.postgres.resources }}
         resources:
         {{- toYaml .Values.dependencies.postgres.resources | nindent 12 }}

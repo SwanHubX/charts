@@ -26,6 +26,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.vector.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.vector.nodeSelector" . | trim) }}
       nodeSelector:
@@ -38,6 +41,10 @@ spec:
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000 "volumeName" "data" "mountPath" "/var/lib/vector") | trim) }}
+      initContainers:
+        {{- . | nindent 8 }}
+      {{- end }}
       containers:
         - name: vector
           image: "{{ .Values.vector.image.repository }}:{{ .Values.vector.image.tag }}"
@@ -90,6 +97,9 @@ spec:
               readOnly: true
             - name: data
               mountPath: /var/lib/vector
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
           {{- if .Values.vector.resources }}
           resources:
           {{- toYaml .Values.vector.resources | nindent 12 }}

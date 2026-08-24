@@ -25,6 +25,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.server.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.server.nodeSelector" . | trim) }}
       nodeSelector:
@@ -111,6 +114,9 @@ spec:
               check_service "Postgres Replica" "$POSTGRES_REPLICA_URL" "5432"
 
               echo "🎉 All dependencies are ready!"
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
       containers:
         - name: server
           image: {{ include "swanlab.server.image" . | quote }}
@@ -123,6 +129,13 @@ spec:
             - -c
             - npx prisma migrate deploy && node migrate.js && pm2-runtime app.js
           env:
+            {{- if .Values.service.server.securityContext.enabled }}
+            # 非 root 运行时 HOME 不可写，重定向到 /tmp（含 pm2）
+            - name: HOME
+              value: /tmp
+            - name: PM2_HOME
+              value: /tmp/.pm2
+            {{- end }}
             # K8s downward API：kubelet 注入 pod 名，不调 API server
             # 应用读取 POD_NAME 暴露 swanlab_pod_info{pod=...}=1，供 Grafana join 显示 pod 名
             - name: POD_NAME
@@ -197,10 +210,23 @@ spec:
                 secretKeyRef:
                   name: {{ include "swanlab.s3.secretName" . }}
                   key: secretKey
+          {{- if .Values.service.server.securityContext.enabled }}
+          volumeMounts:
+            - name: server-tmp
+              mountPath: /tmp
+          {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
         {{- if .Values.service.server.resources }}
           resources:
         {{- toYaml .Values.service.server.resources | nindent 12 }}
         {{- end }}
+      {{- if .Values.service.server.securityContext.enabled }}
+      volumes:
+        - name: server-tmp
+          emptyDir: {}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service

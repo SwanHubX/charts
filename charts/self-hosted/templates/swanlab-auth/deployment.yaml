@@ -25,6 +25,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.auth.securityContext "uid" 65532 "gid" 65532) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       {{- include "swanlab.podAntiAffinity" (list .Values.global.podAntiAffinityPreset "swanlab.auth.selectorLabels" . ) | nindent 6 }}
       {{- with (include "swanlab.auth.nodeSelector" . | trim) }}
       nodeSelector:
@@ -95,6 +98,9 @@ spec:
               check_service "Redis" "$REDIS_URL" "6379"
 
               echo "🎉 All dependencies are reachable!"
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.auth.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
       containers:
         - name: auth
           image: {{ include "swanlab.auth.image" . | quote }}
@@ -116,6 +122,9 @@ spec:
             - name: SA_SSO_PUBLIC_URL
               value: {{ . | quote }}
             {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.auth.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
         {{- if .Values.service.auth.resources }}
           resources:
         {{- toYaml .Values.service.auth.resources | nindent 12 }}

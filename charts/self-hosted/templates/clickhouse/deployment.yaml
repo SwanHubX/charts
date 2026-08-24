@@ -27,6 +27,9 @@ spec:
         {{- . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.dependencies.clickhouse.securityContext "uid" 101 "gid" 101) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
       restartPolicy: Always
       imagePullSecrets:
       {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
@@ -36,6 +39,10 @@ spec:
       {{- end }}
       {{- with (include "swanlab.clickhouse.tolerations" . | trim) }}
       tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.volumePermissionsInit" (dict "root" . "securityContext" .Values.dependencies.clickhouse.securityContext "uid" 101 "gid" 101 "volumeName" (printf "%s-volume" (include "swanlab.clickhouse.fullname" .)) "mountPath" "/var/lib/clickhouse") | trim) }}
+      initContainers:
         {{- . | nindent 8 }}
       {{- end }}
       containers:
@@ -75,6 +82,9 @@ spec:
             subPath: prometheus.xml
             readOnly: true
           {{- end }}
+        {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.dependencies.clickhouse.securityContext) | trim) }}
+        {{- . | nindent 8 }}
+        {{- end }}
         {{- if .Values.dependencies.clickhouse.resources }}
         resources:
         {{- toYaml .Values.dependencies.clickhouse.resources | nindent 12 }}
