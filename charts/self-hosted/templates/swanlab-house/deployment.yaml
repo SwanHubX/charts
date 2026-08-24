@@ -109,6 +109,7 @@ spec:
           {{- . | nindent 10 }}
           {{- end }}
         {{- if .Values.service.house.securityContext.enabled }}
+        # 与其他无状态服务不同，House服务涉及到指标、日志导出并上传S3，因此需要保证可写
         # 非 root 运行时镜像内 /app/playground 不可写；每次启动将其内容拷入可写
         # emptyDir，保证镜像升级后配置始终以镜像内容为准
         - name: init-config
