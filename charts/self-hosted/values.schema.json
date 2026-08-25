@@ -135,7 +135,6 @@
             "securityContext": { "$ref": "#/definitions/securityContext" },
             "replicas": { "type": "integer", "minimum": 0 },
             "image": { "$ref": "#/definitions/image" },
-            "persistence": { "$ref": "#/definitions/persistence" },
             "customLabels": { "type": "object" },
             "customAnnotations": { "type": "object" },
             "customPodLabels": { "type": "object" },

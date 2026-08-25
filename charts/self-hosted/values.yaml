@@ -146,11 +146,6 @@ service:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
-    persistence: # Persistent Storage Configuration
-      # Kubernetes StorageClass to use for dynamic provisioning.
-      storageClass: ""
-      # Volume size for the database data.
-      storageSize: "10Gi"
     # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
     #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
     #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)
