@@ -109,6 +109,12 @@ spec:
             - containerPort: 3000
               name: auth
           env:
+            # K8s downward API：kubelet 注入 pod 名，不调 API server
+            # 应用读取 POD_NAME 暴露 swanlab_pod_info{pod=...}=1, 供 Grafana join 显示 pod 名
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: SA_OAUTH_ENABLED
               value: "false"
             - name: SA_REDIS_URL
