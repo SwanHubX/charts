@@ -60,7 +60,7 @@ data:
         {{ include "swanlab.gateway.identify" . }}:
           plugin:
             identify:
-              AuthUrl: {{ include "swanlab.server.identify" . | quote }}
+              AuthUrl: {{ include "swanlab.auth.identify" . | quote }}
         {{- if .Values.integrations.s3.enabled | eq false }}
         {{ include "swanlab.gateway.s3" . }}:
           headers:
