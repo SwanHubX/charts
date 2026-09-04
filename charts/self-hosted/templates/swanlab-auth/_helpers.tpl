@@ -11,6 +11,14 @@ Cut of 40 chars to comply with k8s name limit.
 {{- end -}}
 
 {{/*
+SwanLab-Auth Identity URL (gateway identify plugin)
+*/}}
+{{- define "swanlab.auth.identify" -}}
+{{- printf "http://%s:%s/api/auth/identity" (include "swanlab.auth.fullname" .) (include "swanlab.auth.port" .) -}}
+{{- end -}}
+
+
+{{/*
 SwanLab-Auth Image
 */}}
 {{- define "swanlab.auth.image" -}}
