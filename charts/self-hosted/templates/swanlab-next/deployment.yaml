@@ -119,7 +119,7 @@ spec:
             - name: API_URL
               value: "http://{{ include "swanlab.gateway.fullname" . }}:{{ include "swanlab.gateway.internal" . }}/api"
             - name: API_VERIFIER_URL
-              value: {{ include "swanlab.server.identify" . | quote }}
+              value: {{ include "swanlab.auth.identify" . | quote }}
             - name: API_INTERNAL_URL
               value: "http://{{ include "swanlab.gateway.fullname" . }}:{{ include "swanlab.gateway.internal" . }}/api"
             {{- with .Values.global.settings.host }}
