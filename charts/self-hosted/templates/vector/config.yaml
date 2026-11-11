@@ -53,6 +53,7 @@ data:
         route:
           scalar_stream: .type == "scalar"
           media_stream:  .type == "media"
+          histogram_stream: .type == "histogram"
           log_stream:    .type == "log"
 
       clean_scalar:
@@ -63,6 +64,11 @@ data:
       clean_media:
         type: remap
         inputs: ["metric_router.media_stream"]
+        source: 'del(.type); del(.ts_obj)'
+
+      clean_histogram:
+        type: remap
+        inputs: ["metric_router.histogram_stream"]
         source: 'del(.type); del(.ts_obj)'
 
       clean_log:
@@ -96,6 +102,25 @@ data:
         endpoint: "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}"
         database: "app"
         table: "media"
+        compression: gzip
+        auth:
+          strategy: basic
+          user: "${CLICKHOUSE_USER}"
+          password: "${CLICKHOUSE_PASSWORD}"
+        batch:
+          max_events: 10000
+          timeout_secs: 5
+        buffer:
+          type: disk
+          max_size: {{ .Values.vector.sinks.bufferMaxSize | int }}
+          when_full: block
+
+      clickhouse_histogram:
+        type: clickhouse
+        inputs: ["clean_histogram"]
+        endpoint: "http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}"
+        database: "app"
+        table: "histogram"
         compression: gzip
         auth:
           strategy: basic
