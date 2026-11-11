@@ -21,10 +21,12 @@ spec:
       {{- with (include "swanlab.vector.podLabels" . | trim) }}
         {{- . | nindent 8 }}
       {{- end }}
-      {{- with (include "swanlab.vector.podAnnotations" . | trim) }}
       annotations:
+        # 实现configmap变化后自动滚动更新，避免出现配置更新后vector不生效的问题
+        checksum/swanlab-vector-configmap: {{ include (print .Template.BasePath "/vector/config.yaml") . | sha256sum }}
+        {{- with (include "swanlab.vector.podAnnotations" . | trim) }}
         {{- . | nindent 8 }}
-      {{- end }}
+        {{- end }}
     spec:
       {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.vector.securityContext "uid" 1000 "gid" 1000) | trim) }}
       {{- . | nindent 6 }}
