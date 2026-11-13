@@ -60,7 +60,8 @@ vector:
     tag: "0.51.1-debian"
     pullPolicy: "IfNotPresent"
   sinks:
-    # Ensure bufferMaxSize is smaller than persistence.storageSize / 3.
+    # Four disk buffers (one per sink) share each Pod's PVC.
+    # Keep bufferMaxSize below persistence.storageSize / 4 to leave filesystem headroom.
     bufferMaxSize: 10737418240 # 10Gi
   customLabels: {}
   customAnnotations: {}
@@ -71,8 +72,8 @@ vector:
   resources: {}
   persistence:
     storageClass: ""
-    # At least 60Gi is recommended for Vector to store logs.
-    # Ensure storageSize is at least 3 times the bufferMaxSize.
+    # At least 60Gi is recommended for the four disk buffers plus filesystem headroom.
+    # Keep storageSize greater than 4 times bufferMaxSize (convert both to bytes).
     storageSize: "40Gi"
   # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
   #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
@@ -105,6 +106,13 @@ service:
     customTolerations: []
     customNodeSelector: {}
     resources: {}
+    # Database migrations run once per Helm release, not in application containers.
+    migration:
+      # Disable only when migrations are managed externally; wait-for-schema still runs.
+      enabled: true
+      # Whole Job timeout (4 hours), including schema and application data migrations.
+      # Set Helm --timeout longer than this, e.g. --timeout 5h.
+      activeDeadlineSeconds: 14400
     # Dedicated headless Service for metrics scraping (does not affect business traffic on the main Service)
     #   true  = create a <fullname>-monitor headless Service so Prometheus dns_sd can discover all Pod IPs
     #   false = do not create it (discover Pods yourself via kubernetes_sd_configs or other means)

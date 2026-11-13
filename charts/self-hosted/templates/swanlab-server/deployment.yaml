@@ -117,6 +117,35 @@ spec:
           {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
           {{- . | nindent 10 }}
           {{- end }}
+      {{- /* Always keep the gate, including when the hook Job is managed externally. */}}
+        - name: wait-for-schema
+          image: {{ include "swanlab.server.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.server.image.pullPolicy }}
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              # Stay in Init until the schema is ready, even during long migrations.
+              until npx --no-install prisma migrate status >/dev/null 2>&1; do
+                echo "Waiting for database migration..."
+                sleep 5
+              done
+          env:
+            - name: HOME
+              value: /tmp
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.postgres.secretName" . }}
+                  key: primaryUrl
+          {{- if .Values.service.server.securityContext.enabled }}
+          volumeMounts:
+            - name: server-tmp
+              mountPath: /tmp
+          {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
       containers:
         - name: server
           image: {{ include "swanlab.server.image" . | quote }}
@@ -124,10 +153,31 @@ spec:
           ports:
             - containerPort: 3000
               name: server
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: server
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: server
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: server
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
           command:
             - bash
             - -c
-            - npx prisma migrate deploy && node migrate.js && pm2-runtime app.js
+            - exec pm2-runtime app.js
           env:
             {{- if .Values.service.server.securityContext.enabled }}
             # 非 root 运行时 HOME 不可写，重定向到 /tmp（含 pm2）
