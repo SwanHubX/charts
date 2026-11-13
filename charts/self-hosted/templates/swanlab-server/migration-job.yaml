@@ -1,0 +1,175 @@
+{{- if .Values.service.server.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "swanlab.server.fullname" . }}-migrate
+  labels:
+    {{- include "swanlab.server.migration.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.integrations.postgres.enabled }}
+    "helm.sh/hook": pre-install,pre-upgrade
+    {{- else }}
+    "helm.sh/hook": post-install,pre-upgrade
+    {{- end }}
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  # Never automatically replay failed DDL; inspect the retained Job first.
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ .Values.service.server.migration.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        {{- include "swanlab.server.migration.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 60
+      {{- with (include "swanlab.server.nodeSelector" . | trim) }}
+      nodeSelector:
+        {{- . | nindent 8 }}
+      {{- end }}
+      {{- with (include "swanlab.server.tolerations" . | trim) }}
+      tolerations:
+        {{- . | nindent 8 }}
+      {{- end }}
+      imagePullSecrets:
+        {{- include "swanlab.imagePullSecrets" . | nindent 8 }}
+      {{- with (include "swanlab.podSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext "uid" 1000 "gid" 1000) | trim) }}
+      {{- . | nindent 6 }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-postgres
+          image: {{ include "swanlab.helperImage" . }}
+          imagePullPolicy: {{ include "swanlab.helperPullPolicy" . }}
+          env:
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.postgres.secretName" . }}
+                  key: primaryUrl
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              tmp="${POSTGRES_URL#*://}"
+              tmp="${tmp%%/*}"
+              tmp="${tmp%%\?*}"
+              host_port="${tmp##*@}"
+              host="${host_port%:*}"
+              port="${host_port##*:}"
+              [ "$host" != "$port" ] || port=5432
+              # Strip IPv6 URL brackets for nc.
+              host="${host#\[}"
+              host="${host%\]}"
+              echo "Checking Postgres ($host:$port)..."
+              until nc -z -w 1 "$host" "$port"; do
+                echo "Waiting for Postgres..."
+                sleep 2
+              done
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+      containers:
+        - name: migrate
+          image: {{ include "swanlab.server.image" . | quote }}
+          imagePullPolicy: {{ .Values.service.server.image.pullPolicy }}
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+
+              # Read migration history directly: Prisma's human-readable status output
+              # does not list all pending migrations on a fresh database.
+              # A read/query failure must stop the Job, never be treated as an empty list.
+              pending=$(node <<'NODE'
+              const fs = require('node:fs')
+              const { PrismaClient } = require('@prisma/client')
+              const prisma = new PrismaClient()
+              async function main() {
+                const tables = await prisma.$queryRaw`
+                  SELECT tablename FROM pg_catalog.pg_tables
+                  WHERE schemaname = current_schema() AND tablename = '_prisma_migrations'
+                `
+                const history = tables.length
+                  ? await prisma.$queryRaw`SELECT migration_name, finished_at, rolled_back_at FROM "_prisma_migrations"`
+                  : []
+                const failed = history.filter(row => !row.finished_at && !row.rolled_back_at)
+                if (failed.length) {
+                  throw new Error('Unresolved failed migrations; repair manually before retrying: ' +
+                    failed.map(row => row.migration_name).join(', '))
+                }
+                const applied = new Set(history
+                  .filter(row => row.finished_at && !row.rolled_back_at)
+                  .map(row => row.migration_name))
+                const migrations = fs.readdirSync('prisma/migrations', { withFileTypes: true })
+                  .filter(entry => entry.isDirectory())
+                  .map(entry => entry.name)
+                  .sort()
+                for (const name of migrations) {
+                  if (!/^[0-9]{14}_[A-Za-z0-9_-]+$/.test(name)) {
+                    throw new Error('Unexpected migration directory: ' + name)
+                  }
+                  fs.accessSync(`prisma/migrations/${name}/migration.sql`, fs.constants.R_OK)
+                }
+                process.stdout.write(migrations.filter(name => !applied.has(name)).join('\n'))
+              }
+              main().catch(error => {
+                console.error(error)
+                process.exitCode = 1
+              }).finally(() => prisma.$disconnect())
+              NODE
+              )
+
+              if [ -z "$pending" ]; then
+                echo "No pending migrations"
+              fi
+              for name in $pending; do
+                echo "Applying ${name}"
+                npx --no-install prisma db execute \
+                  --file "prisma/migrations/${name}/migration.sql" \
+                  --schema prisma/schema.prisma
+
+                # Only retry bookkeeping, never automatically replay successful SQL.
+                resolved=0
+                for i in 1 2 3; do
+                  if npx --no-install prisma migrate resolve --applied "${name}"; then
+                    resolved=1
+                    break
+                  fi
+                  sleep 2
+                done
+                if [ "$resolved" -ne 1 ]; then
+                  echo "Failed to record ${name}; resolve --applied manually before retrying the Job" >&2
+                  exit 1
+                fi
+              done
+
+              echo "=== migration status (after schema migration) ==="
+              npx --no-install prisma migrate status
+              echo "=== data migration (VERSION=${VERSION}) ==="
+              node migrate.js
+          env:
+            - name: HOME
+              value: /tmp
+            # migrate.js must not fall back to 0.0.0 and reset the version table.
+            - name: VERSION
+              value: {{ .Chart.AppVersion | quote }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "swanlab.postgres.secretName" . }}
+                  key: primaryUrl
+          {{- if .Values.service.server.securityContext.enabled }}
+          volumeMounts:
+            - name: migrate-tmp
+              mountPath: /tmp
+          {{- end }}
+          {{- with (include "swanlab.containerSecurityContext" (dict "root" . "securityContext" .Values.service.server.securityContext) | trim) }}
+          {{- . | nindent 10 }}
+          {{- end }}
+      {{- if .Values.service.server.securityContext.enabled }}
+      volumes:
+        - name: migrate-tmp
+          emptyDir: {}
+      {{- end }}
+{{- end }}
