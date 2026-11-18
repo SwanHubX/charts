@@ -99,3 +99,11 @@ SwanLab-Server Identify URL
 {{- define "swanlab.server.identify" }}
 {{- printf "http://%s:%s/api/identity" (include "swanlab.server.fullname" .) (include "swanlab.server.port" .) -}}
 {{- end -}}
+
+{{/*
+Migration Pods must not match the server Service selector.
+*/}}
+{{- define "swanlab.server.migration.labels" -}}
+{{ include "swanlab.selectorLabels" . }}
+app.kubernetes.io/component: {{ include "swanlab.name" . }}-server-migrate
+{{- end -}}

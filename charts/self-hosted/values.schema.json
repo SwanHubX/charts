@@ -124,7 +124,17 @@
     "service": {
       "type": "object",
       "properties": {
-        "server": { "$ref": "#/definitions/standardService" },
+        "server": {
+          "allOf": [
+            { "$ref": "#/definitions/standardService" },
+            {
+              "type": "object",
+              "properties": {
+                "migration": { "$ref": "#/definitions/migration" }
+              }
+            }
+          ]
+        },
         "auth": { "$ref": "#/definitions/standardService" },
         "cloud": { "$ref": "#/definitions/standardService" },
         "next": { "$ref": "#/definitions/standardService" },
@@ -333,6 +343,14 @@
           "description": "Must be a valid K8s quantity like 10Gi, 100Mi"
         },
         "existingClaim": { "type": "string" }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "activeDeadlineSeconds": { "type": "integer", "minimum": 60 }
       }
     },
     "standardService": {
