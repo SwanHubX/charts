@@ -44,8 +44,9 @@ spec:
           image: "{{ .Values.gateway.identifyImage.repository }}:{{ .Values.gateway.identifyImage.tag }}"
           env:
             - name: COPY_TO
-              # The download-identify script automatically creates the 'identify' folder in the /plugins-tmp directory.
-              value: /plugins-tmp
+              # identify v2.1+ copies plugin files directly into COPY_TO. This must match
+              # localPlugins.identify.moduleName (.../swanlab-helper/identify).
+              value: /plugins-tmp/identify
           volumeMounts:
             - name: identify-plugin
               # Mount path for the shared volume
