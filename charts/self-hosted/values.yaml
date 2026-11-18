@@ -27,9 +27,11 @@ gateway:
     repository: repo.swanlab.cn/public/traefik
     tag: "3.6"
     pullPolicy: "IfNotPresent"
+  # Keep the tag in sync with COPY_TO in templates/gateway/deployment.yaml:
+  # v2.1+ needs /plugins-tmp/identify, v1.2 needs /plugins-tmp.
   identifyImage:
     repository: repo.swanlab.cn/public/swanlab-helper/identify
-    tag: "v1.2"
+    tag: "v2.1"
     pullPolicy: "IfNotPresent"
   # Service configuration
   service:
